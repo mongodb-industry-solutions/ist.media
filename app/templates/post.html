@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>IST Media</title>
+	<link rel="stylesheet" href="fontawesome/css/all.min.css"> <!-- https://fontawesome.com/ -->
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet"> <!-- https://fonts.google.com/ -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+<!--
+    
+TemplateMo 553 Xtra Blog
+
+https://templatemo.com/tm-553-xtra-blog
+
+-->
+</head>
+<body>
+	<header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="tm-site-header">
+              <div class="mb-3 mx-auto tm-site-logo">
+		<img style="width: 100%; border-radius: 50%;"
+		     src="img/leaf.png"></img>
+	      </div>
+                <h1 class="text-center">IST Media</h1>
+            </div>
+            <nav class="tm-nav" id="tm-nav">            
+                <ul>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/post" class="tm-nav-link">
+                        <i class="fas fa-pen"></i>
+                        Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/about" class="tm-nav-link">
+                        <i class="fas fa-users"></i>
+                        About IST Media
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/contact" class="tm-nav-link">
+                        <i class="far fa-comments"></i>
+                        Contact Us
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+            <p class="tm-mb-80 pr-5 text-white">
+	      <br/>
+	      Benjamin Lorenz
+	      <br/>
+	      MongoDB Inc. &copy; 2024
+            </p>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <!-- Search form -->
+            <div class="row tm-row">
+                <div class="col-12">
+                    <form method="GET" class="form-inline tm-mb-80 tm-search-form">                
+                      <input class="form-control tm-search-input"
+			     name="query" type="text" placeholder="Search..."
+			     aria-label="Search">
+                        <button class="tm-search-button" type="submit">
+                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
+                        </button>                                
+                    </form>
+                </div>                
+            </div>            
+            <div class="row tm-row">
+                <div class="col-12">
+                  <hr class="tm-hr-primary tm-mb-55">
+		  <img style="width: 100%; margin-bottom: 40px"
+		       src="{{ doc.thread.main_image }}" alt="Image">
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-lg-8 tm-post-col">
+                    <div class="tm-post-full">                    
+                        <div class="mb-4">
+                          <h2 class="pt-2 tm-color-primary tm-post-title">
+			    {{ doc.title }}
+			  </h2>
+                          <p class="tm-mb-40">
+			    {{ fdate }}, by {{ doc.author }}
+			  </p>
+                            <p>
+			      {{ fdoc }}
+                            </p>
+                            <span class="d-block text-right tm-color-primary">Creative . Design . Business</span>
+                        </div>
+                        
+                        <!-- Comments -->
+                        <div>
+                            <h2 class="tm-color-primary tm-post-title">Comments</h2>
+                            <hr class="tm-hr-primary tm-mb-45">
+                            <div class="tm-comment tm-mb-45">
+                                <figure class="tm-comment-figure">
+                                    <img src="img/comment-1.jpg" alt="Image" class="mb-2 rounded-circle img-thumbnail">
+                                    <figcaption class="tm-color-primary text-center">Mark Sonny</figcaption>
+                                </figure>
+                                <div>
+                                    <p>
+                                        Praesent aliquam ex vel lectus ornare tritique. Nunc et eros
+                                        quis enim feugiat tincidunt et vitae dui. Nullam consectetur
+                                        justo ac ex laoreet rhoncus. Nunc id leo pretium, faucibus 
+                                        sapien vel, euismod turpis.
+                                    </p>
+                                    <div class="d-flex justify-content-between">
+                                        <a href="#" class="tm-color-primary">REPLY</a>
+                                        <span class="tm-color-primary">June 14, 2020</span>
+                                    </div>                                                 
+                                </div>                                
+                            </div>
+                            <div class="tm-comment-reply tm-mb-45">
+                                <hr>
+                                <div class="tm-comment">
+                                    <figure class="tm-comment-figure">
+                                        <img src="img/comment-2.jpg" alt="Image" class="mb-2 rounded-circle img-thumbnail">
+                                        <figcaption class="tm-color-primary text-center">Jewel Soft</figcaption>    
+                                    </figure>
+                                    <p>
+                                        Nunc et eros quis enim feugiat tincidunt et vitae dui.
+                                        Nullam consectetur justo ac ex laoreet rhoncus. Nunc
+                                        id leo pretium, faucibus sapien vel, euismod turpis.
+                                    </p>
+                                </div>                                
+                                <span class="d-block text-right tm-color-primary">June 21, 2020</span>
+                            </div>
+                            <form action="" class="mb-5 tm-comment-form">
+                                <h2 class="tm-color-primary tm-post-title mb-4">Your comment</h2>
+                                <div class="mb-4">
+                                    <input class="form-control" name="name" type="text">
+                                </div>
+                                <div class="mb-4">
+                                    <input class="form-control" name="email" type="text">
+                                </div>
+                                <div class="mb-4">
+                                    <textarea class="form-control" name="message" rows="6"></textarea>
+                                </div>
+                                <div class="text-right">
+                                    <button class="tm-btn tm-btn-primary tm-btn-small">Submit</button>                        
+                                </div>                                
+                            </form>                          
+                        </div>
+                    </div>
+                </div>
+                <aside class="col-lg-4 tm-aside-col">
+                    <div class="tm-post-sidebar">
+                        <hr class="mb-3 tm-hr-primary">
+                        <h2 class="mb-4 tm-post-title tm-color-primary">Reformat Article</h2>
+                        <ul class="tm-mb-75 pl-5 tm-category-list">
+                          <li><a href="/post?style=original"
+				 class="tm-color-primary">Original</a></li>
+                          <li><a href="/post?style=summary"
+				   class="tm-color-primary">Summary</a></li>
+                          <li><a href="/post?style=young"
+				 class="tm-color-primary">Young People</a></li>
+                          <li><a href="/post?style=german"
+				 class="tm-color-primary">German Summary</a></li>
+                          <li><a href="/post?style=arabic"
+				 class="tm-color-primary">Arabic Summary</a></li>
+                        </ul>
+                        <hr class="mb-3 tm-hr-primary">
+                        <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
+                        <a href="#" class="d-block tm-mb-40">
+                            <figure>
+                                <img src="img/img-02.jpg" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">Duis mollis diam nec ex viverra scelerisque a sit</figcaption>
+                            </figure>
+                        </a>
+                        <a href="#" class="d-block tm-mb-40">
+                            <figure>
+                                <img src="img/img-05.jpg" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">Integer quis lectus eget justo ullamcorper ullamcorper</figcaption>
+                            </figure>
+                        </a>
+                        <a href="#" class="d-block tm-mb-40">
+                            <figure>
+                                <img src="img/img-06.jpg" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">Nam lobortis nunc sed faucibus commodo</figcaption>
+                            </figure>
+                        </a>
+                    </div>                    
+                </aside>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a rel="nofollow" target="_parent" href="https://templatemo.com" class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright 2020 Xtra Blog Company Co. Ltd.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+</body>
+</html>
