@@ -1,0 +1,9 @@
+#!/bin/sh
+# Copyright (c) 2024 Benjamin Lorenz
+
+# start from the project's root directory (e.g. by running ./bin/uwsgi-debug.start)
+export FLASK_CONFIG=development
+umask 000
+../bin/uwsgi --http :9090 -w manage:app --master --processes 1 --threads 1 \
+      --auto-procname --thunder-lock --touch-reload reload --lazy-apps \
+      --check-static /Users/bjjl/Media/www/app/templates
