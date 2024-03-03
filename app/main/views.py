@@ -13,6 +13,7 @@ from langchain_openai import OpenAI, ChatOpenAI
 from langchain.chains import RetrievalQA
 from datetime import datetime
 import re
+import textwrap
 
 
 openai_api_key="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"
@@ -32,17 +33,30 @@ collection = client[dbName][collectionName]
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    query = request.args.get('query')
+    if query and query != "":
+        pat = re.compile(query, re.I)
+        doc = collection.find_one({ "thread.site" : "bnnbreaking.com",
+                                "text" : {'$regex': pat}})
+        fdate = datetime.fromisoformat(doc["published"]).strftime("%d %b %Y")
+        fdoc = textwrap.shorten(doc['text'], 450)
+        return render_template('index.html', doc=doc, fdate=fdate, fdoc=fdoc)
+    else:
+        doc = collection.find_one({ "thread.site" : "bnnbreaking.com" })
+        fdate = datetime.fromisoformat(doc["published"]).strftime("%d %b %Y")
+        fdoc = textwrap.shorten(doc['text'], 450)
+        return render_template('index.html', doc=doc, fdate=fdate, fdoc=fdoc)
 
 
 @main.route('/post')
 def post():
     style = request.args.get('style')
     query = request.args.get('query')
+    uuid = request.args.get('uuid')
     if query and query != "":
         pat = re.compile(query, re.I)
         doc = collection.find_one({ "thread.site" : "bnnbreaking.com",
-                                    "title" : {'$regex': pat}})
+                                    "text" : {'$regex': pat}})
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']
@@ -139,7 +153,7 @@ def post():
         fdoc = stuff_chain.invoke(lcdocs)['output_text']
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
     else:
-        doc = collection.find_one({ "thread.site" : "bnnbreaking.com" })
+        doc = collection.find_one({ "uuid" : uuid })
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']

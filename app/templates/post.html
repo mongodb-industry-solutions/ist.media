@@ -106,7 +106,11 @@ https://templatemo.com/tm-553-xtra-blog
                             <p>
 			      {{ fdoc }}
                             </p>
-                            <span class="d-block text-right tm-color-primary">Creative . Design . Business</span>
+                            <span class="d-block text-right tm-color-primary">
+			      Content collected with
+			      <a href="https://webz.io/products/news-api" class="tm-external-link"
+				 rel="noopener" target="_blank">Webz.io</a>
+			    </span>
                         </div>
                         
                         <!-- Comments -->
@@ -127,7 +131,7 @@ https://templatemo.com/tm-553-xtra-blog
                                     </p>
                                     <div class="d-flex justify-content-between">
                                         <a href="#" class="tm-color-primary">REPLY</a>
-                                        <span class="tm-color-primary">June 14, 2020</span>
+                                        <span class="tm-color-primary">29 Feb 2024</span>
                                     </div>                                                 
                                 </div>                                
                             </div>
@@ -144,23 +148,8 @@ https://templatemo.com/tm-553-xtra-blog
                                         id leo pretium, faucibus sapien vel, euismod turpis.
                                     </p>
                                 </div>                                
-                                <span class="d-block text-right tm-color-primary">June 21, 2020</span>
+                                <span class="d-block text-right tm-color-primary">5 Mar 2024</span>
                             </div>
-                            <form action="" class="mb-5 tm-comment-form">
-                                <h2 class="tm-color-primary tm-post-title mb-4">Your comment</h2>
-                                <div class="mb-4">
-                                    <input class="form-control" name="name" type="text">
-                                </div>
-                                <div class="mb-4">
-                                    <input class="form-control" name="email" type="text">
-                                </div>
-                                <div class="mb-4">
-                                    <textarea class="form-control" name="message" rows="6"></textarea>
-                                </div>
-                                <div class="text-right">
-                                    <button class="tm-btn tm-btn-primary tm-btn-small">Submit</button>                        
-                                </div>                                
-                            </form>                          
                         </div>
                     </div>
                 </div>
@@ -184,31 +173,36 @@ https://templatemo.com/tm-553-xtra-blog
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
                         <a href="#" class="d-block tm-mb-40">
                             <figure>
-                                <img src="img/img-02.jpg" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">Duis mollis diam nec ex viverra scelerisque a sit</figcaption>
+                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
                             </figure>
                         </a>
+
                         <a href="#" class="d-block tm-mb-40">
                             <figure>
-                                <img src="img/img-05.jpg" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">Integer quis lectus eget justo ullamcorper ullamcorper</figcaption>
+                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
                             </figure>
                         </a>
+			{#			
                         <a href="#" class="d-block tm-mb-40">
                             <figure>
-                                <img src="img/img-06.jpg" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">Nam lobortis nunc sed faucibus commodo</figcaption>
+                                <img src="{{ sug3.img }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ sug3.text }}</figcaption>
                             </figure>
                         </a>
+			#}
                     </div>                    
                 </aside>
             </div>
             <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
-                    Design: <a rel="nofollow" target="_parent" href="https://templatemo.com" class="tm-external-link">TemplateMo</a>
+                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+			     rel="noopener" target="_blank"
+			     class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
-                    Copyright 2020 Xtra Blog Company Co. Ltd.
+                    Copyright 2024 MongoDB Inc.
                 </div>
             </footer>
         </main>
