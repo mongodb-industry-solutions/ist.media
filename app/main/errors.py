@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+#
+
 from flask import render_template, request, jsonify
 from . import main
 

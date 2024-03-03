@@ -1,5 +1,7 @@
 #!/usr/bin/env python3.11
-# Copyright (c) 2024 Benjamin Lorenz
+#
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
 import os

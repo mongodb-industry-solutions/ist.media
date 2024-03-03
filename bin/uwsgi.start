@@ -1,5 +1,8 @@
 #!/bin/sh
-# Copyright (c) 2024 Benjamin Lorenz
+#
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+#
 
 export PATH=/usr/pkg/bin:$PATH
 export OPENAI_API_KEY="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"
