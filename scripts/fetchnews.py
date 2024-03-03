@@ -1,3 +1,9 @@
+#
+# Collect news from webzio DaaS
+#
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 import time
@@ -10,12 +16,19 @@ collectionName = "business_news"
 collection = client[dbName][collectionName]
 
 webzio.config(token=keyparams.webzio_token)
+hours = 4 # how much to look back for news
 queryparams = {
     "q": "site_type:news category:\"Economy, Business and Finance\" num_chars:>300 language:english",
-    "ts": str(int(time.time()) - 60*60*4),
+    "ts": str(int(time.time()) - 60*60*hours),
     "sort": "crawled"
 }
-output = webzio.query("filterWebContent", queryparams)
+
+try:
+    output = webzio.query("filterWebContent", queryparams)
+except Exception as e:
+    print(e)
+    exit(1)
+
 
 while True:
     i = 0
