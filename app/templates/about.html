@@ -13,7 +13,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
 <!--
-    
+
 TemplateMo 553 Xtra Blog
 
 https://templatemo.com/tm-553-xtra-blog
@@ -21,8 +21,7 @@ https://templatemo.com/tm-553-xtra-blog
 -->
 </head>
 <body>
-
-  	<header class="tm-header" id="tm-header">
+    <header class="tm-header" id="tm-header">
         <div class="tm-header-wrapper">
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
@@ -34,7 +33,7 @@ https://templatemo.com/tm-553-xtra-blog
 	      </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
-            <nav class="tm-nav" id="tm-nav">            
+            <nav class="tm-nav" id="tm-nav">
                 <ul>
                     <li class="tm-nav-item"><a href="/" class="tm-nav-link">
                         <i class="fas fa-home"></i>
@@ -44,9 +43,9 @@ https://templatemo.com/tm-553-xtra-blog
                         <i class="fas fa-pen"></i>
                         Single Post
                     </a></li>
-                    <li class="tm-nav-item active"><a href="/about" class="tm-nav-link">
+                    <li class="tm-nav-item active"><a href="/backstage" class="tm-nav-link">
                         <i class="fas fa-users"></i>
-                        About IST Media
+                        Backstage Area
                     </a></li>
                     <li class="tm-nav-item"><a href="/contact" class="tm-nav-link">
                         <i class="far fa-comments"></i>
@@ -78,52 +77,42 @@ https://templatemo.com/tm-553-xtra-blog
     </header>
     <div class="container-fluid">
         <main class="tm-main">
-            <!-- Search form -->
-            <div class="row tm-row">
-                <div class="col-12">
-                    <form method="GET" class="form-inline tm-mb-80 tm-search-form">                
-                        <input class="form-control tm-search-input" name="query" type="text" placeholder="Search..." aria-label="Search">
-                        <button class="tm-search-button" type="submit">
-                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
-                        </button>                                
-                    </form>
-                </div>                
-            </div>            
             <div class="row tm-row tm-mb-45">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
-                    <img src="img/about-01.jpg" alt="Image" class="img-fluid">
                 </div>
             </div>
             <div class="row tm-row tm-mb-40">
-                <div class="col-12">                    
+                <div class="col-12">
                     <div class="mb-4">
-                        <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">About this xtra blog</h2>
+                        <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
+			    Backstage Area
+		        </h2>
                         <p>
-                            You can immediately download 
-                                <a rel="nofollow" href="https://templatemo.com/tm-553-xtra-blog" target="_blank">Xtra Blog Template</a> 
-                                from TemplateMo website for 100% free of charge. Etiam vehicula, tortor ac eleifend tincidunt, diam neque pellentesque ipsum, 
-                                a geugiat eros mauris eget lorem. Quisque in
-                            bibendum elit, in egestas turpis. Vestibulum ornare sollicitudin congue. Aliquam lorem mi, maximus at iaculis ut, viverra vel
-                            mauris. Duis congue luctus metus, sodales tincidunt lectus fringilla ut. Nunc tempus at magna sed vestibulum.
+			    This Web Application tracks your anonymous session.
+			    Following information has been collected so far, and is
+			    used for recommendation of reads.
                         </p>
-                        <p>
-                            Proin et arcu ligula. Praesent quis erat eu est solliditudin tristique ut in arcu. Donec bibendum ex id ligula semper dictum.
-                            Proin malesuada luctus auctor. Suspendisse ullamcorper, mi vel molestie ornare, arcu magna euismod ipsum, in
-                            malesuada nulla magna ut enim. Morbi lacinia magna sed sapien auctor, vitae luctus nunc cursus.
-                        </p>                            
-                    </div>                    
+			<h4 style="margin-top: 50px">History of Visited Articles</h4>
+			<p style="line-height: 1.5em">
+			    {% for doc in history %}
+			    <a class="tm-color-primary"
+			       href="/post?uuid={{ doc.uuid }}">{{ doc.title | truncate(80) }}</a>
+			    <br/>
+			    {% endfor %}
+			</p>
+                    </div>
                 </div>
             </div>
             <div class="row tm-row tm-mb-120">
                 <div class="col-lg-4 tm-about-col">
                     <div class="tm-bg-gray tm-about-pad">
                         <div class="text-center tm-mt-40 tm-mb-60">
-                            <i class="fas fa-bezier-curve fa-4x tm-color-primary"></i>                            
-                        </div>                        
+                            <i class="fas fa-bezier-curve fa-4x tm-color-primary"></i>
+                        </div>
                         <h2 class="mb-3 tm-color-primary tm-post-title">Background</h2>
                         <p class="mb-0 tm-line-height-short">
-                            Phasellus pulvinar nisl ornare leo porttitor, et vestibulum lorem semper. 
+                            Phasellus pulvinar nisl ornare leo porttitor, et vestibulum lorem semper.
                             Duis risus ex, molestie sit amet magna in,
                             pharetra pellentesque est. Curabitur elit metus.
                         </p>
@@ -132,11 +121,11 @@ https://templatemo.com/tm-553-xtra-blog
                 <div class="col-lg-4 tm-about-col">
                     <div class="tm-bg-gray tm-about-pad">
                         <div class="text-center tm-mt-40 tm-mb-60">
-                            <i class="fas fa-users-cog fa-4x tm-color-primary"></i>                            
-                        </div>                        
+                            <i class="fas fa-users-cog fa-4x tm-color-primary"></i>
+                        </div>
                         <h2 class="mb-3 tm-color-primary tm-post-title">Teamwork</h2>
                         <p class="mb-0 tm-line-height-short">
-                            Suspendisse ullamcorper, mi vel molestie ornare, arcu magna euismod ipsum, in malesuada nulla magna ut enim. 
+                            Suspendisse ullamcorper, mi vel molestie ornare, arcu magna euismod ipsum, in malesuada nulla magna ut enim.
                             Morbi lacinia magna sed auctor, vitae nunc cursus.
                         </p>
                     </div>
@@ -144,79 +133,23 @@ https://templatemo.com/tm-553-xtra-blog
                 <div class="col-lg-4 tm-about-col">
                     <div class="tm-bg-gray tm-about-pad">
                         <div class="text-center tm-mt-40 tm-mb-60">
-                            <i class="fab fa-creative-commons-sampling fa-4x tm-color-primary"></i>                            
-                        </div>                        
+                            <i class="fab fa-creative-commons-sampling fa-4x tm-color-primary"></i>
+                        </div>
                         <h2 class="mb-3 tm-color-primary tm-post-title">Our Core Value</h2>
                         <p class="mb-0 tm-line-height-short">
                             Nunc mi ante, suscipit vel dapibus et, volutpat sit amet ante. In tempor nec sem vitae varius. Aliquam tincidunt orci sem, et imperdiet massa consectetur nec.
                         </p>
                     </div>
                 </div>
-            </div>            
-            <div class="row tm-row tm-mb-60">
-                <div class="col-12">
-                    <hr class="tm-hr-primary  tm-mb-55">
-                </div>                
-                <div class="col-lg-6 tm-mb-60 tm-person-col">
-                    <div class="media tm-person">
-                        <img src="img/about-02.jpg" alt="Image" class="img-fluid mr-4">
-                        <div class="media-body">
-                            <h2 class="tm-color-primary tm-post-title mb-2">John Henry</h2>
-                            <h3 class="tm-h3 mb-3">CEO/Founder</h3>
-                            <p class="mb-0 tm-line-height-short">
-                                Aliquam non vulputate lectus, vel ultricies diam. Suspendisse at ipsum
-                                hendrerit, vestibulum mi id, mattis tortor.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 tm-mb-60 tm-person-col">
-                    <div class="media tm-person">
-                        <img src="img/about-03.jpg" alt="Image" class="img-fluid mr-4">
-                        <div class="media-body">
-                            <h2 class="tm-color-primary tm-post-title mb-2">Timy Cake</h2>
-                            <h3 class="tm-h3 mb-3">Project Director</h3>
-                            <p class="mb-0 tm-line-height-short">
-                                Quisque in bibendum elit, in egestas turpis. Vestibulum ornare sollicitudin congue. 
-                                Aliquam lorem mi, maximus at iaculis ut.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 tm-mb-60 tm-person-col">
-                    <div class="media tm-person">
-                        <img src="img/about-04.jpg" alt="Image" class="img-fluid mr-4">
-                        <div class="media-body">
-                            <h2 class="tm-color-primary tm-post-title mb-2">Jay Zoona</h2>
-                            <h3 class="tm-h3 mb-3">Supervisor</h3>
-                            <p class="mb-0 tm-line-height-short">
-                                Maecenas eu mi eu dui cursus consequat non eu metus. Morbi ac
-                                turpis eleifend, commodo purus eget, commodo mauris.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 tm-mb-60 tm-person-col">
-                    <div class="media tm-person">
-                        <img src="img/about-05.jpg" alt="Image" class="img-fluid mr-4">
-                        <div class="media-body">
-                            <h2 class="tm-color-primary tm-post-title mb-2">Catherine Soft</h2>
-                            <h3 class="tm-h3 mb-3">Team Leader</h3>
-                            <p class="mb-0 tm-line-height-short">
-                                Integer eu sapien hendrerit,
-                                imperdiet arcu sit amet, sollicitudin ipsum.
-                                Phasellus consequat suscipit ligula eget bibendum.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>        
-            <footer class="row tm-row">
+	    </div>
+	    <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
-                    Design: <a rel="nofollow" target="_parent" href="https://templatemo.com" class="tm-external-link">TemplateMo</a>
+                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+			     rel="noopener" target="_blank"
+			     class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
-                    Copyright 2020 Xtra Blog Company Co. Ltd.
+                    Copyright 2024 MongoDB Inc.
                 </div>
             </footer>
         </main>

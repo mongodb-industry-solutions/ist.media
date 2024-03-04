@@ -29,12 +29,13 @@ client = MongoClient(MONGO_URI)
 dbName = "1_media_demo"
 collectionName = "business_news"
 collection = client[dbName][collectionName]
-#embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-#vectorStore = MongoDBAtlasVectorSearch.from_connection_string(
-#    MONGO_URI,
-#    dbName + "." + collectionName,
-#    OpenAIEmbeddings(disallowed_special=()),
-#    index_name="vector_index")
+
+vector_search = MongoDBAtlasVectorSearch.from_connection_string(
+    MONGO_URI,
+    dbName + "." + collectionName,
+    OpenAIEmbeddings(disallowed_special=()),
+    index_name="vector_index",
+)
 
 @main.route('/')
 def index():
@@ -58,6 +59,7 @@ def post():
     style = request.args.get('style')
     query = request.args.get('query')
     uuid = request.args.get('uuid')
+    
     if query and query != "":
         pat = re.compile(query, re.I)
         doc = collection.find_one({ "thread.site" : "bnnbreaking.com",
@@ -66,13 +68,27 @@ def post():
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']
         session['uuid'] = doc['uuid']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+        
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+        
+        return render_template('post.html', doc=doc, fdate=fdate,fdoc=fdoc, rcom=rcom)
     if style and style == "original":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+        
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     if style and style == "summary":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
@@ -93,7 +109,14 @@ def post():
         stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
                                           document_variable_name="text")
         fdoc = stuff_chain.invoke(lcdocs)['output_text']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     if style and style == "young":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
@@ -114,7 +137,14 @@ def post():
         stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
                                           document_variable_name="text")
         fdoc = stuff_chain.invoke(lcdocs)['output_text']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+        
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     if style and style == "german":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
@@ -135,7 +165,14 @@ def post():
         stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
                                           document_variable_name="text")
         fdoc = stuff_chain.invoke(lcdocs)['output_text']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+        
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     if style and style == "arabic":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
@@ -156,19 +193,42 @@ def post():
         stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
                                           document_variable_name="text")
         fdoc = stuff_chain.invoke(lcdocs)['output_text']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     else:
-        doc = collection.find_one({ "uuid" : uuid })
+        doc = collection.find_one({ "uuid" : uuid if uuid else
+                                    "3beb3ba6c7120c723dd6bdb611163ded1328f9fc" })
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']
         session['uuid'] = doc['uuid']
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc)
+        if not 'history' in session:
+            session['history'] = []
+        if not doc['uuid'] in session['history']:
+            session['history'].append(doc['uuid'])
+        print(session['history'])
+        
+        vs_query = doc['text']
+        vs_results = vector_search.similarity_search(query=vs_query, k=20)
+        rcom = list(map(lambda r: r.metadata, vs_results))
+        # don't recommend yourself.. ;)
+        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+
+        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
 
     
-@main.route('/about')
+@main.route('/backstage')
 def about():
-    return render_template('about.html')
+    docs = list(map(lambda uuid:
+                    collection.find_one({ "uuid" : uuid }, { "uuid" : 1, "title" : 1, "_id" : 0 }),
+                    session['history']))
+    return render_template('about.html', history=docs)
 
 
 @main.route('/contact')

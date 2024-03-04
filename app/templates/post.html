@@ -43,9 +43,9 @@ https://templatemo.com/tm-553-xtra-blog
                         <i class="fas fa-pen"></i>
                         Single Post
                     </a></li>
-                    <li class="tm-nav-item"><a href="/about" class="tm-nav-link">
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
                         <i class="fas fa-users"></i>
-                        About IST Media
+                        Backstage Area
                     </a></li>
                     <li class="tm-nav-item"><a href="/contact" class="tm-nav-link">
                         <i class="far fa-comments"></i>
@@ -175,27 +175,24 @@ https://templatemo.com/tm-553-xtra-blog
                         </ul>
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
-                        <a href="#" class="d-block tm-mb-40">
+                        <a href="/post?uuid={{ rcom[0].uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
+                                <img src="{{ rcom[0].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ rcom[0].title }}</figcaption>
                             </figure>
                         </a>
-
-                        <a href="#" class="d-block tm-mb-40">
+                        <a href="/post?uuid={{ rcom[1].uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
+                                <img src="{{ rcom[1].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ rcom[1].title }}</figcaption>
                             </figure>
                         </a>
-			{#			
-                        <a href="#" class="d-block tm-mb-40">
+                        <a href="/post?uuid={{ rcom[2].uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ sug3.img }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ sug3.text }}</figcaption>
+                                <img src="{{ rcom[2].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ rcom[2].title }}</figcaption>
                             </figure>
                         </a>
-			#}
                     </div>                    
                 </aside>
             </div>
