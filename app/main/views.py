@@ -43,7 +43,7 @@ def index():
     if query and query != "":
         pat = re.compile(query, re.I)
         docs = collection.find({ "thread.site" : "bnnbreaking.com",
-                                 "text" : {'$regex': pat}}).limit(4)
+                                 "text" : {'$regex': pat}}).limit(8)
     else:
         # the start page, called without parameters
         docs = collection.aggregate([
@@ -103,21 +103,23 @@ def post():
         prompt_template = """Summarize in around 200 words the key facts of the following:
         "{text}"
         CONCISE SUMMARY:"""
-        prompt = PromptTemplate.from_template(prompt_template)
-        # Define LLM chain
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
-        # Define StuffDocumentsChain
-        stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
-                                          document_variable_name="text")
-        fdoc = stuff_chain.invoke(lcdocs)['output_text']
-
+        try:
+            prompt = PromptTemplate.from_template(prompt_template)
+            # Define LLM chain
+            llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
+            llm_chain = LLMChain(llm=llm, prompt=prompt)
+            # Define StuffDocumentsChain
+            stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
+                                              document_variable_name="text")
+            fdoc = stuff_chain.invoke(lcdocs)['output_text']
+        except Exception as e:
+            fdoc = "OpenAI crashed - you should try again (later)"
+            print(e) # will be printed in the log file that is residing in /tmp
         vs_query = doc['text']
         vs_results = vector_search.similarity_search(query=vs_query, k=20)
         rcom = list(map(lambda r: r.metadata, vs_results))
         # don't recommend yourself.. ;)
         rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     if style and style == "young":
         doc = collection.find_one({ "uuid" : session['uuid'] })
@@ -204,8 +206,13 @@ def post():
 
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     else:
-        doc = collection.find_one({ "uuid" : uuid if uuid else
-                                    "3beb3ba6c7120c723dd6bdb611163ded1328f9fc" })
+        if uuid:
+            doc = collection.find_one({ "uuid" : uuid })
+        else:
+            doc = list(collection.aggregate([
+                { "$match": { "thread.site" : "bnnbreaking.com" } },
+                { "$sample": { "size": 1 } }
+            ]))[0]
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc=doc['text']
@@ -214,14 +221,11 @@ def post():
             session['history'] = []
         if not doc['uuid'] in session['history']:
             session['history'].append(doc['uuid'])
-        print(session['history'])
-        
         vs_query = doc['text']
         vs_results = vector_search.similarity_search(query=vs_query, k=20)
         rcom = list(map(lambda r: r.metadata, vs_results))
         # don't recommend yourself.. ;)
         rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
 
     
