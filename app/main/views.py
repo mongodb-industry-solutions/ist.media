@@ -42,16 +42,18 @@ def index():
     query = request.args.get('query')
     if query and query != "":
         pat = re.compile(query, re.I)
-        doc = collection.find_one({ "thread.site" : "bnnbreaking.com",
-                                "text" : {'$regex': pat}})
-        fdate = datetime.fromisoformat(doc["published"]).strftime("%d %b %Y")
-        fdoc = textwrap.shorten(doc['text'], 450)
-        return render_template('index.html', doc=doc, fdate=fdate, fdoc=fdoc)
+        docs = collection.find({ "thread.site" : "bnnbreaking.com",
+                                 "text" : {'$regex': pat}}).limit(4)
     else:
-        doc = collection.find_one({ "thread.site" : "bnnbreaking.com" })
-        fdate = datetime.fromisoformat(doc["published"]).strftime("%d %b %Y")
-        fdoc = textwrap.shorten(doc['text'], 450)
-        return render_template('index.html', doc=doc, fdate=fdate, fdoc=fdoc)
+        # the start page, called without parameters
+        docs = collection.aggregate([
+            { "$match": { "thread.site" : "bnnbreaking.com" } },
+            { "$sample": { "size": 8 } }
+        ])
+    docs = list(map(lambda doc: doc | {
+        'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
+        'ftext' : textwrap.shorten(doc['text'], 450) }, docs))
+    return render_template('index.html', docs=docs)
 
 
 @main.route('/post')
