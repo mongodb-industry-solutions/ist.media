@@ -129,9 +129,11 @@ def post():
         rcom = calculate_recommendations(doc['text'], session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     else:
-        if uuid:
+        if uuid: # highest prio: use uuid page parameter, if provided
             doc = collection.find_one({ "uuid" : uuid })
-        else:
+        elif 'uuid' in session: # session-saved uuid as the second choice
+            doc = collection.find_one({ "uuid" : session['uuid'] })
+        else: # TODO: use a personalized doc, if history is not empty
             doc = list(collection.aggregate([
                 { "$match": { "thread.site" : "bnnbreaking.com" } },
                 { "$sample": { "size": 1 } }
