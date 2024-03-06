@@ -4,7 +4,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-export PATH=/usr/pkg/bin:$PATH
+export PATH=/usr/local/bin:/usr/pkg/bin:$PATH
 export OPENAI_API_KEY="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"
 
 # start from the project's root directory (e.g. by running ./bin/uwsgi.start)
