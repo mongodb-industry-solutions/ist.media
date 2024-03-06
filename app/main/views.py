@@ -30,6 +30,8 @@ dbName = "1_media_demo"
 collectionName = "business_news"
 collection = client[dbName][collectionName]
 
+MAX_DOCS = 8     # used for page views
+MAX_DOCS_VS = 30 # used for vector search
 
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
     MONGO_URI,
@@ -39,14 +41,13 @@ vector_search = MongoDBAtlasVectorSearch.from_connection_string(
 )
 
 
-def calculate_recommendations(doc, history):
-    vs_results = vector_search.similarity_search(query=doc['text'], k=10)
+def calculate_recommendations(text, history):
+    vs_results = vector_search.similarity_search(query=text, k=MAX_DOCS_VS)
     rcom = list(map(lambda r: r.metadata, vs_results))
     # don't recommend historic items
     rcom = list(filter(lambda r: not r['uuid'] in history, rcom))
-    print("[DEBUG]: " + str(len(rcom)) +
-          " recommendations left after history filter.")
-    return rcom
+    print("[DEBUG]: " + str(len(rcom)) + " recommendations left after history filter")
+    return rcom # TODO: These documents lack the 'text' field - WHY?
 
 
 @main.route('/delete_history', methods=['POST'])
@@ -61,16 +62,34 @@ def index():
     if query and query != "":
         pat = re.compile(query, re.I)
         docs = collection.find({ "thread.site" : "bnnbreaking.com",
-                                 "text" : {'$regex': pat}}).limit(8)
-    else:
-        # the start page, called without parameters
-        docs = collection.aggregate([
-            { "$match": { "thread.site" : "bnnbreaking.com" } },
-            { "$sample": { "size": 8 } }
-        ])
+                                 "text" : {'$regex': pat}}).limit(MAX_DOCS)
+    else: # the start page, called without query parameter
+        if 'history' in session and len(session['history']) > 0:
+            history_docs = list(map(lambda uuid:
+                    collection.find_one({ "uuid" : uuid },
+                                        { "uuid" : 1, "title" : 1, "_id" : 0 }),
+                    session['history']))
+            concatenated_titles = ""
+            i = 0
+            for doc in history_docs:
+                concatenated_titles += ("" if i == 0 else " ") + doc['title']
+                i += 1
+            print("[DEBUG]: Personalization with doc titles: " + concatenated_titles)
+            docs = calculate_recommendations(concatenated_titles, session['history'])
+            # for unknown reasons, these docs lack the 'text' field - refetching...
+            docs = list(map(lambda doc:
+                            collection.find_one({ "uuid" : doc['uuid'] }), docs))
+            if len(docs) > MAX_DOCS:
+                docs = docs[:MAX_DOCS]
+        else: # no personalization possible - shuffle some items to start with
+            docs = collection.aggregate([
+                { "$match": { "thread.site" : "bnnbreaking.com" } },
+                { "$sample": { "size": MAX_DOCS } }
+            ])
+    # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
-        'ftext' : textwrap.shorten(doc['text'], 450) }, docs))
+        'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
     return render_template('index.html', docs=docs)
 
 
@@ -107,7 +126,7 @@ def post():
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
             print(e) # will be printed in the log file that is residing in /tmp
-        rcom = calculate_recommendations(doc, session['history'])
+        rcom = calculate_recommendations(doc['text'], session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     else:
         if uuid:
@@ -125,7 +144,7 @@ def post():
             session['history'] = []
         if not doc['uuid'] in session['history']:
             session['history'].append(doc['uuid'])
-        rcom = calculate_recommendations(doc, session['history'])
+        rcom = calculate_recommendations(doc['text'], session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
 
     
