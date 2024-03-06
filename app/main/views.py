@@ -131,6 +131,8 @@ def post():
     
 @main.route('/backstage')
 def about():
+    if not 'history' in session:
+        session['history'] = []
     docs = list(map(lambda uuid:
                     collection.find_one({ "uuid" : uuid },
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
