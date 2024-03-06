@@ -9,10 +9,11 @@ export OPENAI_API_KEY="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"
 
 # start from the project's root directory (e.g. by running ./bin/uwsgi.start)
 cd /usr/local/share/ist.media
-uwsgi-3.11 -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 \
+uwsgi -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 \
       --daemonize /tmp/uwsgi_media.log --disable-logging --auto-procname \
       --thunder-lock --umask 0022 --vacuum --touch-reload reload --lazy-apps \
       --procname-prefix-spaced ist.media --uid bjjl --gid users \
-      --check-static /usr/local/share/ist.media/app/templates
+      --check-static /usr/local/share/ist.media/app/templates \
+      --master-fifo /tmp/uwsgi_media.fifo
 sleep 5
 chmod 777 /tmp/uwsgi_media.sock

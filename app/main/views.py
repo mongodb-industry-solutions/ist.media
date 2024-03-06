@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import render_template, request, session
+from flask import render_template, redirect, request, session
 from .. import mongo
 from . import main
 from pymongo import MongoClient
@@ -30,12 +30,30 @@ dbName = "1_media_demo"
 collectionName = "business_news"
 collection = client[dbName][collectionName]
 
+
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
     MONGO_URI,
     dbName + "." + collectionName,
     OpenAIEmbeddings(disallowed_special=()),
     index_name="vector_index",
 )
+
+
+def calculate_recommendations(doc, history):
+    vs_results = vector_search.similarity_search(query=doc['text'], k=10)
+    rcom = list(map(lambda r: r.metadata, vs_results))
+    # don't recommend historic items
+    rcom = list(filter(lambda r: not r['uuid'] in history, rcom))
+    print("[DEBUG]: " + str(len(rcom)) +
+          " recommendations left after history filter.")
+    return rcom
+
+
+@main.route('/delete_history', methods=['POST'])
+def delete_history():
+    session['history'] = []
+    return redirect('/backstage')
+
 
 @main.route('/')
 def index():
@@ -63,34 +81,7 @@ def post():
     uuid = request.args.get('uuid')
     
     if query and query != "":
-        pat = re.compile(query, re.I)
-        doc = collection.find_one({ "thread.site" : "bnnbreaking.com",
-                                    "text" : {'$regex': pat}})
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
-        session['uuid'] = doc['uuid']
-        
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-        
-        return render_template('post.html', doc=doc, fdate=fdate,fdoc=fdoc, rcom=rcom)
-    if style and style == "original":
-        doc = collection.find_one({ "uuid" : session['uuid'] })
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
-        
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
+        return index()
     if style and style == "summary":
         doc = collection.find_one({ "uuid" : session['uuid'] })
         sdate = doc["published"]
@@ -109,101 +100,14 @@ def post():
             llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
             llm_chain = LLMChain(llm=llm, prompt=prompt)
             # Define StuffDocumentsChain
-            stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
-                                              document_variable_name="text")
-            fdoc = stuff_chain.invoke(lcdocs)['output_text']
+            stuff_chain = StuffDocumentsChain(
+                llm_chain=llm_chain,
+                document_variable_name="text")
+            fdoc = "SUMMARY: " + stuff_chain.invoke(lcdocs)['output_text']
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
             print(e) # will be printed in the log file that is residing in /tmp
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
-    if style and style == "young":
-        doc = collection.find_one({ "uuid" : session['uuid'] })
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
-        lcdocs = [
-            Document(page_content=doc['text'], metadata={"source": "local"})
-        ]
-        # Define prompt
-        prompt_template = """Rewrite for a 12 year old person:
-        "{text}"
-        REFORMATTED:"""
-        prompt = PromptTemplate.from_template(prompt_template)
-        # Define LLM chain
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
-        # Define StuffDocumentsChain
-        stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
-                                          document_variable_name="text")
-        fdoc = stuff_chain.invoke(lcdocs)['output_text']
-
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-        
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
-    if style and style == "german":
-        doc = collection.find_one({ "uuid" : session['uuid'] })
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
-        lcdocs = [
-            Document(page_content=doc['text'], metadata={"source": "local"})
-        ]
-        # Define prompt
-        prompt_template = """Summarize in around 150 words the key facts of the following and translate the summary to German:
-        "{text}"
-        TRANSLATION:"""
-        prompt = PromptTemplate.from_template(prompt_template)
-        # Define LLM chain
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
-        # Define StuffDocumentsChain
-        stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
-                                          document_variable_name="text")
-        fdoc = stuff_chain.invoke(lcdocs)['output_text']
-
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-        
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
-    if style and style == "arabic":
-        doc = collection.find_one({ "uuid" : session['uuid'] })
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
-        lcdocs = [
-            Document(page_content=doc['text'], metadata={"source": "local"})
-        ]
-        # Define prompt
-        prompt_template = """Summarize in around 250 words the key facts of the following and translate the summary to Arabic:
-        "{text}"
-        TRANSLATION:"""
-        prompt = PromptTemplate.from_template(prompt_template)
-        # Define LLM chain
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
-        # Define StuffDocumentsChain
-        stuff_chain = StuffDocumentsChain(llm_chain=llm_chain,
-                                          document_variable_name="text")
-        fdoc = stuff_chain.invoke(lcdocs)['output_text']
-
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
-
+        rcom = calculate_recommendations(doc, session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
     else:
         if uuid:
@@ -221,18 +125,15 @@ def post():
             session['history'] = []
         if not doc['uuid'] in session['history']:
             session['history'].append(doc['uuid'])
-        vs_query = doc['text']
-        vs_results = vector_search.similarity_search(query=vs_query, k=20)
-        rcom = list(map(lambda r: r.metadata, vs_results))
-        # don't recommend yourself.. ;)
-        rcom = list(filter(lambda r: r['uuid'] != doc['uuid'], rcom))
+        rcom = calculate_recommendations(doc, session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc, rcom=rcom)
 
     
 @main.route('/backstage')
 def about():
     docs = list(map(lambda uuid:
-                    collection.find_one({ "uuid" : uuid }, { "uuid" : 1, "title" : 1, "_id" : 0 }),
+                    collection.find_one({ "uuid" : uuid },
+                                        { "uuid" : 1, "title" : 1, "_id" : 0 }),
                     session['history']))
     return render_template('about.html', history=docs)
 
@@ -247,6 +148,7 @@ def yyy():
     topic1 = request.args.get('topic1')
     topic2 = request.args.get('topic2')
     return render_template('content.html', topic1=topic1, topic2=topic2)
+
 
 @main.route('/about/<topic>')
 def xxx(topic):

@@ -12,15 +12,14 @@ USERNAME="bjjl"
 
 if [ $SYSNAME = "NetBSD" ]
 then
-    UWSGI=uwsgi-3.11
     STATIC_FILES_DIR=/home/$USERNAME/ist.media/app/templates
 else # macOS
-    UWSGI=uwsgi
     STATIC_FILES_DIR=/Users/$USERNAME/ist.media/app/templates
 fi
 
 export FLASK_CONFIG=development
 umask 000
-$UWSGI --http :9090 -w manage:app --master --processes 1 --threads 1 \
+uwsgi --http :9090 -w manage:app --master --processes 1 --threads 2 \
       --auto-procname --thunder-lock --touch-reload reload --lazy-apps \
-      --check-static $STATIC_FILES_DIR
+      --check-static $STATIC_FILES_DIR \
+      --master-fifo /tmp/uwsgi_media.fifo
