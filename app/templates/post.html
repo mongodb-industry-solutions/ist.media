@@ -95,28 +95,39 @@
                 <div class="col-lg-8 tm-post-col">
                     <div class="tm-post-full">
                         <div class="mb-4">
-                          <h2 class="pt-2 tm-color-primary tm-post-title">
-			    {{ doc.title }}
-			  </h2>
-                          <p class="tm-mb-40">
-			    {{ fdate }}, by {{ doc.author }}
-			  </p>
+                            <h2 class="pt-2 tm-color-primary tm-post-title">
+				{{ doc.title }}
+			    </h2>
+                            <p class="tm-mb-40">
+				{{ fdate }}, by {{ doc.author }}
+				{% if not request.args.get('style') %}
+				<br/><a style="text-align: right" href="/post?style=summary"
+					class="tm-color-primary">&#10145; Create summary</a>
+				{% else %}
+				<br/><a style="text-align: right" href="/post"
+					class="tm-color-primary">&#10145; Back to full article</a>
+				{% endif %}
+			    </p>
                             <p>
-			      {{ fdoc }}
+				{{ fdoc }}
                             </p>
                         </div>
                     </div>
                 </div>
                 <aside class="col-lg-4 tm-aside-col">
                     <div class="tm-post-sidebar">
+			{% if keywords is defined and keywords|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
-                        <h2 class="mb-4 tm-post-title tm-color-primary">Reformat Article</h2>
-                        <ul class="tm-mb-75 pl-5 tm-category-list">
-                          <li><a href="/post"
-				 class="tm-color-primary">Original</a></li>
-                          <li><a href="/post?style=summary"
-				   class="tm-color-primary">Summary</a></li>
-                        </ul>
+                        <h2 class="mb-4 tm-post-title tm-color-primary">Keywords</h2>
+			<div style="line-height: 1.6em; padding-left: 0.9em">
+			    {% for keyword in keywords %}
+			    <a href="/insights?query={{ keyword }}" class="tm-color-primary"
+				  style="font-size: 90%">{{ keyword }}</span><br/>
+			    {% endfor %}
+			    &nbsp;<br/>
+			    &nbsp;
+			</div>
+			{% endif %}
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
                         <a href="/post?uuid={{ rcom[0].uuid }}" class="d-block tm-mb-40">
