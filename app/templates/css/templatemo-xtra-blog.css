@@ -17,7 +17,7 @@ body {
     overflow-x: hidden;
 }
 
-p, span, ol { color: #777; }
+p, span, ol, ul { color: #777; }
 hr {
     border-top-color: #CCC;
     margin-top: 10px;
@@ -133,9 +133,17 @@ ul, ol {
     padding: 0;
 }
 
-ol ul li {
+.ai-gen ol li {
+    list-style: none;
+}
+
+.ai-gen ul li {
+    list-style: none;
+}
+
+.ai-gen ol ul li {
     margin-left: 1.8em;
-    margin-bottom: 1.2em;
+    margin-bottom: 0.9em;
 }
 
 .tm-nav { margin-left: -30px; }
@@ -272,10 +280,6 @@ ol ul li {
 .tm-btn-primary:hover {
     background-color: #09b6b6;
     color: white;
-}
-
-ol li {
-    list-style: none;
 }
 
 .tm-paging-nav ul li {
