@@ -98,7 +98,7 @@ def calculate_insights(text):
 def calculate_using_rag(question):
     template = """Answer the question based only on the following context:
     {context}
-    
+
     Question: {question}
     """
     try:
@@ -166,7 +166,7 @@ def post():
     style = request.args.get('style')
     query = request.args.get('query')
     uuid = request.args.get('uuid')
-    
+
     if query and query != "":
         return index()
     if style and style == "summary":
@@ -219,7 +219,7 @@ def post():
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
                                rcom=rcom, keywords=keywords)
 
-    
+
 @main.route('/backstage')
 def about():
     if not 'history' in session:
