@@ -17,15 +17,15 @@ body {
     overflow-x: hidden;
 }
 
-p, span { color: #999; }
+p, span, ol { color: #777; }
 hr {
     border-top-color: #CCC;
     margin-top: 10px;
     margin-bottom: 10px;
 }
-.form-control::-webkit-input-placeholder { color: #999; }
-.form-control:-ms-input-placeholder { color: #999; }
-.form-control::placeholder { color: #999; }
+.form-control::-webkit-input-placeholder { color: #777; }
+.form-control:-ms-input-placeholder { color: #777; }
+.form-control::placeholder { color: #777; }
 
 .tm-header {
     background-color: #00684A;
@@ -128,9 +128,14 @@ hr {
 
 .tm-nav-link i { margin-right: 37px; }
 
-ul {
+ul, ol {
     margin: 0;
     padding: 0;
+}
+
+ol ul li {
+    margin-left: 1.8em;
+    margin-bottom: 1.2em;
 }
 
 .tm-nav { margin-left: -30px; }
@@ -243,7 +248,7 @@ ul {
 
 .tm-h3 {
     font-size: 1.3rem;
-    color: #999;
+    color: #777;
 }
 
 .tm-post-link:hover .tm-post-title { color: #00684A; }
@@ -269,6 +274,10 @@ ul {
     color: white;
 }
 
+ol li {
+    list-style: none;
+}
+
 .tm-paging-nav ul li {
     list-style: none;
     display: inline-block;
@@ -279,7 +288,7 @@ ul {
 
 .tm-paging-link {
     background-color: #F0F0F0;
-    color: #999;
+    color: #777;
     width: 50px;
     height: 50px;
     display: flex;
@@ -295,7 +304,7 @@ ul {
 
 .tm-btn.disabled {
     background-color: #F0F0F0;
-    color: #999;
+    color: #777;
     cursor: not-allowed;
 }
 
@@ -373,7 +382,7 @@ figcaption { line-height: 1.4; }
 .tm-mt-100 { margin-top: 100px; }
 .tm-mr-20 { margin-right: 20px; }
 .tm-color-primary, span.tm-color-primary { color: #00684A; }
-a.tm-color-gray, .tm-color-gray { color: #999; }
+a.tm-color-gray, .tm-color-gray { color: #777; }
 a.tm-color-gray:hover { color: #00684A; }
 .tm-bg-gray { background-color: #F3F4F5; }
 button:focus { outline: none; }
