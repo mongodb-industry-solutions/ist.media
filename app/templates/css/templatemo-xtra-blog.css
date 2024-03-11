@@ -133,17 +133,17 @@ ul, ol {
     padding: 0;
 }
 
-.ai-gen ol li {
-    list-style: none;
-}
-
-.ai-gen ul li {
-    list-style: none;
+.ai-gen ol li, .ai-gen ul li {
+    list-style: square;
+    margin-left: 1.4em;
 }
 
 .ai-gen ol ul li {
-    margin-left: 1.8em;
-    margin-bottom: 0.9em;
+    margin-bottom: 1em;
+}
+
+.ai-gen strong {
+    color: #555;
 }
 
 .tm-nav { margin-left: -30px; }

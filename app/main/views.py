@@ -191,6 +191,7 @@ def post():
                 llm_chain=llm_chain,
                 document_variable_name="text")
             fdoc = "SUMMARY: " + stuff_chain.invoke(lcdocs)['output_text']
+            fdoc = html(fdoc.replace("\n", "\n\n"))
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
             print(e) # will be printed in the log file that is residing in /tmp
@@ -208,7 +209,7 @@ def post():
             ]))[0]
         sdate = doc["published"]
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
+        fdoc = html(doc['text'].replace("\n", "\n\n"))
         session['uuid'] = doc['uuid']
         if not 'history' in session:
             session['history'] = []

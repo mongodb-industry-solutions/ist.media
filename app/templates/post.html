@@ -108,9 +108,7 @@
 					class="tm-color-primary">&#10145; Back to full article</a>
 				{% endif %}
 			    </p>
-                            <p>
-				{{ fdoc }}
-                            </p>
+			    {{ fdoc|safe }}
                         </div>
                     </div>
                 </div>
@@ -122,7 +120,7 @@
 			<div style="line-height: 1.6em; padding-left: 0.9em">
 			    {% for keyword in keywords %}
 			    <a href="/insights?query={{ keyword }}" class="tm-color-primary"
-				  style="font-size: 90%">{{ keyword }}</span><br/>
+			       style="font-size: 90%">{{ keyword }}</a><br/>
 			    {% endfor %}
 			    &nbsp;<br/>
 			    &nbsp;
