@@ -139,7 +139,7 @@ ul, ol {
     margin-bottom: 1em;
 }
 
-.ai-gen li ol li, li ul li {
+.ai-gen li ol li, .ai-gen li ul li {
     margin-top: 1em;
 }
 
