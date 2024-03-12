@@ -251,11 +251,20 @@ def rag():
     if query and query != "":
         content = html(calculate_using_rag(query))
         title = ' '.join([w.title() if w.islower() else w for w in query.split()])
-        return render_template('insights.html', html_title="AI-Generated Insights (RAG)",
+        return render_template('rag.html', placeholder="AI-Generated Insights (RAG)",
                                title=title, content=content)
     else:
-        return render_template('insights.html', html_title="AI-Generated Insights (RAG)",
-                               title="No Title", content="No insights.")
+        return render_template('rag.html', placeholder="AI-Generated Insights (RAG)",
+                               title="AI-Generated Insights (RAG)",
+                               content="""<p>Please enter your question in the form above.
+                               Answer will be provided based only on the documents
+                               stored in MongoDB, using Vector Search and OpenAI GPT-4.</p>
+
+                               <p>GPT-4 is currently still a very expensive model,
+                               so please use this part of the demo with care. Also,
+                               calculation can take some time. You have to be patient, and
+                               please avoid refreshing the page or re-entering the question.</p>
+                               """)
 
 
 @main.route('/contact')
