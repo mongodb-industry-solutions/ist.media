@@ -136,10 +136,11 @@ ul, ol {
 .ai-gen ol li, .ai-gen ul li {
     list-style: square;
     margin-left: 1.4em;
+    margin-bottom: 1em;
 }
 
-.ai-gen ol ul li {
-    margin-bottom: 1em;
+.ai-gen li ol li, li ul li {
+    margin-top: 1em;
 }
 
 .ai-gen strong {
