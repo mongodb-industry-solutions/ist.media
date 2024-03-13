@@ -54,8 +54,14 @@ def calculate_recommendations(text, history):
 
 def calculate_keywords(text):
     lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
-    prompt_template = """What are six key concepts of the following,
-    return as a machine-readable Python list:
+    prompt_template = """Given the context of the media article, please provide
+    me with 6 keywords that capture the essence of the content and help
+    finding the article while searching the web. Consider terms
+    that are central to the article's subject and are likely to be imported for
+    summarization. Please prioritize names of companies, names of persons,
+    names of products, events, technical terms, business terms
+    over general words.
+    Return as a machine-readable Python list.
     "{text}"
     KEYWORDS:"""
     try:
@@ -139,7 +145,7 @@ def index():
                     session['history']))
             concatenated_titles = ""
             i = 0
-            for doc in history_docs:
+            for doc in history_docs[-5:]: # only consider the recent history
                 concatenated_titles += ("" if i == 0 else " ") + doc['title']
                 i += 1
             print("[DEBUG]: Personalization with doc titles: " + concatenated_titles)
@@ -213,8 +219,11 @@ def post():
         session['uuid'] = doc['uuid']
         if not 'history' in session:
             session['history'] = []
-        if not doc['uuid'] in session['history']:
-            session['history'].append(doc['uuid'])
+        session['history'].append(doc['uuid']) # YES, allow for dups!
+        # to make the floating history work, clicked items ALWAYS must be
+        # appended at the end
+        if len(session['history']) > 30: # limit the max length of history
+            session['history'] = session['history'][-30:]
         keywords = calculate_keywords(doc['text'])
         rcom = calculate_recommendations(doc['text'], session['history'])
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
