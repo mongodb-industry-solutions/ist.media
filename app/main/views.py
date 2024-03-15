@@ -7,6 +7,7 @@ from flask import render_template, redirect, request, session
 from mistune import html
 from .. import mongo
 from . import main
+from bson.objectid import ObjectId
 from pymongo import MongoClient
 from langchain.docstore.document import Document
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
@@ -32,6 +33,9 @@ client = MongoClient(MONGO_URI)
 dbName = "1_media_demo"
 collectionName = "business_news"
 collection = client[dbName][collectionName]
+
+gen_ai_cache_collectionName = "gen_ai_cache"
+gen_ai_cache_collection = client[dbName][gen_ai_cache_collectionName]
 
 MAX_DOCS = 8     # used for page views
 MAX_DOCS_VS = 30 # used for vector search
@@ -118,6 +122,7 @@ def calculate_using_rag(question):
             | StrOutputParser()
         )
         answer = chain.invoke(question)
+        gen_ai_cache_collection.insert_one({ "question" : question, "answer" : answer })
     except Exception as e:
         print(e) # will be printed in the log file that is residing in /tmp
         answer = ""
@@ -238,7 +243,12 @@ def about():
                     collection.find_one({ "uuid" : uuid },
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
                     session['history']))
-    return render_template('about.html', history=docs)
+    try:
+        gen_ai_cache = list(gen_ai_cache_collection.find())
+    except Exception as e:
+        gen_ai_cache = []
+        print(e) # will be printed in the log file that is residing in /tmp
+    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache)
 
 
 @main.route('/insights')
@@ -256,10 +266,31 @@ def insights():
 
 @main.route('/rag')
 def rag():
+    _id = request.args.get('_id')
     query = request.args.get('query')
-    if query and query != "":
-        content = html(calculate_using_rag(query))
-        title = ' '.join([w.title() if w.islower() else w for w in query.split()])
+    if _id and _id != "":
+        try:
+            cached_entry = gen_ai_cache_collection.find_one({ "_id" : ObjectId(_id) })
+        except Exception as e:
+            cached_entry = { "question" : "AI-Generated Insights (RAG)" ,
+                             "answer" : "Error reading cached Q/A"}
+            print(e) # will be printed in the log file that is residing in /tmp
+        content = html(cached_entry['answer'])
+        title = ' '.join([w.title() if w.islower() else w for w in cached_entry['question'].split()])
+        return render_template('rag.html', placeholder="AI-Generated Insights (RAG)",
+                               title=title, content=content)
+    elif query and query != "":
+        cached_entry = None
+        try:
+            cached_entry = gen_ai_cache_collection.find_one({ "question" : query })
+        except Exception as e:
+            print(e) # will be printed in the log file that is residing in /tmp
+        if cached_entry:
+            content = html(cached_entry['answer'])
+            title = ' '.join([w.title() if w.islower() else w for w in cached_entry['question'].split()])
+        else:
+            content = html(calculate_using_rag(query))
+            title = ' '.join([w.title() if w.islower() else w for w in query.split()])
         return render_template('rag.html', placeholder="AI-Generated Insights (RAG)",
                                title=title, content=content)
     else:

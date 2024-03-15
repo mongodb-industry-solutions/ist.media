@@ -92,11 +92,21 @@
 			    Delete History button to start from scratch (initial news
 			    will be shuffled on the Home page then).
                         </p>
-			<h4 style="margin-top: 50px">History of Visited Articles</h4>
+			<h4 style="margin-top: 50px">History of Articles</h4>
 			<p>
 			    {% for doc in history %}
-			    <a class="tm-color-primary"
-			       href="/post?uuid={{ doc.uuid }}">{{ doc.title | truncate(80) }}</a>
+			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
+				{{ doc.title | truncate(80) }}
+			    </a>
+			    <br/>
+			    {% endfor %}
+			</p>
+			<h4 style="margin-top: 50px">History of Questions</h4>
+			<p>
+			    {% for entry in gen_ai_cache %}
+			    <a class="tm-color-primary" href="/rag?_id={{ entry._id | string }}">
+				{{ entry.question | truncate(80) }}
+			    </a>
 			    <br/>
 			    {% endfor %}
 			</p>
