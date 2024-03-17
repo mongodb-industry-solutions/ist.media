@@ -258,9 +258,9 @@ def about():
     docs = list(map(lambda uuid:
                     collection.find_one({ "uuid" : uuid },
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
-                    session['history']))
+                    reversed(session['history'])))
     try:
-        gen_ai_cache = list(gen_ai_cache_collection.find())
+        gen_ai_cache = list(gen_ai_cache_collection.find().sort({ "$natural" : -1 }))
     except Exception as e:
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
@@ -310,10 +310,19 @@ def insights():
                                Answer will be provided based only on the documents
                                stored in MongoDB, using Vector Search and OpenAI GPT-4.</p>
 
+                               <p>This page is also used to display AI-generated insights
+                               when clicking on a keyword in the Single Post page. In
+                               that case, general knowledge from GPT-3.5 is being used,
+                               without RAG.</p>
+
                                <p>GPT-4 is currently still a very expensive model,
                                so please use this part of the demo with care. Also,
                                calculation can take some time. You have to be patient, and
                                please avoid refreshing the page or re-entering the question.</p>
+
+                               <p>Most recent insights are cached, and can be accessed
+                               from the Backstage Area. Consider using these
+                               examples when conducting a demo!</p>
                                """)
 
 

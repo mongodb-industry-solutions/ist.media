@@ -98,7 +98,7 @@
                         </p>
 			<h4 style="margin-top: 50px">History of Read Articles</h4>
 			{% if history|length > 0 %}
-			<p>
+			<p class="tm-pt-10">
 			    {% for doc in history %}
 			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
 				{{ doc.title | truncate(80) }}
@@ -117,12 +117,12 @@
                             </div>
 			</form>
 			{% else %}
-			<p>
+			<p class="tm-pt-10">
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
 			<h4 style="margin-top: 50px">History of AI-Generated Insights</h4>
-			<p>
+			<p class="tm-pt-10">
 			    {% for entry in gen_ai_cache %}
 			    <a class="tm-color-primary" href="/insights?_id={{ entry._id | string }}">
 				{{ entry.question | truncate(80) }}
@@ -145,7 +145,7 @@
 			     class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
-                    Copyright 2024 MongoDB Inc.
+                    Copyright &copy; 2024 MongoDB Inc.
                 </div>
             </footer>
         </main>

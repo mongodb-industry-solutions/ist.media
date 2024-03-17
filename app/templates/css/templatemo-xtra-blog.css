@@ -371,6 +371,8 @@ figcaption { line-height: 1.4; }
     margin-right: 0;
 }
 
+.tm-pt-10 { padding-top: 10px; }
+.tm-pt-15 { padding-top: 15px; }
 .tm-pt-20 { padding-top: 20px; }
 .tm-pt-30 { padding-top: 30px; }
 .tm-pt-45 { padding-top: 45px; }
