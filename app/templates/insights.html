@@ -33,9 +33,13 @@
                         <i class="fas fa-home"></i>
                         Home
                     </a></li>
-                    <li class="tm-nav-item active"><a href="/post" class="tm-nav-link">
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
                         <i class="fas fa-pen"></i>
                         Single Post
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/insights" class="tm-nav-link">
+                        <i class="fas fa-pen"></i>
+                        Insights
                     </a></li>
                     <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
                         <i class="fas fa-users"></i>
@@ -71,11 +75,19 @@
     </header>
     <div class="container-fluid">
         <main class="tm-main">
-	    <div class="row tm-row">
+	    <!-- Search form -->
+            <div class="row tm-row">
                 <div class="col-12">
-		    <h1 class="tm-color-primary">{{ html_title }}</h1>
-		</div>
-	    </div>
+                    <form method="GET" class="form-inline tm-mb-60 tm-search-form">
+                        <input class="form-control tm-search-input"
+			       name="query" type="text" placeholder="{{ placeholder }}"
+			       aria-label="Search">
+                        <button class="tm-search-button" type="submit">
+                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
             <div class="row tm-row tm-mb-45">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
@@ -87,7 +99,7 @@
                         <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
 			    {{ title }}
 		        </h2>
-			{{ content|safe }}
+			{{ content | safe }}
                     </div>
                 </div>
             </div>

@@ -37,6 +37,10 @@
                         <i class="fas fa-pen"></i>
                         Single Post
                     </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                        <i class="fas fa-pen"></i>
+                        Insights
+                    </a></li>
                     <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
                         <i class="fas fa-users"></i>
                         Backstage Area
@@ -74,7 +78,7 @@
             <!-- Search form -->
             <div class="row tm-row">
                 <div class="col-12">
-                    <form method="GET" class="form-inline tm-mb-80 tm-search-form">
+                    <form method="GET" class="form-inline tm-mb-60 tm-search-form">
 			<input class="form-control tm-search-input"
 			       name="query" type="text" placeholder="Search..."
 			       aria-label="Search">
@@ -108,7 +112,7 @@
 					class="tm-color-primary">&#10145; Back to full article</a>
 				{% endif %}
 			    </p>
-			    {{ fdoc|safe }}
+			    {{ fdoc | safe }}
                         </div>
                     </div>
                 </div>
@@ -119,33 +123,25 @@
                         <h2 class="mb-4 tm-post-title tm-color-primary">Keywords</h2>
 			<div style="line-height: 1.6em; padding-left: 0.9em">
 			    {% for keyword in keywords %}
-			    <a href="/insights?query={{ keyword }}" class="tm-color-primary"
+			    <a href="/insights?keyword={{ keyword | urlencode }}" class="tm-color-primary"
 			       style="font-size: 90%">{{ keyword }}</a><br/>
 			    {% endfor %}
 			    &nbsp;<br/>
 			    &nbsp;
 			</div>
 			{% endif %}
+			{% if recommendations is defined and recommendations|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
-                        <a href="/post?uuid={{ rcom[0].uuid }}" class="d-block tm-mb-40">
+			{% for doc in recommendations %}
+                        <a href="/post?uuid={{ doc.uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ rcom[0].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ rcom[0].title }}</figcaption>
+                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
                             </figure>
                         </a>
-                        <a href="/post?uuid={{ rcom[1].uuid }}" class="d-block tm-mb-40">
-                            <figure>
-                                <img src="{{ rcom[1].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ rcom[1].title }}</figcaption>
-                            </figure>
-                        </a>
-                        <a href="/post?uuid={{ rcom[2].uuid }}" class="d-block tm-mb-40">
-                            <figure>
-                                <img src="{{ rcom[2].thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ rcom[2].title }}</figcaption>
-                            </figure>
-                        </a>
+			{% endfor %}
+			{% endif %}
                     </div>
                 </aside>
             </div>

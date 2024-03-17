@@ -37,6 +37,10 @@
                         <i class="fas fa-pen"></i>
                         Single Post
                     </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                        <i class="fas fa-pen"></i>
+                        Insights
+                    </a></li>
                     <li class="tm-nav-item active"><a href="/backstage" class="tm-nav-link">
                         <i class="fas fa-users"></i>
                         Backstage Area
@@ -83,16 +87,17 @@
 			    Backstage Area
 		        </h2>
                         <p>
-			    This web application tracks your anonymous session. While you
-			    have been clicking on articles, the following information was
-			    collected so far, and is used for recommendation of reads.
-			</p>
-			<p>
-			    You can press the
-			    Delete History button to start from scratch (initial news
-			    will be shuffled on the Home page then).
+			    This web application tracks your anonymous
+			    session. While you have been clicking on
+			    articles, the following information was
+			    collected so far, and is used for
+			    recommendation of reads.  You can press
+			    the Delete History button to start from
+			    scratch (initial news will be shuffled on
+			    the Home page then).
                         </p>
-			<h4 style="margin-top: 50px">History of Articles</h4>
+			<h4 style="margin-top: 50px">History of Read Articles</h4>
+			{% if history|length > 0 %}
 			<p>
 			    {% for doc in history %}
 			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
@@ -101,17 +106,7 @@
 			    <br/>
 			    {% endfor %}
 			</p>
-			<h4 style="margin-top: 50px">History of Questions</h4>
-			<p>
-			    {% for entry in gen_ai_cache %}
-			    <a class="tm-color-primary" href="/rag?_id={{ entry._id | string }}">
-				{{ entry.question | truncate(80) }}
-			    </a>
-			    <br/>
-			    {% endfor %}
-			</p>
-			<p>&nbsp;</p>
-			<form method="POST" action="/delete_history"
+			<form method="POST" action="/delete_articles_history"
 			      class="mb-5 ml-auto mr-0 tm-contact-form">
 			    <div class="form-group row text-right">
 				<div class="col-12">
@@ -121,6 +116,25 @@
 				</div>
                             </div>
 			</form>
+			{% else %}
+			<p>
+			    <i>List is empty</i>
+			</p>
+			{% endif %}
+			<h4 style="margin-top: 50px">History of AI-Generated Insights</h4>
+			<p>
+			    {% for entry in gen_ai_cache %}
+			    <a class="tm-color-primary" href="/insights?_id={{ entry._id | string }}">
+				{{ entry.question | truncate(80) }}
+			    </a>
+			    &nbsp;
+			    <a class="tm-color-primary" style="font-size: smaller"
+			       href="/delete_insights_history_item/{{ entry._id | string }}">
+				[delete]
+			    </a>
+			    <br/>
+			    {% endfor %}
+			</p>
                     </div>
                 </div>
             </div>
