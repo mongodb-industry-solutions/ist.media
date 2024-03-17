@@ -13,7 +13,7 @@ body {
     padding: 0;
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 19px;
-    line-height: 2em;
+    line-height: 1.6em;
     overflow-x: hidden;
 }
 
@@ -73,7 +73,7 @@ hr {
 
 .tm-main {
     margin-left: 400px;
-    padding: 80px 100px 25px;
+    padding: 60px 80px 25px;
 }
 
 .tm-post { max-width: 470px; }
@@ -196,7 +196,7 @@ ul, ol {
     transition: all 0.3s ease;
 }
 
-.tm-search-button:hover { background-color: #09b6b6; }
+.tm-search-button:hover { background-color: #004628; }
 
 .tm-search-icon {
     color: white;
@@ -279,7 +279,7 @@ ul, ol {
 .tm-btn-small { padding: 8px 33px; }
 
 .tm-btn-primary:hover {
-    background-color: #09b6b6;
+    background-color: #004628;
     color: white;
 }
 
