@@ -147,6 +147,18 @@ ul, ol {
     color: #555;
 }
 
+.ai-gen h3 {
+    padding-top: 0.6em;
+    font-size: 1.4rem;
+    font-weight: normal;
+    color: #00684A;
+}
+
+.ai-gen h3 strong {
+    font-weight: normal;
+    color: #00684A;
+}
+
 .tm-nav { margin-left: -30px; }
 
 .tm-social-link {
