@@ -371,6 +371,12 @@ figcaption { line-height: 1.4; }
     margin-right: 0;
 }
 
+.tm-insights {
+    background: #F1F1F1;
+    line-height: 1.3em;
+    padding: 0 1em 1em 1em;
+}
+
 .tm-pt-10 { padding-top: 10px; }
 .tm-pt-15 { padding-top: 15px; }
 .tm-pt-20 { padding-top: 20px; }

@@ -90,20 +90,34 @@
             </div>
             <div class="row tm-row tm-mb-45">
                 <div class="col-12">
-                    <hr class="tm-hr-primary tm-mb-55">
+                    <hr class="tm-hr-primary">
                 </div>
             </div>
-            <div class="row tm-row tm-mb-40">
-                <div class="col-12">
-                    <div class="mb-4 ai-gen">
-                        <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
-			    {{ title }}
-		        </h2>
-			{{ content | safe }}
+            <div class="row tm-row">
+		<div class="col-lg-8 tm-post-col">
+		    <div class="tm-post-full">
+			<div class="mb-4 ai-gen">
+                            <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
+				{{ title }}
+		            </h2>
+			    {{ content | safe }}
+			</div>
                     </div>
                 </div>
+		<aside class="col-lg-4 tm-aside-col">
+                    <div class="tm-post-sidebar tm-insights">
+			{% for entry in gen_ai_cache %}
+			<p style="padding: 0.6em 0 0 0; margin: 0">
+			    <a class="tm-color-primary" style="font-size: 90%"
+			       href="/insights?_id={{ entry._id | string }}">
+				{{ entry.question | truncate(250) }}
+			    </a>
+			</p>
+			{% endfor %}
+		    </div>
+		</aside>
             </div>
-	    <footer class="row tm-row">
+	    <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
                   Design: <a href="https://templatemo.com/tm-553-xtra-blog"
 			     rel="noopener" target="_blank"

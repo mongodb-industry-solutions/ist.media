@@ -260,7 +260,7 @@ def about():
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
                     reversed(session['history'])))
     try:
-        gen_ai_cache = list(gen_ai_cache_collection.find().sort({ "$natural" : -1 }))
+        gen_ai_cache = list(gen_ai_cache_collection.find().sort({ "$natural" : -1 }).limit(100))
     except Exception as e:
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
@@ -272,11 +272,16 @@ def insights():
     keyword = request.args.get('keyword')
     _id = request.args.get('_id')
     query = request.args.get('query')
+    try:
+        gen_ai_cache = list(gen_ai_cache_collection.find().sort({ "$natural" : -1 }).limit(20))
+    except Exception as e:
+        gen_ai_cache = []
+        print(e) # will be printed in the log file that is residing in /tmp
     if keyword and keyword != "":
         content = html(calculate_insights(keyword))
         title = capitalize(keyword)
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
-                               title=title, content=content)
+                               title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif _id and _id != "":
         try:
             cached_entry = gen_ai_cache_collection.find_one({ "_id" : ObjectId(_id) })
@@ -287,7 +292,7 @@ def insights():
         content = html(cached_entry['answer'])
         title = capitalize(cached_entry['question'])
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
-                               title=title, content=content)
+                               title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif query and query != "":
         query = query.strip()
         cached_entry = None
@@ -302,7 +307,7 @@ def insights():
             content = html(calculate_using_rag(query))
             title = capitalize(query)
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
-                               title=title, content=content)
+                               title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
                                title="AI-Generated Insights (RAG)",
@@ -321,9 +326,9 @@ def insights():
                                please avoid refreshing the page or re-entering the question.</p>
 
                                <p>Most recent insights are cached, and can be accessed
-                               from the Backstage Area. Consider using these
+                               from the right column of this page. Consider using these
                                examples when conducting a demo!</p>
-                               """)
+                               """, gen_ai_cache=gen_ai_cache)
 
 
 @main.route('/contact')
