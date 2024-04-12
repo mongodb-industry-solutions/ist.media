@@ -23,7 +23,8 @@ def generate_openai_embeddings(text: str) -> list[float]:
 
 i = 0
 try:
-    for doc in collection.find({ "thread.site" : "bnnbreaking.com" }):
+    for doc in collection.find({ "thread.site" : "bnnbreaking.com",
+                                 "embedding" : { "$exists" : False }}):
         i += 1
         if i % 50 == 0:
             print("\n" + str(i))
