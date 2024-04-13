@@ -16,9 +16,9 @@ collectionName = "business_news"
 collection = client[dbName][collectionName]
 
 webzio.config(token=keyparams.webzio_token)
-hours = 4 # how much to look back for news
+hours = 48 # how much to look back for news
 queryparams = {
-    "q": "site_type:news category:\"Economy, Business and Finance\" num_chars:>300 language:english",
+    "q": "site:bnnbreaking.com num_chars:>800 language:english",
     "ts": str(int(time.time()) - 60*60*hours),
     "sort": "crawled"
 }
