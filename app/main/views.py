@@ -25,9 +25,8 @@ import textwrap
 import string
 
 
-openai_api_key="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"
-MONGO_URI="mongodb+srv://mediademouser:mediademouserpassword\
-@ist-shared.n0kts.mongodb.net/?retryWrites=true&w=majority"
+openai_api_key = os.environ['OPENAI_API_KEY']
+MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
 client = MongoClient(MONGO_URI)
 dbName = "1_media_demo"

@@ -10,10 +10,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
 
     # MongoDB Atlas
-    MONGO_URI = 'mongodb+srv://mediademouser:mediademouserpassword@ist-shared.n0kts.mongodb.net/' + \
-        '?retryWrites=true&w=majority'
-    #MONGO_URI = 'mongodb+srv://watch:w741.-gs@diary.vgtmh.mongodb.net/main' + \
-    #    '?retryWrites=true&w=majority'
+    MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
     @staticmethod
     def init_app(app):
