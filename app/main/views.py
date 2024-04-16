@@ -23,6 +23,7 @@ from datetime import datetime
 import re
 import textwrap
 import string
+import os
 
 
 openai_api_key = os.environ['OPENAI_API_KEY']
