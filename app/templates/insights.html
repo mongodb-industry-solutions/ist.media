@@ -101,6 +101,22 @@
 				{{ title }}
 		            </h2>
 			    {{ content | safe }}
+			    {% if context is defined and context|length > 0 %}
+			    <p>&nbsp;</p>
+			    <p style="font-size: 80%; margin-bottom: 0.3rem">
+				<strong>Sources:</strong>
+			    </p>
+			    <ul>
+				{% for c in context %}
+				<li style="margin-bottom: 0; line-height: 1.4em">
+				    <a href="/post?uuid={{ c.uuid }}"
+				       class="tm-color-primary" style="font-size: 80%">
+					{{ c.title | truncate(72) }}
+				    </a>
+				</li>
+				{% endfor %}
+			    </ul>
+			    {% endif %}
 			</div>
                     </div>
                 </div>
