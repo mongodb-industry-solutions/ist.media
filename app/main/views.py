@@ -13,7 +13,7 @@ from langchain.docstore.document import Document
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.llm import LLMChain
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_core.runnables import RunnableLambda, RunnableParallel, RunnablePassthrough
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_community.document_loaders import DirectoryLoader
@@ -78,7 +78,6 @@ def calculate_keywords(text: str) -> list[str]:
             llm_chain=llm_chain,
             document_variable_name="text")
         keywords_string = stuff_chain.invoke(lcdocs)['output_text']
-        print(keywords_string) # audit if OpenAI returns the right format
         keywords = eval(keywords_string) # convert str into list
         keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
         keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
@@ -129,6 +128,40 @@ def calculate_using_rag(question: str) -> str:
         print(e) # will be printed in the log file that is residing in /tmp
         answer = ""
     return answer
+
+
+def calculate_using_rag_and_return_context(question):
+    template = """Answer the question based only on the following context:
+    {context}
+
+    Question: {question}
+    """
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+    try:
+        prompt = ChatPromptTemplate.from_template(template)
+        retriever = vector_search.as_retriever(search_kwargs={ "k" : 3 })
+        model = ChatOpenAI(model_name="gpt-3.5-turbo-0125")
+        chain = (
+            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
+            | prompt
+            | model
+            | StrOutputParser()
+        )
+        chain_with_source = RunnableParallel(
+            { "context": retriever, "question": RunnablePassthrough() }
+        ).assign(answer=chain)
+        result = chain_with_source.invoke(question)
+        answer = result['answer']
+        cx = result['context']
+        context = []
+        for c in cx:
+            context.append(collection.find_one({ "uuid" : c.metadata['uuid'] }))
+        gen_ai_cache_collection.insert_one({ "question" : question, "answer" : answer })
+    except Exception as e:
+        print(e) # will be printed in the log file that is residing in /tmp
+        answer = ""
+    return answer, context
 
 
 def capitalize(text: str) -> str:
