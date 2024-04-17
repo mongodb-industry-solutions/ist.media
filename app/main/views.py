@@ -201,7 +201,6 @@ def index():
             for doc in history_docs[-5:]: # only consider the recent history
                 concatenated_titles += ("" if i == 0 else " ") + doc['title']
                 i += 1
-            print("[DEBUG]: Personalization with doc titles: " + concatenated_titles)
             docs = calculate_recommendations(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
