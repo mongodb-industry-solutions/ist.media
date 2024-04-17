@@ -72,7 +72,7 @@ def calculate_keywords(text: str) -> list[str]:
     KEYWORDS:"""
     try:
         prompt = PromptTemplate.from_template(prompt_template)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         stuff_chain = StuffDocumentsChain(
             llm_chain=llm_chain,
@@ -94,7 +94,7 @@ def calculate_insights(text: str) -> str:
     INSIGHTS:"""
     try:
         prompt = PromptTemplate.from_template(prompt_template)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         stuff_chain = StuffDocumentsChain(
             llm_chain=llm_chain,
@@ -115,7 +115,7 @@ def calculate_using_rag(question: str) -> str:
     try:
         prompt = ChatPromptTemplate.from_template(template)
         retriever = vector_search.as_retriever()
-        model = ChatOpenAI(model_name="gpt-4-turbo-preview")
+        model = ChatOpenAI(model_name="gpt-4-turbo")
         chain = (
             { "context": retriever, "question": RunnablePassthrough() }
             | prompt
@@ -141,7 +141,7 @@ def calculate_using_rag_and_return_context(question):
     try:
         prompt = ChatPromptTemplate.from_template(template)
         retriever = vector_search.as_retriever(search_kwargs={ "k" : 3 })
-        model = ChatOpenAI(model_name="gpt-3.5-turbo-0125")
+        model = ChatOpenAI(model_name="gpt-3.5-turbo")
         chain = (
             RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
             | prompt
@@ -240,7 +240,7 @@ def post():
         try:
             prompt = PromptTemplate.from_template(prompt_template)
             # Define LLM chain
-            llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-0125")
+            llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
             llm_chain = LLMChain(llm=llm, prompt=prompt)
             # Define StuffDocumentsChain
             stuff_chain = StuffDocumentsChain(
