@@ -183,6 +183,11 @@ def delete_insights_history_item(id):
     return redirect('/backstage')
 
 
+@main.route('/welcome')
+def welcome():
+    return render_template('welcome.html')
+
+
 @main.route('/')
 def index():
     query = request.args.get('query')
