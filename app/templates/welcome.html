@@ -85,9 +85,149 @@
             <div class="row tm-row">
                 <div class="col-12">
 		    <p>
-			Here we say something. Let's make it a little longer text,
-			so we can see how it wraps on the page. Curious...
+			This web application showcases how
+			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
+			   class="tm-color-primary">MongoDB Atlas Vector Search</a>
+			in combination with
+			<a href="https://platform.openai.com/docs/quickstart?context=python"
+			   class="tm-color-primary">OpenAI</a>
+			and
+			<a href="https://python.langchain.com/docs/integrations/vectorstores/mongodb_atlas/"
+			   class="tm-color-primary">LangChain</a>
+			can be used to drive personalized experiences for the Media industry.
 		    </p>
+		    <p>
+			This is what has been implemented currently:
+		    </p>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Personalization
+		    </h2>
+		    <p>
+			When you start using the news application, and you navigate to
+			the <a href="/" class="tm-color-primary">Home Page</a>, nothing is known
+			about you yet (no browsing history, no explicit user profile), therefore
+			eight articles are shuffled out of a few thousand available ones.
+		    <p/>
+		    <p>
+			You can click on an article to load its content, displayed on the
+			<a href="/post" class="tm-color-primary">Single Post Page</a>. This will
+			save the article in your browsing history, which is basically a list of
+			previously clicked articles. With every click on an article, the list
+			grows, and information about your interests grows with it. You can check
+			which articles are in your browsing history by navigating to the
+			<a href="/backstage" class="tm-color-primary">Backstage Area</a>. From there,
+			it is also possible to delete the history, to start from scratch again.
+		    </p>
+		    <p>
+			Every time you navigate to the
+			<a href="/" class="tm-color-primary">Home Page</a> while there are articles
+			in your browsing history, the displayed news aren't shuffled, but rather a
+			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
+			   class="tm-color-primary">MongoDB Atlas Vector Search</a>
+			is executed, finding content on-the-fly that is similar (KNN Search, K-Nearest Neighbour)
+			to what is in your history.
+		    </p>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Search Form
+		    </h2>
+		    <p>
+			On the <a href="/" class="tm-color-primary">Home Page</a> and on the
+			<a href="/post" class="tm-color-primary">Single Post Page</a>, you find a search
+			form at the top:<br/>
+			<img style="width: 40%" src="/img/vsform.png"><br/>
+			Whatever you send through this form will trigger
+			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
+			   class="tm-color-primary">Vector Search</a> to find
+			semantically close news articles. Don't just use keywords for your search,
+			but also experiment with sending multiple words, or even complete sentences!
+		    </p>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Content Suggestions
+		    </h2>
+		    <p>
+			Another location in the application where
+			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
+			   class="tm-color-primary">MongoDB Atlas Vector Search</a> will be executed
+			is the <a href="/post" class="tm-color-primary">Single Post Page</a>.
+			It contains a right column with an area called "Related Posts". These are
+			calculated on-the-fly to be similar to the article on screen.<br/>&nbsp;<br/>
+			<img style="width: 25%" src="/img/ctsugg.png"><br/>&nbsp;<br/>
+			Once you click on one of these "next best reads", and the article is therefore put into
+			your browsing history, it gets blacklisted for the "Related Posts" view, to
+			avoid circular referrals. This does not hold for the
+			<a href="/" class="tm-color-primary">Home Page</a> &mdash; the article is allowed
+			to appear there again nevertheless.
+		    </p>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Keyword Generation
+		    </h2>
+		    <p>
+			The right column of the
+			<a href="/post" class="tm-color-primary">Single Post Page</a> contains another
+			area called "Keywords". It contains up to six entries that are calculated
+			on-the-fly by calling GPT-3.5 with the following prompt:
+		    </p>
+		    <pre style="white-space: pre-line; font-size: smaller; color: darkorange">
+			Return a machine-readable Python list.
+			Given the context of the media article,
+			please provide me with 6 short keywords
+			that capture the essence of the content
+			and help finding the article while
+			searching the web. Consider terms that
+			are central to the article's subject
+			and are likely to be imported for
+			summarization. Please prioritize names
+			of companies, names of persons, names
+			of products, events, technical terms,
+			business terms over general words.
+			Return a machine-readable Python list.
+		    </pre>
+		    <p>
+			Each keyworld is clickable. This will load
+			the <a href="/insights?keyword=keyword" class="tm-color-primary">Insights Page</a>,
+			where GPT-3.5 is instructed to provide some background information,
+			using the following prompt:
+		    </p>
+		    <pre style="white-space: pre-line; font-size: smaller; color: darkorange">
+			Tell me about the following, writing three paragraphs.
+		    </pre>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Summarization
+		    </h2>
+		    <p>
+			The article header in the
+			<a href="/post" class="tm-color-primary">Single Post Page</a>
+			contains a link to calculate a summary:<br/>
+			<img style="width: 50%" src="/img/crsum.png"><br/>
+			This instructs GPT-3.5 to summarize the displayed article:
+		    </p>
+		    <pre style="white-space: pre-line; font-size: smaller; color: darkorange">
+			Summarize in around 200 words the key facts of the following.
+		    </pre>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Retrieval Augmented Generation (RAG)
+		    </h2>
+		    <p>
+			When you call the <a href="/insights" class="tm-color-primary">Insights Page</a>
+			without any arguments (e.g. by calling it from the left main menu), you
+			can start experimenting with RAG by entering your question in the search form
+			at the top of the page.<br/>
+			<img style="width: 40%" src="/img/ragform.png"><br/>
+			This will instruct GPT-4 to generate an answer in natural language, using a
+			context that is calculated on the fly by calling
+			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
+			   class="tm-color-primary">MongoDB Atlas Vector Search</a>,
+			to find the most relevant articles for the answer:
+		    </p>
+		    <img style="width: 100%" src="/img/rag.png">
+		    <p>
+			&nbsp;<br/>All calculated answers are cached in MongoDB, and are available
+			for easy and fast retrieval in the right column of the page. The
+			<a href="/backstage" class="tm-color-primary">Backstage Area</a> has
+			functionality to delete individual cached entries
+			("History of AI-Generated Insights").
+		    </p>
+		    <p>&nbsp;</p>
                 </div>
             </div>
             <footer class="row tm-row">

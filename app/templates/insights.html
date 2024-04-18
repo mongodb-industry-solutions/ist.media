@@ -120,6 +120,7 @@
 			</div>
                     </div>
                 </div>
+		{% if gen_ai_cache|length > 0 %}
 		<aside class="col-lg-4 tm-aside-col">
                     <div class="tm-post-sidebar tm-insights">
 			{% for entry in gen_ai_cache %}
@@ -132,6 +133,7 @@
 			{% endfor %}
 		    </div>
 		</aside>
+		{% endif %}
             </div>
 	    <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
