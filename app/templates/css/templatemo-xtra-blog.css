@@ -203,6 +203,16 @@ ul, ol {
     font-size: 1.2rem;
 }
 
+.form-inline .form-control.tm-rag-input {
+    display: block;
+    height: 60px;
+    width: 570px;
+    margin-right: 30px;
+    border-radius: 0;
+    border-color: #00684A;
+    font-size: 1.2rem;
+}
+
 .tm-search-button {
     width: 60px;
     height: 60px;
@@ -487,10 +497,15 @@ a:hover figcaption { color: #004628; }
 @media (max-width: 1199px) {
     .tm-post-sidebar { max-width: 440px; }
     .form-inline .form-control.tm-search-input { width: 420px; }
+    .form-inline .form-control.tm-rag-input { width: 420px; }
 }
 
 @media (max-width: 1086px) {
     .form-inline .form-control.tm-search-input {
+        width: 80%;
+        margin-right: 15px;
+    }
+    .form-inline .form-control.tm-rag-input {
         width: 80%;
         margin-right: 15px;
     }

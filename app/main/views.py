@@ -19,7 +19,7 @@ from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import textwrap
 import string
@@ -190,6 +190,9 @@ def welcome():
 
 @main.route('/')
 def index():
+    if not 'was_here_before' in session:
+        session['was_here_before'] = '1'
+        return render_template('welcome.html')
     query = request.args.get('query')
     if query and query != "":
         docs = calculate_recommendations(query.strip(), [], MAX_DOCS)
