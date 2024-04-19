@@ -12,7 +12,6 @@ uwsgi -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 
       --daemonize /tmp/uwsgi_media.log --disable-logging --auto-procname \
       --thunder-lock --umask 0022 --vacuum --touch-reload reload --lazy-apps \
       --procname-prefix-spaced ist.media --uid bjjl --gid users \
-      --check-static /usr/local/share/ist.media/app/templates \
       --master-fifo /tmp/uwsgi_media.fifo
 
 sleep 5
