@@ -1,9 +1,9 @@
 # ist.media - News Demo
-This demo showcases AI-powered Content Personalization and Summarization
+This demo showcases an AI-powered news website.
 
 ## Highlights
 
-- Joint play of Python/Flask, MongoDB Atlas, Vector Search, Langchain, and OpenAI
+- Joint play of Python/Flask, MongoDB Atlas, Vector Search, Langchain, and OpenAI.
 - Allows to experiment with Personalization, Content Suggestions, Summarization, Keyword Extraction, and RAG-based News Insights. See [ist.media/welcome](https://ist.media/welcome) for more information about the functionality of the demo.
 
 ## Installation on a Mac
@@ -52,7 +52,9 @@ They have to follow this schema:
 
 ![news datamodel](https://github.com/mongodb-industry-solutions/ist.media/blob/main/etc/datamodel.png?raw=true)
 
-The ```embedding``` field can be calculated by calling ```ist.media/scripts/vectorize.py```. And the vector index should then be calculated from within the Atlas web interface, using ```cosine``` similarity, and ```1536``` dimensions.
+The ```embedding``` field is calculated by calling ```ist.media/scripts/vectorize.py```, the ```keywords``` field is calculated with AI on-the-fly, so can be left alone. Finally, ```visit_count``` and ```read_count``` will be calculated in a later version of the demo from within application code, so these also do not need to be existing in your data model.
+
+A vector index should then be calculated from within the Atlas web interface, using ```cosine``` similarity and ```1536``` dimensions.
 
 #### Start the application:
 
@@ -61,7 +63,7 @@ cd ist.media
 ./bin/uwsgi-debug.start
 ```
 
-You will probably need to adapt some path names in the start script. If all goes well, you can access the app from your browser at localhost:9090.
+You will probably need to adapt some paths in the start script. If all goes well, you can access the app from your browser at localhost:9090.
 
 
 ## Acknowledgements
