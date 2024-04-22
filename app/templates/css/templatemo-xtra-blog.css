@@ -19,7 +19,7 @@ body {
     overflow-x: hidden;
 }
 
-p, span, ol, ul { color: #777; }
+p, span, ol, ul, table { color: #777; }
 hr {
     border-top-color: #CCC;
     margin-top: 10px;
@@ -146,20 +146,48 @@ ul, ol {
 }
 
 .ai-gen strong {
-    color: #555;
+    color: #666;
+    font-weight: bold;
+}
+
+.ai-gen h3, .ai-gen h4 {
+    color: #00684A;
+    font-weight: normal;
+    padding-top: 0.9em;
+    padding-bottom: 0.5em;
+}
+
+.ai-gen h3 strong, .ai-gen h4 strong {
+    color: #00684A;
+    font-weight: normal;
 }
 
 .ai-gen h3 {
-    padding-top: 0.9em;
-    padding-bottom: 0.5em;
-    font-size: 1.4rem;
-    font-weight: normal;
-    color: #00684A;
+    font-size: 1.5rem;
 }
 
-.ai-gen h3 strong {
+.ai-gen h4 {
+    font-size: 1.4rem;
+}
+
+.ai-gen table {
+    font-size: 17px;
+    line-height: 1.45em;
+    margin-bottom: 1em;
+}
+
+.ai-gen thead th {
+    color: #666;
+    font-weight: bold;
+}
+
+.ai-gen tbody td strong {
+    color: #777;
     font-weight: normal;
-    color: #00684A;
+}
+
+.ai-gen td, .ai-gen th {
+    padding-right: 1.15em;
 }
 
 .tm-nav { margin-left: -30px; }
