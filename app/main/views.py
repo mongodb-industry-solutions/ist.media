@@ -280,7 +280,7 @@ def post():
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
             print(e) # will be printed in the log file that is residing in /tmp
-        recommendations = calculate_recommendations(doc['text'], session['history'], MAX_RCOM)
+        recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         return render_template('post.html', doc=doc, fdate=fdate,
                                fdoc=fdoc, recommendations=recommendations)
     else:
