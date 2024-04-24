@@ -2,4 +2,5 @@
 - calculate_recommendations. Add function signature again.
 - Keywords in /post: recalculate link
 - /index infoline: clear history link
+- /post secret parameter to delete the post
 - compare openai-embedding-2 vs. -3 regarding suitability for news comparison
