@@ -1,0 +1,2 @@
+- check docu on welcome page. Only form-based vector search ignores history, not personalization.
+- calculate_recommendations. Add function signature again.

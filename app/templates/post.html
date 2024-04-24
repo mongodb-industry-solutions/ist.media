@@ -114,6 +114,9 @@
 				{% if not request.args.get('style') %}
 				<br/><a style="text-align: right" href="/post?style=summary"
 					class="tm-color-primary">&#10145; Create summary</a>
+				<br/>
+				Visits: <strong>{{ visit_count }}</strong>
+				&nbsp;Reads: <strong>{{ read_count }}</strong>
 				{% else %}
 				<br/><a style="text-align: right" href="/post"
 					class="tm-color-primary">&#10145; Back to full article</a>
@@ -140,11 +143,14 @@
 			{% if recommendations is defined and recommendations|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
-			{% for doc in recommendations %}
-                        <a href="/post?uuid={{ doc.uuid }}" class="d-block tm-mb-40">
+			{% for rc in recommendations %}
+                        <a href="/post?uuid={{ rc.0.uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ doc.thread.main_image }}" alt="Image" class="mb-3 img-fluid">
-                                <figcaption class="tm-color-primary">{{ doc.title }}</figcaption>
+                                <img src="{{ rc.0.thread.main_image }}"
+				     alt="Image" class="mb-3 img-fluid">
+                                <figcaption class="tm-color-primary">
+				    {{ rc.0.title }} ({{ "%.2f" | format(rc.1) }})
+				</figcaption>
                             </figure>
                         </a>
 			{% endfor %}

@@ -20,10 +20,7 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
-import re
-import textwrap
-import string
-import os
+import re, textwrap, string, os, time
 
 
 openai_api_key = os.environ['OPENAI_API_KEY']
@@ -50,11 +47,18 @@ vector_search = MongoDBAtlasVectorSearch.from_connection_string(
 )
 
 
-def calculate_recommendations(text: str, history: list[str], count=MAX_DOCS_VS) -> list[dict]:
+def similarity_search(text: str, history: list[str], count=MAX_DOCS_VS) -> list[dict]:
     results = vector_search.similarity_search(query=text, k=MAX_DOCS_VS)
     docs = map(lambda r: r.metadata, results) # docs lack the 'text' field - WHY?
     # don't recommend history items, and limit to count
     return list(filter(lambda r: not r['uuid'] in history, docs))[:count]
+
+
+def calculate_recommendations(embedding, history, count=MAX_DOCS_VS):
+    results = vector_search._similarity_search_with_score(embedding=embedding, k=MAX_DOCS_VS)
+    tuples = map(lambda r: (r[0].metadata, r[1]), results)
+    # don't recommend history items, and limit to count
+    return list(filter(lambda t: not t[0]['uuid'] in history, tuples))[:count]
 
 
 def calculate_keywords(text: str) -> list[str]:
@@ -168,6 +172,18 @@ def capitalize(text: str) -> str:
     return ' '.join([w.title() if w.islower() else w for w in text.split()])
 
 
+def check_for_quality_read():
+    if 'uuid_since' in session:
+        delta_seconds = int(time.time()) - session['uuid_since']
+        session.pop('uuid_since')
+        if delta_seconds > 10 and delta_seconds < 300:
+            try:
+                collection.update_one({ "uuid" : session['uuid'] },
+                                      { "$inc" : { "read_count" : 1 }})
+            except Exception as e:
+                print(e)
+
+
 @main.route('/delete_articles_history', methods=['POST'])
 def delete_articles_history():
     session['history'] = []
@@ -185,6 +201,7 @@ def delete_insights_history_item(id):
 
 @main.route('/welcome')
 def welcome():
+    check_for_quality_read()
     return render_template('welcome.html')
 
 
@@ -193,11 +210,13 @@ def index():
     if not 'was_here_before' in session:
         session['was_here_before'] = '1'
         return render_template('welcome.html')
+    check_for_quality_read()
     query = request.args.get('query')
     if query and query != "":
-        docs = calculate_recommendations(query.strip(), [], MAX_DOCS)
+        docs = similarity_search(query.strip(), [], MAX_DOCS)
         # for unknown reasons, these docs lack the 'text' field - refetching...
         docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
+        infoline = 'Showing best-matching articles for vector search: "' + query.strip() + '"'
     else: # the start page, called without query parameter
         if 'history' in session and len(session['history']) > 0:
             history_docs = list(map(lambda uuid:
@@ -209,23 +228,25 @@ def index():
             for doc in history_docs[-5:]: # only consider the recent history
                 concatenated_titles += ("" if i == 0 else " ") + doc['title']
                 i += 1
-            docs = calculate_recommendations(concatenated_titles, session['history'], MAX_DOCS)
+            docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
+            infoline = "Showing personalized content, based on browsing history"
         else: # no personalization possible - shuffle some items to start with
             docs = collection.aggregate([
-                { "$match": { "thread.site" : "bnnbreaking.com" } },
                 { "$sample": { "size": MAX_DOCS } }
             ])
+            infoline = "Showing random content, no browsing history yet"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
-    return render_template('index.html', docs=docs)
+    return render_template('index.html', docs=docs, infoline=infoline)
 
 
 @main.route('/post')
 def post():
+    check_for_quality_read()
     style = request.args.get('style')
     query = request.args.get('query')
     uuid = request.args.get('uuid')
@@ -269,7 +290,6 @@ def post():
             doc = collection.find_one({ "uuid" : session['uuid'] })
         else: # TODO: use a personalized doc, if history is not empty
             doc = list(collection.aggregate([
-                { "$match": { "thread.site" : "bnnbreaking.com" } },
                 { "$sample": { "size": 1 } }
             ]))[0]
         if not doc:
@@ -278,6 +298,7 @@ def post():
         fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc = html(doc['text'].replace("\n", "\n\n"))
         session['uuid'] = doc['uuid']
+        session['uuid_since'] = int(time.time())
         if not 'history' in session:
             session['history'] = []
         session['history'].append(doc['uuid']) # YES, allow for dups!
@@ -285,14 +306,29 @@ def post():
         # appended at the end
         if len(session['history']) > 30: # limit the max length of history
             session['history'] = session['history'][-30:]
-        keywords = calculate_keywords(doc['text'])
-        recommendations = calculate_recommendations(doc['text'], session['history'], MAX_RCOM)
+        if not 'keywords' in doc or len(doc['keywords']) == 0:
+            keywords = calculate_keywords(doc['text'])
+            if len(keywords) > 0:
+                print("INFO: Caching keywords for uuid " + doc['uuid'])
+                try:
+                    collection.update_one({ "_id" : doc["_id"] },
+                                          { "$set" : { "keywords" : keywords }})
+                except Exception as e:
+                    print(e)
+        else:
+            keywords = doc['keywords']
+        recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        collection.update_one({ "_id" : doc["_id"] },
+                              { "$inc" : { "visit_count" : 1 }})
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
-                               recommendations=recommendations, keywords=keywords)
+                               recommendations=recommendations, keywords=keywords,
+                               visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,
+                               read_count=doc['read_count'] if 'read_count' in doc else 0)
 
 
 @main.route('/backstage')
 def about():
+    check_for_quality_read()
     if not 'history' in session:
         session['history'] = []
     docs = list(map(lambda uuid:
@@ -309,6 +345,7 @@ def about():
 
 @main.route('/insights')
 def insights():
+    check_for_quality_read()
     keyword = request.args.get('keyword')
     _id = request.args.get('_id')
     query = request.args.get('query')
@@ -349,6 +386,7 @@ def insights():
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
+        most_read_articles = collection.find().sort({ 'read_count' : -1 }).limit(5)
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
                                title="AI-Generated Insights (RAG)",
                                content="""<p>Please enter your question in the form above.
@@ -368,9 +406,12 @@ def insights():
                                <p>Most recent insights are cached, and can be accessed
                                from the right column of this page. Consider using these
                                examples when conducting a demo!</p>
-                               """, gen_ai_cache=gen_ai_cache)
+                               """,
+                               gen_ai_cache=gen_ai_cache,
+                               most_read_articles=most_read_articles)
 
 
 @main.route('/contact')
 def contact():
+    check_for_quality_read()
     return render_template('contact.html')

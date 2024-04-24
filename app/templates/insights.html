@@ -124,6 +124,30 @@
 				{% endfor %}
 			    </ul>
 			    {% endif %}
+			    {% if most_read_articles is defined %}
+			    <p>&nbsp;</p>
+			    <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
+				Top Articles (Most Read)
+		            </h2>
+			    <p>
+				<table style="font-size: 15px">
+				    {% for doc in most_read_articles %}
+				    <tr>
+					<td style="text-align: right; vertical-align: top">
+					    {{ doc.read_count }}
+					</td>
+					<td>
+					    <a href="/post?uuid={{ doc.uuid }}"
+					       class="tm-color-primary">
+						{{ doc.title | truncate(80) }}
+					    </a>
+					</td>
+				    </tr>
+				    {% endfor %}
+				</table>
+			    </p>
+			    <p>&nbsp;</p>
+			    {% endif %}
 			</div>
                     </div>
                 </div>
