@@ -175,12 +175,40 @@
 			It contains a right column with an area called "Related Posts". These are
 			calculated on-the-fly to be similar to the article on screen.<br/>&nbsp;<br/>
 			<img style="width: 25%" src="/img/ctsugg.png"><br/>&nbsp;<br/>
-			Once you click on one of these "next best reads", and the article is therefore
-			put into your browsing history, it gets filtered from the "Related Posts" area,
+			Appended to the titles, you find in parentheses a score, which
+			is calculated by MongoDB Atlas Vector Search. The score has a fixed range
+			from 0 to 1, and indicates "how well" the article matches. The higher the score,
+			the closer the match.
+		    </p>
+		    <p>
+			Once you click on one of the suggested articles, and that article is put into your browsing
+			history, it is from that moment on filtered from the "Related Posts" area,
 			and also from the personalized
-			<a href="/" class="tm-color-primary">Home Page</a>, to avoid circular referrals.
-			This does not hold for the search form, though &mdash; an article from the
-			user's history is allowed to appear in vector search results at any time.
+			<a href="/" class="tm-color-primary">Home Page</a>. This is to avoid circular
+			referrals, and to support content discovery.
+		    </p>
+		    <p>
+			The filter does not apply for the search form, though &mdash; an article from the
+			user's history is allowed to appear in vector search results at any time, independent
+			if it has been viewed in the same browser session before, or not.
+		    </p>
+		    <h2 class="pt-2 tm-color-primary tm-post-title">
+			Article Visits and Quality Reads
+		    </h2>
+		    <p>
+			Every time you visit an article, its `visits´ counter is incremented by one.
+			To distinguish mere clicks from actual reads, there's a second counter, called `reads´,
+			which is only incremented if the time delta to the next interaction with the
+			application is between 10 and 300 seconds. Idea behind this heuristics is that you
+			need some minimum time to read the article, but on the other hand, (too) long time
+			to the next interaction will most probably indicate that you have left the application.
+		    </p>
+		    <p>
+			The current values of both counters are displayed on the
+			<a href="/post" class="tm-color-primary">Single Post Page</a>, in the header
+			area of the article. In addition, the top ten most read articles are presented
+			at the bottom of the
+			<a href="/insights" class="tm-color-primary">Insights Page</a>.
 		    </p>
 		    <h2 class="pt-2 tm-color-primary tm-post-title">
 			Keyword Generation

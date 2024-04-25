@@ -402,7 +402,7 @@ def insights():
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
-        most_read_articles = collection.find().sort({ 'read_count' : -1 }).limit(5)
+        most_read_articles = collection.find().sort({ 'read_count' : -1 }).limit(10)
         return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
                                title="AI-Generated Insights (RAG)",
                                content="""<p>Please enter your question in the form above.
