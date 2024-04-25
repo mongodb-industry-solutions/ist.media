@@ -201,9 +201,9 @@ def delete_insights_history_item(id):
     return redirect('/backstage')
 
 
-@main.route('/recalculate_keywords/<id>', methods=['GET'])
-def recalculate_keywords(id):
-    doc = collection.find_one({ "_id" : ObjectId(id) })
+@main.route('/recalculate_keywords/<uuid>', methods=['GET'])
+def recalculate_keywords(uuid):
+    doc = collection.find_one({ "uuid" : uuid })
     keywords = calculate_keywords(doc['text'])
     if len(keywords) > 0:
         print("INFO: Re-caching keywords for uuid " + doc['uuid'])
@@ -212,7 +212,7 @@ def recalculate_keywords(id):
                                   { "$set" : { "keywords" : keywords }})
         except Exception as e:
             print(e)
-    return redirect('/post')
+    return redirect('/post?uuid=' + uuid)
 
 
 @main.route('/welcome')

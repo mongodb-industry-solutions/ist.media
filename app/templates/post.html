@@ -133,14 +133,16 @@
                         <h2 class="mb-4 tm-post-title tm-color-primary">
 			    Keywords
 			    <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
-			       href="/recalculate_keywords/{{ doc._id | string }}">
+			       href="/recalculate_keywords/{{ doc.uuid }}">
 				[recalculate]
 			    </a>
 			</h2>
 			<div style="line-height: 1.6em; padding-left: 0.9em">
 			    {% for keyword in keywords %}
-			    <a href="/insights?keyword={{ keyword | urlencode }}" class="tm-color-primary"
-			       style="font-size: 90%">{{ keyword }}</a><br/>
+			    <a href="/insights?keyword={{ keyword | urlencode }}"
+			       class="tm-color-primary" style="font-size: 90%">
+				{{ keyword }}
+			    </a><br/>
 			    {% endfor %}
 			    &nbsp;<br/>
 			    &nbsp;
