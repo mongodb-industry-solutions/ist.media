@@ -18,7 +18,7 @@ collection = client[dbName][collectionName]
 
 openai = OpenAI(api_key=keyparams.openai_api_key)
 def generate_openai_embeddings(text: str) -> list[float]:
-    response = openai.embeddings.create(model="text-embedding-3-small", input=text)
+    response = openai.embeddings.create(model="text-embedding-ada-002", input=text)
     return response.data[0].embedding
 
 i = 0
@@ -32,7 +32,7 @@ try:
             embedding = generate_openai_embeddings(doc['text'])
         except Exception as e:
             print("e", end="", flush=True)
-            collection.delete_one({ "_id" : doc["_id"] })
+            #collection.delete_one({ "_id" : doc["_id"] })
             continue
         collection.update_one({ "_id" : doc["_id"] },
                               { "$set" : { "embedding" : embedding }})

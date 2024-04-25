@@ -42,7 +42,7 @@ MAX_RCOM = 3      # number of recommended articles
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
     MONGO_URI,
     dbName + "." + collectionName,
-    OpenAIEmbeddings(model="text-embedding-3-small"),
+    OpenAIEmbeddings(disallowed_special=()),
     index_name="vector_index",
 )
 
