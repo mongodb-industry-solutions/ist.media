@@ -21,10 +21,10 @@ def create_uuid_from_string(val: str) -> str:
     hex_string = hashlib.md5(val.encode("UTF-8")).hexdigest()
     return str(uuid.UUID(hex=hex_string))
 
-    
+
 try:
-    q = QueryArticlesIter(keywords = QueryItems.OR(["quarterly numbers", "DAX Companies",
-                                                    "Germany", "Q2 2024" ]),
+    q = QueryArticlesIter(keywords = QueryItems.OR([ "SEPA",
+                                                     "Europe" ]),
                           sourceUri= er.getSourceUri("Seeking Alpha"),
                           lang="eng")
     output = q.execQuery(er, sortBy = "date", maxItems = 200)

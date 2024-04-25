@@ -130,7 +130,13 @@
                     <div class="tm-post-sidebar">
 			{% if keywords is defined and keywords|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
-                        <h2 class="mb-4 tm-post-title tm-color-primary">Keywords</h2>
+                        <h2 class="mb-4 tm-post-title tm-color-primary">
+			    Keywords
+			    <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
+			       href="/recalculate_keywords/{{ doc._id | string }}">
+				[recalculate]
+			    </a>
+			</h2>
 			<div style="line-height: 1.6em; padding-left: 0.9em">
 			    {% for keyword in keywords %}
 			    <a href="/insights?keyword={{ keyword | urlencode }}" class="tm-color-primary"

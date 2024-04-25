@@ -47,14 +47,16 @@ vector_search = MongoDBAtlasVectorSearch.from_connection_string(
 )
 
 
-def similarity_search(text: str, history: list[str], count=MAX_DOCS_VS) -> list[dict]:
+def similarity_search(text: str,
+                      history: list[str], count=MAX_DOCS_VS) -> list[dict]:
     results = vector_search.similarity_search(query=text, k=MAX_DOCS_VS)
     docs = map(lambda r: r.metadata, results) # docs lack the 'text' field - WHY?
     # don't recommend history items, and limit to count
     return list(filter(lambda r: not r['uuid'] in history, docs))[:count]
 
 
-def calculate_recommendations(embedding, history, count=MAX_DOCS_VS):
+def calculate_recommendations(embedding: list[float],
+                              history: list[str], count=MAX_DOCS_VS) -> list[tuple]:
     results = vector_search._similarity_search_with_score(embedding=embedding, k=MAX_DOCS_VS)
     tuples = map(lambda r: (r[0].metadata, r[1]), results)
     # don't recommend history items, and limit to count
@@ -195,8 +197,22 @@ def delete_insights_history_item(id):
     try:
         gen_ai_cache_collection.delete_one({ "_id" : ObjectId(id) })
     except Exception as e:
-        pass
+        print(e)
     return redirect('/backstage')
+
+
+@main.route('/recalculate_keywords/<id>', methods=['GET'])
+def recalculate_keywords(id):
+    doc = collection.find_one({ "_id" : ObjectId(id) })
+    keywords = calculate_keywords(doc['text'])
+    if len(keywords) > 0:
+        print("INFO: Re-caching keywords for uuid " + doc['uuid'])
+        try:
+            collection.update_one({ "_id" : doc["_id"] },
+                                  { "$set" : { "keywords" : keywords }})
+        except Exception as e:
+            print(e)
+    return redirect('/post')
 
 
 @main.route('/welcome')
