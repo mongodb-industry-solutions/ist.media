@@ -90,20 +90,20 @@
             <div class="row tm-row tm-mb-40">
                 <div class="col-12">
                     <div class="mb-4">
-                        <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
+			<h1 class="tm-color-primary tm-mb-30">
 			    Backstage Area
-		        </h2>
+		        </h1>
                         <p>
 			    First and foremost &mdash;
 			    <a href="/welcome" class="tm-color-primary">help is available here</a>.<br/>
                         </p>
-			<h4 style="margin-top: 50px">History of Read Articles</h4>
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    History of Read Articles
+			</h2>
 			{% if history|length > 0 %}
 			<p class="tm-pt-10">
 			    {% for doc in history %}
-			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
-				{{ doc.title | truncate(80) }}
-			    </a>
+			    {{ doc.title | truncate(80) }}
 			    <br/>
 			    {% endfor %}
 			</p>
@@ -122,13 +122,13 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
-			<h4 style="margin-top: 50px">History of AI-Generated Insights</h4>
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    History of AI-Generated Insights
+			</h2>
 			{% if gen_ai_cache|length > 0 %}
 			<p class="tm-pt-10">
 			    {% for entry in gen_ai_cache %}
-			    <a class="tm-color-primary" href="/insights?_id={{ entry._id | string }}">
-				{{ entry.question | truncate(80) }}
-			    </a>
+			    {{ entry.question | truncate(80) }}
 			    &nbsp;
 			    <a class="tm-color-primary" style="font-size: smaller"
 			       href="/delete_insights_history_item/{{ entry._id | string }}">
@@ -142,7 +142,9 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
-			<h4 style="margin-top: 50px">Usage Stats (nginx/uwsgi)</h4>
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    Usage Stats (nginx/uwsgi)
+			</h2>
 			<p class="tm-pt-10">
 			    The following chart was calculated by GPT-4, based on the
 			    uploaded nginx access.log file. Snapshot contains all data
