@@ -247,12 +247,12 @@ def index():
             docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
-            infoline = "Personalized content (history exists)"
+            infoline = "Personalized content - history exists"
         else: # no personalization possible - shuffle some items to start with
             docs = collection.aggregate([
                 { "$sample": { "size": MAX_DOCS } }
             ])
-            infoline = "Random content (no history yet)"
+            infoline = "Random content - no history yet"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
@@ -318,10 +318,11 @@ def post():
         if not 'history' in session:
             session['history'] = []
         session['history'].append(doc['uuid']) # YES, allow for dups!
-        # to make the floating history work, clicked items ALWAYS must be
-        # appended at the end
-        if len(session['history']) > 30: # limit the max length of history
-            session['history'] = session['history'][-30:]
+        # to make the floating history work, clicked items ALWAYS must be appended at the end
+        # TODO: re-evaluate this
+        max_hist_len = 20
+        if len(session['history']) > max_hist_len: # limit the max length of history
+            session['history'] = session['history'][-max_hist_len:]
         if not 'keywords' in doc or len(doc['keywords']) == 0:
             keywords = calculate_keywords(doc['text'])
             if len(keywords) > 0:
