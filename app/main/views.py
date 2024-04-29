@@ -232,7 +232,7 @@ def index():
         docs = similarity_search(query.strip(), [], MAX_DOCS)
         # for unknown reasons, these docs lack the 'text' field - refetching...
         docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
-        infoline = 'Showing best-matching articles for vector search: "' + query.strip() + '"'
+        infoline = '"' + query.strip() + '"'
     else: # the start page, called without query parameter
         if 'history' in session and len(session['history']) > 0:
             history_docs = list(map(lambda uuid:
@@ -247,12 +247,12 @@ def index():
             docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
-            infoline = "Showing personalized content, based on browsing history"
+            infoline = "Personalized content (history exists)"
         else: # no personalization possible - shuffle some items to start with
             docs = collection.aggregate([
                 { "$sample": { "size": MAX_DOCS } }
             ])
-            infoline = "Showing random content, no browsing history yet"
+            infoline = "Random content (no history yet)"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
