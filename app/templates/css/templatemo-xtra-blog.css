@@ -600,6 +600,11 @@ a:hover figcaption { color: #004628; }
         max-width: 375px;
         margin-right: 15px;
     }
+    .form-inline .form-control.tm-rag-input {
+        width: 70%;
+        max-width: 375px;
+        margin-right: 15px;
+    }
 
     .tm-search-form { justify-content: flex-start; }
     .tm-main { padding: 60px 10px; }
