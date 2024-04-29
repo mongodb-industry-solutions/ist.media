@@ -374,7 +374,7 @@ def insights():
     if keyword and keyword != "":
         content = html(calculate_insights(keyword))
         title = capitalize(keyword)
-        return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
+        return render_template('insights.html',
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif _id and _id != "":
         try:
@@ -385,7 +385,7 @@ def insights():
             print(e) # will be printed in the log file that is residing in /tmp
         content = html(cached_entry['answer'])
         title = capitalize(cached_entry['question'])
-        return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
+        return render_template('insights.html',
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif query and query != "":
         query = query.strip()
@@ -400,11 +400,11 @@ def insights():
         else:
             content = html(calculate_using_rag(query))
             title = capitalize(query)
-        return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
+        return render_template('insights.html',
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
         most_read_articles = collection.find().sort({ 'read_count' : -1 }).limit(10)
-        return render_template('insights.html', placeholder="AI-Generated Insights (RAG)",
+        return render_template('insights.html',
                                title="AI-Generated Insights (RAG)",
                                content="""<p>Please enter your question in the form above.
                                Answer will be provided based only on the documents
