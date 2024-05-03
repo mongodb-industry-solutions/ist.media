@@ -192,6 +192,12 @@ def delete_articles_history():
     return redirect('/backstage')
 
 
+@main.route('/delete_articles_history_from_homepage', methods=['GET'])
+def delete_articles_history_from_homepage():
+    session['history'] = []
+    return redirect('/')
+
+
 @main.route('/delete_insights_history_item/<id>', methods=['GET'])
 def delete_insights_history_item(id):
     try:
@@ -247,7 +253,7 @@ def index():
             docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
-            infoline = "Personalized content - history exists"
+            infoline = "Personalized content"
         else: # no personalization possible - shuffle some items to start with
             docs = collection.aggregate([
                 { "$sample": { "size": MAX_DOCS } }

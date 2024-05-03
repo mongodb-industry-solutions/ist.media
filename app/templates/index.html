@@ -94,8 +94,14 @@
                         </button>
                     </form>
 		    <div style="background: #f1f1f1">
-			<span style="padding-left: 0.1em" class="tm-color-primary">
-			    <i>{{ infoline }}</i>
+			<span style="padding-left: 0.2em" class="tm-color-primary">
+			    {{ infoline }}
+			    {% if infoline == "Personalized content" %}
+			    &nbsp;
+			    <a href="/delete_articles_history_from_homepage"
+			       class="tm-color-primary"
+			       style="font-size: smaller">[ delete history ]</a>
+			    {% endif %}
 			</span>
 		    </div>
 		    <div style="padding-bottom: 5px"></div>
