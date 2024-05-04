@@ -99,7 +99,7 @@
                 <div class="col-12">
                   <hr class="tm-hr-primary tm-mb-55">
 		  <img style="width: 100%; margin-bottom: 40px"
-		       src="{{ doc.thread.main_image }}" alt="Image">
+		       src="/content/images/{{ doc.uuid }}.avif" alt="Image">
                 </div>
             </div>
             <div class="row tm-row">
@@ -154,7 +154,7 @@
 			{% for rc in recommendations %}
                         <a href="/post?uuid={{ rc.0.uuid }}" class="d-block tm-mb-40">
                             <figure>
-                                <img src="{{ rc.0.thread.main_image }}"
+                                <img src="/content/images/{{ rc.0.uuid }}.avif"
 				     alt="Image" class="mb-3 img-fluid">
                                 <figcaption class="tm-color-primary">
 				    {{ rc.0.title }} ({{ "%.2f" | format(rc.1) }})
