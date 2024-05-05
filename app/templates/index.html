@@ -111,10 +111,11 @@
 		{% for doc in docs %}
                 <article class="col-12 col-md-6 tm-post">
                     <hr class="tm-hr-primary">
-                    <a href="/post?uuid={{ doc.uuid }}" class="tm-post-link tm-pt-20">
+                    <a href="/post?uuid={{ doc.uuid }}"
+		       class="tm-post-link tm-pt-20 tm-color-primary">
                         <div class="tm-post-link-inner">
-                            <img src="/content/images/{{ doc.uuid }}.avif" alt="Image"
-				 style="aspect-ratio: 1200/675" class="img-fluid">
+                            <img src="/content/images/{{ doc.uuid }}.avif"
+				 style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">{{ doc.title }}</h2>
                     </a>
