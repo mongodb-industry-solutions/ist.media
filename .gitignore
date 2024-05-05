@@ -46,3 +46,6 @@ flycheck_*.el
 
 # compiled Python files
 __pycache__
+
+# cached media content
+/app/templates/content
