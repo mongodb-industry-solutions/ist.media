@@ -98,8 +98,8 @@
             <div class="row tm-row">
                 <div class="col-12">
                   <hr class="tm-hr-primary tm-mb-55">
-		  <img style="width: 100%; margin-bottom: 40px"
-		       src="/content/images/{{ doc.uuid }}.avif" alt="Image">
+		  <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
+		       src="/content/images/{{ doc.uuid }}.webp" alt="">
                 </div>
             </div>
             <div class="row tm-row">
@@ -152,10 +152,11 @@
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
 			{% for rc in recommendations %}
-                        <a href="/post?uuid={{ rc.0.uuid }}" class="d-block tm-mb-40">
+                        <a href="/post?uuid={{ rc.0.uuid }}"
+			   class="d-block tm-mb-40 tm-color-primary">
                             <figure>
-                                <img src="/content/images/{{ rc.0.uuid }}.avif"
-				     alt="Image" class="mb-3 img-fluid">
+                                <img src="/content/images/{{ rc.0.uuid }}.webp"
+				     style="aspect-ratio: 1200/675" class="mb-3 img-fluid" alt="">
                                 <figcaption class="tm-color-primary">
 				    {{ rc.0.title }} ({{ "%.2f" | format(rc.1) }})
 				</figcaption>
