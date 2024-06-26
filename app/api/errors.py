@@ -1,30 +1,29 @@
 #
-# Copyright (c) 2021 Benjamin Lorenz
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
 from flask import jsonify
-from app.exceptions import ValidationError
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
 from . import api
 
 
-def response(error, message, code):
-    resp = jsonify({ 'result' : error, 'description' : message })
-    resp.status_code = code
-    return resp
+def response(message, code):
+    return jsonify({ 'error' : str(message) }), code
 
+
+@api.app_errorhandler(BadRequest)
 def bad_request(message):
-    return response('bad request', message, 400)
+    return response(message, 400)
 
-def unauthorized(message):
-    return response('unauthorized', message, 401)
+@api.app_errorhandler(NotFound)
+def not_found(message):
+    return response(message, 404)
 
-def forbidden(message):
-    return response('forbidden', message, 403)
-
-
-@api.errorhandler(ValidationError)
-def validation_error(e):
-    return bad_request(e.args[0])
+@api.app_errorhandler(InternalServerError)
+def internal_server_error(message):
+    suffix = " (this is most probably a bug - please report to benjamin.lorenz@mongodb.com)"
+    return response(message + suffix, 500)
 
 
 class ApiError(Exception):
