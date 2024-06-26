@@ -26,6 +26,7 @@ class CustomJSONProvider(DefaultJSONProvider):
 def create_app(config_name):
     app = Flask(__name__)
     app.json = CustomJSONProvider(app)
+    #app.json.ensure_ascii = False # don't escape unicode characters
     app.secret_key = 'IST_MEDIA_SECRET_KEY'
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
