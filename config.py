@@ -19,6 +19,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    UPLOAD_FOLDER = '/home/bjjl/uploads'
 
 
 class ProductionConfig(Config):

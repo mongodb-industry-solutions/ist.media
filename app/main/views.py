@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import render_template, redirect, request, session
+from flask import render_template, redirect, request, session, url_for
 from mistune import html
 from .. import mongo
 from . import main
@@ -20,7 +20,7 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
-import re, textwrap, string, os, time
+import re, textwrap, string, os, time, uuid as python_uuid
 
 
 openai_api_key = os.environ['OPENAI_API_KEY']
@@ -64,6 +64,8 @@ def calculate_recommendations(embedding: list[float],
 
 
 def calculate_keywords(text: str) -> list[str]:
+    if len(text) < 300:
+        return [] # AI fails to generate meaningful keywords for input that is too short
     lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
     prompt_template = """Return a machine-readable Python list.
     Given the context of the media article, please provide
@@ -302,7 +304,10 @@ def post():
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
             print(e) # will be printed in the log file that is residing in /tmp
-        recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        if 'embedding' in doc:
+            recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        else:
+            recommendations = []
         return render_template('post.html', doc=doc, fdate=fdate,
                                fdoc=fdoc, recommendations=recommendations)
     else:
@@ -340,7 +345,10 @@ def post():
                     print(e)
         else:
             keywords = doc['keywords']
-        recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        if 'embedding' in doc:
+            recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        else:
+            recommendations = []
         collection.update_one({ "_id" : doc["_id"] },
                               { "$inc" : { "visit_count" : 1 }})
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
@@ -432,6 +440,39 @@ def insights():
                                """,
                                gen_ai_cache=gen_ai_cache,
                                most_read_articles=most_read_articles)
+
+
+@main.route('/new')
+def new_article():
+    if 'title' in session:
+        title = session['title']
+    else:
+        title = ''
+    if 'text' in session:
+        text = session['text']
+    else:
+        text = ''
+    return render_template('new.html', title=title, text=text)
+
+
+@main.route('/submit_post', methods=['POST'])
+def submit_post():
+    session['title'] = request.form.get('title')
+    session['text'] = request.form.get('text')
+    if 'image' not in request.files:
+        return redirect(url_for('.new_article', error="missing_image"))
+    image_file = request.files['image']
+    if image_file.filename == '':
+        return redirect(url_for('.new_article', error="missing_image"))
+    uuid = str(python_uuid.uuid4().hex)
+    published = datetime.utcnow().isoformat()
+    author = 'Benjamin Lorenz'
+    image_file.save(os.path.join('/home/bjjl/content/images', uuid + '.jpg'))
+    collection.insert_one({ 'uuid' : uuid, 'published' : published, 'author' : author,
+                            'title' : session['title'], 'text' : session['text'] })
+    session.pop('title')
+    session.pop('text')
+    return redirect('/post?uuid=' + uuid)
 
 
 @main.route('/contact')
