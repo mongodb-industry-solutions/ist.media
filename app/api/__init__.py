@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2021 Benjamin Lorenz
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
 from flask import Blueprint

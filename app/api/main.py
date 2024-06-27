@@ -1,22 +1,28 @@
 #
-# Copyright (c) 2021 Benjamin Lorenz
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
 from flask import jsonify, request, current_app
 from .. import mongo
 from . import api
-from .errors import ApiError, bad_request, unauthorized, forbidden
+from .errors import ApiError, bad_request, internal_server_error
 from bson import ObjectId
+from langchain.docstore.document import Document
+from langchain.chains.llm import LLMChain
+from langchain.chains.combine_documents.stuff import StuffDocumentsChain
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 import datetime
 import json
 import pymongo
 
 
-
-### some helper functions ###
+### some helper functions
 
 def missing(inp):
     return ApiError(bad_request("missing `%s' attribute" % inp))
+
 
 def get_data(data):
     try:
@@ -24,23 +30,19 @@ def get_data(data):
     except json.JSONDecodeError as e:
         raise ApiError(bad_request('JSON: ' + e.msg))
 
-### end helper functions ###
-
-
-
-### extract JSON data ###
 
 def get_string_attribute(data, key, max_len):
     try:
         attr_val = data[key]
     except:
-        return "-"
+        raise ApiError(bad_request("missing `%s' attribute" % key))
     if type(attr_val) is not str:
         raise ApiError(bad_request("`%s' must be of type String" % key))
     len_val = len(attr_val)
     if len_val > max_len:
         raise ApiError(bad_request("`%s' size exceeded (%d > %d)" % (key, len_val, max_len)))
     return attr_val
+
 
 def get_boolean_attribute(data, key):
     try:
@@ -51,56 +53,57 @@ def get_boolean_attribute(data, key):
         raise ApiError(bad_request("`%s' must be of type Boolean (true or false)" % key))
     return attr_val == "true"
 
-### end extract JSON data ###
+
+#---------------------
+### keyword generation
+
+def calculate_keywords(text: str) -> list[str]:
+    lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
+    prompt_template = """Return a machine-readable Python list.
+    Given the context of the media article, please provide
+    me with 6 short keywords that capture the essence of the content and help
+    finding the article while searching the web. Consider terms
+    that are central to the article's subject and are likely to be imported for
+    summarization. Please prioritize names of companies, names of persons,
+    names of products, events, technical terms, business terms
+    over general words.
+    Return a machine-readable Python list.
+    "{text}"
+    KEYWORDS:"""
+    try:
+        prompt = PromptTemplate.from_template(prompt_template)
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        llm_chain = LLMChain(llm=llm, prompt=prompt)
+        stuff_chain = StuffDocumentsChain(
+            llm_chain=llm_chain,
+            document_variable_name="text")
+        keywords_string = stuff_chain.invoke(lcdocs)['output_text']
+        keywords = eval(keywords_string) # convert str into list
+        keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
+        keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
+    except Exception as e:
+        print(e) # will be printed in the log file that is residing in /tmp
+        keywords = []
+    return keywords
 
 
-
-### the actual API functions start here ###
-
-
-
-
-###
-###
-###  NO API IMPLEMENTED YET - BELOW CODE BELONGS
-###  TO ANOTHER PROJECT AND STAYS HERE JUST FOR REFERENCE
-###
-###
-
-
-@api.route('/receive', methods=['GET'])
-def receive():
+@api.route('/keywords', methods=['POST'])
+def keywords():
     ip = request.environ.get("X-Real-IP", request.remote_addr)
 
+    # parameter handling
     try:
-        user_id = request.args.get('user_id')
-        day = int(request.args.get('day'))
-        month = int(request.args.get('month'))
+        data = get_data(request.data)
+        text = get_string_attribute(data, 'text', 32768)
+    except ApiError as error:
+        return error.response
 
-    except:
-        pass
-
+    # real action starts here
     try:
-        try: [day, month]
-        except NameError:
-            result = mongo.db.entries.find({ 'user_id' : user_id }) \
-                                     .sort('timestamp', pymongo.DESCENDING) \
-                                     .limit(10)
-        else:
-            expr = { '$expr' :
-                     { '$and' : [
-                         { '$eq' : [ '$user_id', user_id ] },
-                         { '$eq' : [ { '$dayOfMonth' : '$timestamp' }, day ] },
-                         { '$eq' : [ { '$month' : '$timestamp' }, month ] }
-                     ]}
-                    }
-            result = mongo.db.entries.find(expr) \
-                                     .sort('timestamp', pymongo.DESCENDING) \
-                                     .limit(50)
-        return jsonify(list(result))
-    
+        keywords = calculate_keywords(text)
+        return jsonify({ 'keywords' : keywords })
     except Exception as e:
-        return jsonify({ 'result' : 'ERROR', 'description' : str(e) })
+        return ApiError(internal_server_error(str(e))).response
 
 
 @api.route('/send', methods=['POST'])
