@@ -3,7 +3,8 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import jsonify, request, current_app
+from flask import jsonify, request
+from flask import current_app as app
 from .. import mongo
 from . import api
 from .errors import ApiError, bad_request, internal_server_error
@@ -18,7 +19,15 @@ import json
 import pymongo
 
 
+
+###
 ### some helper functions
+###
+
+def debug(msg: str):
+    if app.config['DEBUG']:
+        print("[DEBUG]: " + msg)
+
 
 def missing(inp):
     return ApiError(bad_request("missing `%s' attribute" % inp))
@@ -54,11 +63,15 @@ def get_boolean_attribute(data, key):
     return attr_val == "true"
 
 
-#---------------------
-### keyword generation
 
-def calculate_keywords(text: str) -> list[str]:
-    lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
+###
+### Keyword Generation
+###
+
+def calculate_keywords(text: str, model_name: str) -> list[str]:
+    if len(text) < 300:
+        return [] # AI fails to generate meaningful keywords for input that is too short
+    lcdocs = [ Document(page_content=text, metadata={ "source" : "local" }) ]
     prompt_template = """Return a machine-readable Python list.
     Given the context of the media article, please provide
     me with 6 short keywords that capture the essence of the content and help
@@ -72,12 +85,13 @@ def calculate_keywords(text: str) -> list[str]:
     KEYWORDS:"""
     try:
         prompt = PromptTemplate.from_template(prompt_template)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        llm = ChatOpenAI(temperature=0, model_name=model_name)
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         stuff_chain = StuffDocumentsChain(
             llm_chain=llm_chain,
             document_variable_name="text")
         keywords_string = stuff_chain.invoke(lcdocs)['output_text']
+        debug('calculated keywords for "' + text[:25] + '...": ' + str(keywords_string))
         keywords = eval(keywords_string) # convert str into list
         keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
         keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
@@ -95,16 +109,21 @@ def keywords():
     try:
         data = get_data(request.data)
         text = get_string_attribute(data, 'text', 32768)
+        llm = get_string_attribute(data, 'llm', 64)
     except ApiError as error:
         return error.response
 
     # real action starts here
     try:
-        keywords = calculate_keywords(text)
+        keywords = calculate_keywords(text, llm)
         return jsonify({ 'keywords' : keywords })
     except Exception as e:
         return ApiError(internal_server_error(str(e))).response
 
+
+
+
+### old code - please ignore. Will be removed soon.
 
 @api.route('/send', methods=['POST'])
 def send():

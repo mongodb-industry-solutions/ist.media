@@ -4,6 +4,7 @@
 #
 
 from flask import render_template, redirect, request, session, url_for
+from flask import current_app as app
 from mistune import html
 from .. import mongo
 from . import main
@@ -20,7 +21,7 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
-import re, textwrap, string, os, time, uuid as python_uuid
+import re, textwrap, string, os, time, uuid as python_uuid, requests
 
 
 openai_api_key = os.environ['OPENAI_API_KEY']
@@ -37,6 +38,11 @@ gen_ai_cache_collection = client[dbName][gen_ai_cache_collectionName]
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 8      # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
+
+
+def debug(msg: str):
+    if app.config['DEBUG']:
+        print("[DEBUG]: " + msg)
 
 
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
@@ -63,35 +69,19 @@ def calculate_recommendations(embedding: list[float],
     return list(filter(lambda t: not t[0]['uuid'] in history, tuples))[:count]
 
 
-def calculate_keywords(text: str) -> list[str]:
-    if len(text) < 300:
-        return [] # AI fails to generate meaningful keywords for input that is too short
-    lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
-    prompt_template = """Return a machine-readable Python list.
-    Given the context of the media article, please provide
-    me with 6 short keywords that capture the essence of the content and help
-    finding the article while searching the web. Consider terms
-    that are central to the article's subject and are likely to be imported for
-    summarization. Please prioritize names of companies, names of persons,
-    names of products, events, technical terms, business terms
-    over general words.
-    Return a machine-readable Python list.
-    "{text}"
-    KEYWORDS:"""
-    try:
-        prompt = PromptTemplate.from_template(prompt_template)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
-        stuff_chain = StuffDocumentsChain(
-            llm_chain=llm_chain,
-            document_variable_name="text")
-        keywords_string = stuff_chain.invoke(lcdocs)['output_text']
-        keywords = eval(keywords_string) # convert str into list
-        keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
-        keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
-    except Exception as e:
-        print(e) # will be printed in the log file that is residing in /tmp
-        keywords = []
+def calculate_keywords(doc: dict) -> list[str]:
+    service_url = app.config['API_BASE_URL'] + '/keywords'
+    response = requests.post(service_url,
+                             json = { "text" : doc['text'],
+                                      "llm" : app.config['AVAILABLE_LLMS']['OpenAI GPT-3.5'] })
+    keywords = response.json()['keywords']
+    if len(keywords) > 0:
+        try:
+            collection.update_one({ "_id" : doc["_id"] },
+                                  { "$set" : { "keywords" : keywords }})
+            debug("keywords cached for uuid " + doc['uuid'])
+        except Exception as e:
+            print(e)
     return keywords
 
 
@@ -211,15 +201,7 @@ def delete_insights_history_item(id):
 
 @main.route('/recalculate_keywords/<uuid>', methods=['GET'])
 def recalculate_keywords(uuid):
-    doc = collection.find_one({ "uuid" : uuid })
-    keywords = calculate_keywords(doc['text'])
-    if len(keywords) > 0:
-        print("INFO: Re-caching keywords for uuid " + doc['uuid'])
-        try:
-            collection.update_one({ "_id" : doc["_id"] },
-                                  { "$set" : { "keywords" : keywords }})
-        except Exception as e:
-            print(e)
+    calculate_keywords(collection.find_one({ "uuid" : uuid }))
     return redirect('/post?uuid=' + uuid)
 
 
@@ -335,14 +317,7 @@ def post():
         if len(session['history']) > max_hist_len: # limit the max length of history
             session['history'] = session['history'][-max_hist_len:]
         if not 'keywords' in doc or len(doc['keywords']) == 0:
-            keywords = calculate_keywords(doc['text'])
-            if len(keywords) > 0:
-                print("INFO: Caching keywords for uuid " + doc['uuid'])
-                try:
-                    collection.update_one({ "_id" : doc["_id"] },
-                                          { "$set" : { "keywords" : keywords }})
-                except Exception as e:
-                    print(e)
+            keywords = calculate_keywords(doc)
         else:
             keywords = doc['keywords']
         if 'embedding' in doc:
