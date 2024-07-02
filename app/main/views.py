@@ -6,7 +6,7 @@
 from flask import render_template, redirect, request, session, url_for
 from flask import current_app as app
 from mistune import html
-from .. import mongo
+from .. import mongo, logger
 from . import main
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -21,10 +21,9 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
-import re, textwrap, string, os, time, uuid as python_uuid, requests
+import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder
 
 
-openai_api_key = os.environ['OPENAI_API_KEY']
 MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
 client = MongoClient(MONGO_URI)
@@ -35,6 +34,9 @@ collection = client[dbName][collectionName]
 gen_ai_cache_collectionName = "gen_ai_cache"
 gen_ai_cache_collection = client[dbName][gen_ai_cache_collectionName]
 
+ip_info_cache_collectionName = "ip_info_cache"
+ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
+
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 8      # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
@@ -43,6 +45,21 @@ MAX_RCOM = 3      # number of recommended articles
 def debug(msg: str):
     if app.config['DEBUG']:
         print("[DEBUG]: " + msg)
+
+
+def log(request):
+    ip = request.environ.get("X-Real-IP", request.remote_addr)
+    loc = ip_info_cache_collection.find_one({ "ip" : ip })
+    if not loc:
+        debug("Retrieving IP location information for " + ip + " with geocoder web service")
+        ws = geocoder.ip(ip)
+        loc = { "ip" : ip,
+                "city" : ws.city if ws.city else " - ",
+                "country" : ws.country if ws.country else " - " }
+        ip_info_cache_collection.insert_one(loc)
+    logger.info(ip + " (" + loc['city'] + ", " + loc['country'] + "): " + request.base_url +
+            (" (" + str(request.content_length) + " bytes)" if request.content_length else ""))
+    return loc
 
 
 vector_search = MongoDBAtlasVectorSearch.from_connection_string(
@@ -105,6 +122,7 @@ def calculate_insights(text: str) -> str:
 
 
 def calculate_using_rag(question: str) -> str:
+    logger.info(question)
     template = """Answer the question based only on the following context:
     {context}
 
@@ -113,7 +131,7 @@ def calculate_using_rag(question: str) -> str:
     try:
         prompt = ChatPromptTemplate.from_template(template)
         retriever = vector_search.as_retriever()
-        model = ChatOpenAI(model_name="gpt-4-turbo")
+        model = ChatOpenAI(model_name="gpt-4o")
         chain = (
             { "context": retriever, "question": RunnablePassthrough() }
             | prompt
@@ -180,18 +198,21 @@ def check_for_quality_read():
 
 @main.route('/delete_articles_history', methods=['POST'])
 def delete_articles_history():
+    log(request)
     session['history'] = []
     return redirect('/backstage')
 
 
 @main.route('/delete_articles_history_from_homepage', methods=['GET'])
 def delete_articles_history_from_homepage():
+    log(request)
     session['history'] = []
     return redirect('/')
 
 
 @main.route('/delete_insights_history_item/<id>', methods=['GET'])
 def delete_insights_history_item(id):
+    log(request)
     try:
         gen_ai_cache_collection.delete_one({ "_id" : ObjectId(id) })
     except Exception as e:
@@ -201,12 +222,14 @@ def delete_insights_history_item(id):
 
 @main.route('/recalculate_keywords/<uuid>', methods=['GET'])
 def recalculate_keywords(uuid):
+    log(request)
     calculate_keywords(collection.find_one({ "uuid" : uuid }))
     return redirect('/post?uuid=' + uuid)
 
 
 @main.route('/welcome')
 def welcome():
+    log(request)
     check_for_quality_read()
     return render_template('welcome.html')
 
@@ -216,6 +239,7 @@ def index():
     if not 'was_here_before' in session:
         session['was_here_before'] = '1'
         return render_template('welcome.html')
+    log(request)
     check_for_quality_read()
     query = request.args.get('query')
     if query and query != "":
@@ -252,6 +276,7 @@ def index():
 
 @main.route('/post')
 def post():
+    log(request)
     check_for_quality_read()
     style = request.args.get('style')
     query = request.args.get('query')
@@ -334,6 +359,7 @@ def post():
 
 @main.route('/backstage')
 def about():
+    loc = log(request)
     check_for_quality_read()
     if not 'history' in session:
         session['history'] = []
@@ -346,11 +372,12 @@ def about():
     except Exception as e:
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
-    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache)
+    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache, loc=loc)
 
 
 @main.route('/insights')
 def insights():
+    log(request)
     check_for_quality_read()
     keyword = request.args.get('keyword')
     _id = request.args.get('_id')
@@ -452,5 +479,6 @@ def submit_post():
 
 @main.route('/contact')
 def contact():
+    log(request)
     check_for_quality_read()
     return render_template('contact.html')

@@ -5,28 +5,45 @@
 
 from flask import jsonify, request
 from flask import current_app as app
-from .. import mongo
+from .. import mongo, logger
 from . import api
 from .errors import ApiError, bad_request, internal_server_error
 from bson import ObjectId
+from pymongo import MongoClient
 from langchain.docstore.document import Document
 from langchain.chains.llm import LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-import datetime
-import json
-import pymongo
+import os, datetime, json, geocoder
 
 
+MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
-###
-### some helper functions
-###
+client = MongoClient(MONGO_URI)
+dbName = "1_media_demo"
+
+ip_info_cache_collectionName = "ip_info_cache"
+ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
+
 
 def debug(msg: str):
     if app.config['DEBUG']:
         print("[DEBUG]: " + msg)
+
+
+def log(request):
+    ip = request.environ.get("X-Real-IP", request.remote_addr)
+    loc = ip_info_cache_collection.find_one({ "ip" : ip })
+    if not loc:
+        debug("Retrieving IP location information for " + ip + " with geocoder web service")
+        ws = geocoder.ip(ip)
+        loc = { "ip" : ip,
+                "city" : ws.city if ws.city else " - ",
+                "country" : ws.country if ws.country else " - " }
+        ip_info_cache_collection.insert_one(loc)
+    logger.info(ip + " (" + loc['city'] + ", " + loc['country'] + "): " + request.base_url +
+            (" (" + str(request.content_length) + " bytes)" if request.content_length else ""))
 
 
 def missing(inp):
@@ -103,8 +120,7 @@ def calculate_keywords(text: str, model_name: str) -> list[str]:
 
 @api.route('/keywords', methods=['POST'])
 def keywords():
-    ip = request.environ.get("X-Real-IP", request.remote_addr)
-
+    log(request)
     # parameter handling
     try:
         data = get_data(request.data)
@@ -112,7 +128,6 @@ def keywords():
         llm = get_string_attribute(data, 'llm', 64)
     except ApiError as error:
         return error.response
-
     # real action starts here
     try:
         keywords = calculate_keywords(text, llm)
@@ -121,50 +136,7 @@ def keywords():
         return ApiError(internal_server_error(str(e))).response
 
 
-
-
-### old code - please ignore. Will be removed soon.
-
-@api.route('/send', methods=['POST'])
-def send():
+@api.route('/delete/<uuid>', methods=['DELETE'])
+def delete(uuid):
     ip = request.environ.get("X-Real-IP", request.remote_addr)
-    
-    try:
-        data = get_data(request.data)
-        user_id = get_string_attribute(data, 'user_id', 128)
-        entry = get_string_attribute(data, 'entry', 8192)
-        city = get_string_attribute(data, 'city', 256)
-        is_encrypted = get_boolean_attribute(data, 'is_encrypted')
-        
-    except ApiError as error:
-        return error.response
-
-    if city == "-":
-        doc = { 'user_id' : user_id, 'timestamp' : datetime.datetime.now(datetime.timezone.utc),
-                'entry' : entry, 'is_encrypted' : is_encrypted }
-    else:
-        doc = { 'user_id' : user_id, 'timestamp' : datetime.datetime.now(datetime.timezone.utc),
-                'entry' : entry, 'city' : city, 'is_encrypted' : is_encrypted }
-    try:
-        result = mongo.db.entries.insert_one(doc)
-        return jsonify({ 'result' : 'OK', 'inserted' : str(result.inserted_id) })
-
-    except Exception as e:
-        return jsonify({ 'result' : 'ERROR', 'description' : str(e) })
-
-
-@api.route('/delete/<object_id>', methods=['DELETE'])
-def delete(object_id):
-    ip = request.environ.get("X-Real-IP", request.remote_addr)
-
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({ 'result' : 'ERROR', 'description' : 'user_id parameter missing' })
-
-    try:
-        result = mongo.db.entries.delete_one(
-            { '_id' : ObjectId(object_id), 'user_id' : user_id })
-        return jsonify({ 'result' : 'OK', 'deleted' : str(result.deleted_count) })
-
-    except Exception as e:
-        return jsonify({ 'result' : 'ERROR', 'description' : str(e) })
+    # to be implemented

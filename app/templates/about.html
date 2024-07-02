@@ -123,6 +123,15 @@
 			</p>
 			{% endif %}
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    IP Address Information
+			</h2>
+			<p class="tm-pt-10">
+			    {{ loc.ip }}
+			    {% if loc.country != " - " %}
+			    <br/>{{ loc.city }}, {{ loc.country }}
+			    {% endif %}
+			</p>
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    History of AI-Generated Insights
 			</h2>
 			{% if gen_ai_cache|length > 0 %}
