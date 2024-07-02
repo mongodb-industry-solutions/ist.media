@@ -15,7 +15,7 @@ from langchain.chains.llm import LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-import os, datetime, json, geocoder
+import os, re, datetime, json, geocoder
 
 
 MONGO_URI = os.environ['MONGODB_IST_MEDIA']
@@ -90,14 +90,13 @@ def calculate_keywords(text: str, model_name: str) -> list[str]:
         return [] # AI fails to generate meaningful keywords for input that is too short
     lcdocs = [ Document(page_content=text, metadata={ "source" : "local" }) ]
     prompt_template = """Return a machine-readable Python list.
-    Given the context of the media article, please provide
-    me with 6 short keywords that capture the essence of the content and help
-    finding the article while searching the web. Consider terms
-    that are central to the article's subject and are likely to be imported for
-    summarization. Please prioritize names of companies, names of persons,
-    names of products, events, technical terms, business terms
-    over general words.
-    Return a machine-readable Python list.
+    Given the context of the media article, please provide me with 6
+    short keywords that capture the essence of the content and help
+    finding the article while searching the web. Consider terms that
+    are central to the article's subject and are likely to be imported
+    for summarization. Please prioritize names of companies, names of
+    persons, names of products, events, technical terms, business
+    terms over general words. Return a machine-readable Python list.
     "{text}"
     KEYWORDS:"""
     try:
@@ -109,11 +108,15 @@ def calculate_keywords(text: str, model_name: str) -> list[str]:
             document_variable_name="text")
         keywords_string = stuff_chain.invoke(lcdocs)['output_text']
         debug('calculated keywords for "' + text[:25] + '...": ' + str(keywords_string))
-        keywords = eval(keywords_string) # convert str into list
+        # handle unescaped quotes that might come back from the LLM (e.g. 'Goodman's Bay')
+        keywords_string = re.sub(r"(?<=\w)'(?=\w)", "\\\\'", keywords_string)
+        # convert to list of strings - can still fail if the LLM was f*cking it up
+        keywords = eval(keywords_string)
+        # remove keywords that are very long
         keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
         keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
     except Exception as e:
-        print(str(e) + ": " + str(keywords_string)) # printed in the log file that is residing in /tmp
+        print(str(e) + ": " + str(keywords_string)) # log file in /tmp
         keywords = []
     return keywords
 
