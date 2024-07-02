@@ -113,7 +113,7 @@ def calculate_keywords(text: str, model_name: str) -> list[str]:
         keywords = list(filter(lambda keyword: len(keyword) < 30, keywords))
         keywords = keywords[:7] # safety guard - sometimes OpenAI returns too much
     except Exception as e:
-        print(e) # will be printed in the log file that is residing in /tmp
+        print(str(e) + ": " + str(keywords_string)) # printed in the log file that is residing in /tmp
         keywords = []
     return keywords
 
