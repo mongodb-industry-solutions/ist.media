@@ -8,9 +8,11 @@ from flask_pymongo import PyMongo
 from flask.json.provider import JSONProvider, DefaultJSONProvider
 from bson import ObjectId
 from config import config
+import logging
 
 
 mongo = PyMongo()
+logger = logging.getLogger(__name__)
 
 def json_default(obj):
     if isinstance(obj, ObjectId):
@@ -32,6 +34,13 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     mongo.init_app(app)
+
+    logging.basicConfig(
+        filename = '/tmp/ist.media.log',
+        level = logging.INFO,
+        format = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+        datefmt = '%Y-%m-%d %H:%M:%S'
+    )
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
