@@ -20,6 +20,27 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    <style>
+	table {
+            width: 80%;
+            border-collapse: collapse;
+	}
+	th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+	}
+	th {
+	    color: white;
+            background-color: #007D59;
+	}
+	tr:nth-child(even) {
+            background-color: #f9f9f9;
+	}
+	tr:hover {
+            background-color: #e8e8e8;
+	}
+    </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -123,7 +144,7 @@
 			</p>
 			{% endif %}
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    IP Address Information
+			    Current IP Address
 			</h2>
 			<p class="tm-pt-10">
 			    {{ loc.ip }}
@@ -131,6 +152,35 @@
 			    <br/>{{ loc.city }}, {{ loc.country }}
 			    {% endif %}
 			</p>
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    Access Statistics per Country
+			</h2>
+			{% if access_stats|length > 0 %}
+			<p class="tm-pt-10">
+			    <table>
+				<thead>
+				    <tr>
+					<th>ISO</th>
+					<th>Country</th>
+					<th>Count</th>
+				    </tr>
+				</thead>
+				<tbody>
+				    {% for entry in access_stats %}
+				    <tr>
+					<td>{{ entry._id }}</td>
+					<td>{{ entry.country }}</td>
+					<td>{{ entry.access_count }}</td>
+				    </tr>
+				    {% endfor %}
+				</tbody>
+			    </table>
+			</p>
+			{% else %}
+			<p class="tm-pt-10">
+			    <i>List is empty</i>
+			</p>
+			{% endif %}
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    History of AI-Generated Insights
 			</h2>
@@ -151,6 +201,7 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
+			{#
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Usage Stats (nginx/uwsgi)
 			</h2>
@@ -161,6 +212,7 @@
 			</p>
 			<img style="width: 100%; margin-top: 20px"
 			     src="img/nginx-up-to-week-16.png" alt="Image">
+			#}
                     </div>
                 </div>
             </div>

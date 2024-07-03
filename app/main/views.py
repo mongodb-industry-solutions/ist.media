@@ -21,7 +21,8 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
-import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder
+from urllib.parse import urlparse
+import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder, pycountry
 
 
 MONGO_URI = os.environ['MONGODB_IST_MEDIA']
@@ -31,11 +32,9 @@ dbName = "1_media_demo"
 collectionName = "business_news"
 collection = client[dbName][collectionName]
 
-gen_ai_cache_collectionName = "gen_ai_cache"
-gen_ai_cache_collection = client[dbName][gen_ai_cache_collectionName]
-
-ip_info_cache_collectionName = "ip_info_cache"
-ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
+gen_ai_cache_collection = client[dbName]["gen_ai_cache"]
+ip_info_cache_collection = client[dbName]["ip_info_cache"]
+access_log_collection = client[dbName]["access_log"]
 
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 8      # number of articles on the home page
@@ -59,6 +58,20 @@ def log(request):
         ip_info_cache_collection.insert_one(loc)
     logger.info(ip + " (" + loc['city'] + ", " + loc['country'] + "): " + request.base_url +
             (" (" + str(request.content_length) + " bytes)" if request.content_length else ""))
+    try:
+        if loc['country'] != " - ":
+            log_entry = { "timestamp" : datetime.utcnow(),
+                          "path" : urlparse(request.base_url).path,
+                          "ip" : loc['ip'],
+                          "city" : loc['city'],
+                          "country" : loc['country']}
+        else:
+            log_entry = { "timestamp" : datetime.utcnow(),
+                          "path" : urlparse(request.base_url).path,
+                          "ip" : loc['ip']}
+        access_log_collection.insert_one(log_entry)
+    except Exception as e:
+        print(e)
     return loc
 
 
@@ -357,6 +370,11 @@ def post():
                                read_count=doc['read_count'] if 'read_count' in doc else 0)
 
 
+def get_country_name(iso_code):
+    country = pycountry.countries.get(alpha_2=iso_code)
+    return country.name if country else "Unknown"
+
+
 @main.route('/backstage')
 def about():
     loc = log(request)
@@ -372,7 +390,40 @@ def about():
     except Exception as e:
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
-    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache, loc=loc)
+    try:
+        pipeline = [
+            {
+                "$match": {
+                    "country": { "$exists": True }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$country",
+                    "access_count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "access_count": -1 }
+            },
+            {
+                "$limit": 15
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "access_count": 1
+                }
+            }
+        ]
+        access_stats = list(access_log_collection.aggregate(pipeline))
+        for entry in access_stats: # add full country names
+            entry['country'] = get_country_name(entry['_id'])
+    except Exception as e:
+        access_stats = []
+        print(e) # will be printed in the log file that is residing in /tmp
+    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
+                           loc=loc, access_stats=access_stats)
 
 
 @main.route('/insights')
