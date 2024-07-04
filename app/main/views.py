@@ -393,25 +393,47 @@ def about():
         pipeline_countries = [
             {
                 "$match": {
-                    "country": { "$exists": True }
+                    "country": { "$exists": True },
+                    "city": { "$exists": True }
                 }
             },
             {
                 "$group": {
-                    "_id": "$country",
-                    "access_count": { "$sum": 1 }
+                    "_id": {
+                        "country": "$country",
+                        "city": "$city"
+                    },
+                    "city_access_count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "city_access_count": -1 }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.country",
+                    "access_count": { "$sum": "$city_access_count" },
+                    "top_cities": {
+                        "$push": {
+                            "city": "$_id.city",
+                            "access_count": "$city_access_count"
+                        }
+                    }
                 }
             },
             {
                 "$sort": { "access_count": -1 }
             },
             {
-                "$limit": 15
+                "$limit": 12
             },
             {
                 "$project": {
                     "_id": 1,
-                    "access_count": 1
+                    "access_count": 1,
+                    "top_cities": {
+                        "$slice": ["$top_cities", 5]
+                    }
                 }
             }
         ]

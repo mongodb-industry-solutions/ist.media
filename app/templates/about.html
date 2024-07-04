@@ -192,9 +192,32 @@
 				    {% for entry in country_stats %}
 				    <tr>
 					<td>{{ entry._id }}</td>
-					<td>{{ entry.country }}</td>
-					<td>{{ entry.access_count }}</td>
+					<td>
+					    <span style="font-weight: bold">
+						{{ entry.country }}
+					    </span>
+					</td>
+					<td>
+					    <span style="font-weight: bold">
+						{{ entry.access_count }}
+					    </span>
+					</td>
 				    </tr>
+				    {% for city in entry.top_cities %}
+				    <tr>
+					<td></td>
+					<td>
+					    <span style="font-size: smaller">
+						&nbsp;&nbsp;&nbsp;&nbsp;{{ city.city }}
+					    </span>
+					</td>
+					<td>
+					    <span style="font-size: smaller">
+						{{ city.access_count }}
+					    </span>
+					</td>
+				    </tr>
+				    {% endfor %}
 				    {% endfor %}
 				</tbody>
 			    </table>
