@@ -391,7 +391,7 @@ def about():
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
     try:
-        pipeline = [
+        pipeline_countries = [
             {
                 "$match": {
                     "country": { "$exists": True }
@@ -416,14 +416,36 @@ def about():
                 }
             }
         ]
-        access_stats = list(access_log_collection.aggregate(pipeline))
-        for entry in access_stats: # add full country names
+        pipeline_paths = [
+            {
+                "$group": {
+                    "_id": "$path",
+                    "access_count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "access_count": -1 }
+            },
+            {
+                "$limit": 15
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "access_count": 1
+                }
+            }
+        ]
+        country_stats = list(access_log_collection.aggregate(pipeline_countries))
+        path_stats = list(access_log_collection.aggregate(pipeline_paths))
+        for entry in country_stats: # add full country names
             entry['country'] = get_country_name(entry['_id'])
     except Exception as e:
-        access_stats = []
+        country_stats = []
+        path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
-                           loc=loc, access_stats=access_stats)
+                           loc=loc, country_stats=country_stats, path_stats=path_stats)
 
 
 @main.route('/insights')

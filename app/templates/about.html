@@ -22,7 +22,7 @@
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
     <style>
 	table {
-            width: 80%;
+            width: 100%;
             border-collapse: collapse;
 	}
 	th, td {
@@ -115,9 +115,10 @@
 			    Backstage Area
 		        </h1>
                         <p>
-			    First and foremost &mdash;
-			    <a href="/welcome" class="tm-color-primary">help is available here</a>.<br/>
+			    First and foremost &mdash; help about how to use this demo
+			    <a href="/welcome" class="tm-color-primary">is available here</a>.
                         </p>
+			<div style="padding: 2px"></div>
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    History of Visited Articles
 			</h2>
@@ -144,6 +145,26 @@
 			</p>
 			{% endif %}
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+			    AI-Generated Insights
+			</h2>
+			{% if gen_ai_cache|length > 0 %}
+			<p class="tm-pt-10">
+			    {% for entry in gen_ai_cache %}
+			    {{ entry.question | truncate(80) }}
+			    &nbsp;
+			    <a class="tm-color-primary" style="font-size: smaller"
+			       href="/delete_insights_history_item/{{ entry._id | string }}">
+				[delete]
+			    </a>
+			    <br/>
+			    {% endfor %}
+			</p>
+			{% else %}
+			<p class="tm-pt-10">
+			    <i>List is empty</i>
+			</p>
+			{% endif %}
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Current IP Address
 			</h2>
 			<p class="tm-pt-10">
@@ -155,7 +176,7 @@
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Access Statistics per Country
 			</h2>
-			{% if access_stats|length > 0 %}
+			{% if country_stats|length > 0 %}
 			<p class="tm-pt-10">
 			    <table>
 				<thead>
@@ -166,7 +187,7 @@
 				    </tr>
 				</thead>
 				<tbody>
-				    {% for entry in access_stats %}
+				    {% for entry in country_stats %}
 				    <tr>
 					<td>{{ entry._id }}</td>
 					<td>{{ entry.country }}</td>
@@ -182,19 +203,26 @@
 			</p>
 			{% endif %}
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    History of AI-Generated Insights
+			    Access Statistics per Path
 			</h2>
-			{% if gen_ai_cache|length > 0 %}
+			{% if path_stats|length > 0 %}
 			<p class="tm-pt-10">
-			    {% for entry in gen_ai_cache %}
-			    {{ entry.question | truncate(80) }}
-			    &nbsp;
-			    <a class="tm-color-primary" style="font-size: smaller"
-			       href="/delete_insights_history_item/{{ entry._id | string }}">
-				[delete]
-			    </a>
-			    <br/>
-			    {% endfor %}
+			    <table>
+				<thead>
+				    <tr>
+					<th>Path</th>
+					<th>Count</th>
+				    </tr>
+				</thead>
+				<tbody>
+				    {% for entry in path_stats %}
+				    <tr>
+					<td>{{ entry._id }}</td>
+					<td>{{ entry.access_count }}</td>
+				    </tr>
+				    {% endfor %}
+				</tbody>
+			    </table>
 			</p>
 			{% else %}
 			<p class="tm-pt-10">
