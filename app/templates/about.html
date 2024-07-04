@@ -125,7 +125,9 @@
 			{% if history|length > 0 %}
 			<p class="tm-pt-10">
 			    {% for doc in history %}
-			    {{ doc.title | truncate(80) }}
+			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
+				{{ doc.title | truncate(80) }}
+			    </a>
 			    <br/>
 			    {% endfor %}
 			</p>

@@ -348,10 +348,9 @@ def post():
         session['uuid_since'] = int(time.time())
         if not 'history' in session:
             session['history'] = []
-        session['history'].append(doc['uuid']) # YES, allow for dups!
-        # to make the floating history work, clicked items ALWAYS must be appended at the end
-        # TODO: re-evaluate this
-        max_hist_len = 20
+        if not doc['uuid'] in session['history']: # don't allow dups
+            session['history'].append(doc['uuid'])
+        max_hist_len = 10
         if len(session['history']) > max_hist_len: # limit the max length of history
             session['history'] = session['history'][-max_hist_len:]
         if not 'keywords' in doc or len(doc['keywords']) == 0:
@@ -427,7 +426,7 @@ def about():
                 "$sort": { "access_count": -1 }
             },
             {
-                "$limit": 15
+                "$limit": 10
             },
             {
                 "$project": {
