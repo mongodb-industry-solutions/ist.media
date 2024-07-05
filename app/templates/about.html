@@ -242,7 +242,7 @@
 				<tbody>
 				    {% for entry in path_stats %}
 				    <tr>
-					<td>{{ entry._id }}</td>
+					<td>{{ entry._id | truncate(45) }}</td>
 					<td>{{ entry.access_count }}</td>
 				    </tr>
 				    {% endfor %}
