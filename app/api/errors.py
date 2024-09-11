@@ -23,7 +23,7 @@ def not_found(message):
 @api.app_errorhandler(InternalServerError)
 def internal_server_error(message):
     suffix = " (this is most probably a bug - please report to benjamin.lorenz@mongodb.com)"
-    return response(message + suffix, 500)
+    return response(str(message) + suffix, 500)
 
 
 class ApiError(Exception):

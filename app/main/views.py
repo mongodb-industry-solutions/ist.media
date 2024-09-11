@@ -104,7 +104,12 @@ def calculate_keywords(doc: dict) -> list[str]:
     response = requests.post(service_url,
                              json = { "text" : doc['text'],
                                       "llm" : app.config['AVAILABLE_LLMS']['OpenAI GPT-3.5'] })
-    keywords = response.json()['keywords']
+    try:
+        keywords = response.json()['keywords']
+    except Exception as e:
+        print(e) # will be printed in the log file that is residing in /tmp
+        keywords = []
+
     if len(keywords) > 0:
         try:
             collection.update_one({ "_id" : doc["_id"] },
