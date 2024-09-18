@@ -26,12 +26,12 @@ try:
             print("\n" + str(i))
 
         prompt = "Never show people, organizations, or copyrighted elements. " + doc['title'] + " " + doc['text'][:300]
-        print(prompt)
         response = client.images.generate(
             model = "dall-e-3",
             prompt = prompt,
             size = "1792x1024",
-            quality = "hd",
+            #quality = "hd",
+            quality = "standard",
             n = 1,
         )
 
