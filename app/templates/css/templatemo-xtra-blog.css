@@ -19,12 +19,26 @@ body {
     overflow-x: hidden;
 }
 
-p, span, ol, ul, table { color: #777; }
+p, span, ol, ul, table, label { color: #777; }
 hr {
     border-top-color: #CCC;
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.radio-container {
+}
+
+label {
+    margin-left: 12px;
+}
+
+input[type='radio'] {
+    accent-color: #00684A;
+    vertical-align: middle;
+    margin-top: -2px;
+}
+
 .form-control::-webkit-input-placeholder { color: #777; }
 .form-control:-ms-input-placeholder { color: #777; }
 .form-control::placeholder { color: #777; }

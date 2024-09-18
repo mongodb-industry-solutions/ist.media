@@ -119,6 +119,7 @@
 			    <a href="/welcome" class="tm-color-primary">is available here</a>.
                         </p>
 			<div style="padding: 2px"></div>
+
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    History of Visited Articles
 			</h2>
@@ -146,6 +147,7 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
+
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    AI-Generated Insights
 			</h2>
@@ -166,6 +168,30 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
+
+			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40 tm-mb-25">
+			    Content to be used
+			</h2>
+			<form method="POST" action="/select_news_source">
+			    <div class="radio-container">
+				<input type="radio" id="traditional" name="news_option" value="traditional"
+				       {% if news_source == "business_news" %}checked="checked"{% endif %}>
+				<label for="traditional">Traditional, used at .local NYC 2024</label>
+			    </div>
+			    <div class="radio-container">
+				<input type="radio" id="artificial" name="news_option" value="artificial"
+				       {% if news_source == "news" %}checked="checked"{% endif %}>
+				<label for="artificial">Artificial, updated regularly</label>
+			    </div>
+			    <div class="form-group row text-right">
+				<div class="col-12">
+				    <button type="submit" class="tm-btn tm-btn-primary tm-btn-small">
+					Select Content
+				    </button>
+				</div>
+                            </div>
+			</form>
+
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Current IP Address
 			</h2>
@@ -175,6 +201,7 @@
 			    <br/>{{ loc.city }}, {{ loc.country }}
 			    {% endif %}
 			</p>
+
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Access Statistics per Country
 			</h2>
@@ -227,6 +254,7 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
+
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Access Statistics per Path
 			</h2>
@@ -254,6 +282,8 @@
 			    <i>List is empty</i>
 			</p>
 			{% endif %}
+
+
 			{#
 			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
 			    Usage Stats (nginx/uwsgi)
@@ -266,6 +296,8 @@
 			<img style="width: 100%; margin-top: 20px"
 			     src="img/nginx-up-to-week-16.png" alt="Image">
 			#}
+
+
                     </div>
                 </div>
             </div>

@@ -29,8 +29,6 @@ MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
 client = MongoClient(MONGO_URI)
 dbName = "1_media_demo"
-collectionName = "business_news"
-collection = client[dbName][collectionName]
 
 gen_ai_cache_collection = client[dbName]["gen_ai_cache"]
 ip_info_cache_collection = client[dbName]["ip_info_cache"]
@@ -44,6 +42,16 @@ MAX_RCOM = 3      # number of recommended articles
 def debug(msg: str):
     if app.config['DEBUG']:
         print("[DEBUG]: " + msg)
+
+
+def read_collection_from_session():
+    if not 'news_source' in session:
+        session['news_source'] = 'business_news' # that's the default for now
+    return session['news_source']
+
+
+def collection():
+    return client[dbName][read_collection_from_session()]
 
 
 def log(request):
@@ -75,17 +83,17 @@ def log(request):
     return loc
 
 
-vector_search = MongoDBAtlasVectorSearch.from_connection_string(
-    MONGO_URI,
-    dbName + "." + collectionName,
-    OpenAIEmbeddings(disallowed_special=()),
-    index_name="vector_index",
-)
+def vector_search():
+    return MongoDBAtlasVectorSearch.from_connection_string(
+        MONGO_URI,
+        dbName + "." + read_collection_from_session(),
+        OpenAIEmbeddings(disallowed_special=()),
+        index_name="vector_index")
 
 
 def similarity_search(text: str,
                       history: list[str], count=MAX_DOCS_VS) -> list[dict]:
-    results = vector_search.similarity_search(query=text, k=MAX_DOCS_VS)
+    results = vector_search().similarity_search(query=text, k=MAX_DOCS_VS)
     docs = map(lambda r: r.metadata, results) # docs lack the 'text' field - WHY?
     # don't recommend history items, and limit to count
     return list(filter(lambda r: not r['uuid'] in history, docs))[:count]
@@ -93,7 +101,7 @@ def similarity_search(text: str,
 
 def calculate_recommendations(embedding: list[float],
                               history: list[str], count=MAX_DOCS_VS) -> list[tuple]:
-    results = vector_search._similarity_search_with_score(embedding=embedding, k=MAX_DOCS_VS)
+    results = vector_search()._similarity_search_with_score(embedding=embedding, k=MAX_DOCS_VS)
     tuples = map(lambda r: (r[0].metadata, r[1]), results)
     # don't recommend history items, and limit to count
     return list(filter(lambda t: not t[0]['uuid'] in history, tuples))[:count]
@@ -112,7 +120,7 @@ def calculate_keywords(doc: dict) -> list[str]:
 
     if len(keywords) > 0:
         try:
-            collection.update_one({ "_id" : doc["_id"] },
+            collection().update_one({ "_id" : doc["_id"] },
                                   { "$set" : { "keywords" : keywords }})
             debug("keywords cached for uuid " + doc['uuid'])
         except Exception as e:
@@ -148,7 +156,7 @@ def calculate_using_rag(question: str) -> str:
     """
     try:
         prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search.as_retriever()
+        retriever = vector_search().as_retriever()
         model = ChatOpenAI(model_name="gpt-4o")
         chain = (
             { "context": retriever, "question": RunnablePassthrough() }
@@ -174,7 +182,7 @@ def calculate_using_rag_and_return_context(question):
         return "\n\n".join(doc.page_content for doc in docs)
     try:
         prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search.as_retriever(search_kwargs={ "k" : 3 })
+        retriever = vector_search().as_retriever(search_kwargs={ "k" : 3 })
         model = ChatOpenAI(model_name="gpt-3.5-turbo")
         chain = (
             RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
@@ -190,7 +198,7 @@ def calculate_using_rag_and_return_context(question):
         cx = result['context']
         context = []
         for c in cx:
-            context.append(collection.find_one({ "uuid" : c.metadata['uuid'] }))
+            context.append(collection().find_one({ "uuid" : c.metadata['uuid'] }))
         gen_ai_cache_collection.insert_one({ "question" : question, "answer" : answer })
     except Exception as e:
         print(e) # will be printed in the log file that is residing in /tmp
@@ -208,10 +216,23 @@ def check_for_quality_read():
         session.pop('uuid_since')
         if delta_seconds > 10 and delta_seconds < 300:
             try:
-                collection.update_one({ "uuid" : session['uuid'] },
+                collection().update_one({ "uuid" : session['uuid'] },
                                       { "$inc" : { "read_count" : 1 }})
             except Exception as e:
                 print(e)
+
+
+@main.route('/select_news_source', methods=['POST'])
+def select_news_source():
+    selected_option = request.form['news_option']
+    session['news_source'] = 'business_news' if selected_option == 'traditional' else 'news'
+    # need to reset some stuff when switching source
+    delete_articles_history()
+    if 'uuid' in session:
+        session.pop('uuid')
+    if 'uuid_since' in session:
+        session.pop('uuid_since')
+    return redirect('/')
 
 
 @main.route('/delete_articles_history', methods=['POST'])
@@ -241,7 +262,7 @@ def delete_insights_history_item(id):
 @main.route('/recalculate_keywords/<uuid>', methods=['GET'])
 def recalculate_keywords(uuid):
     log(request)
-    calculate_keywords(collection.find_one({ "uuid" : uuid }))
+    calculate_keywords(collection().find_one({ "uuid" : uuid }))
     return redirect('/post?uuid=' + uuid)
 
 
@@ -263,12 +284,12 @@ def index():
     if query and query != "":
         docs = similarity_search(query.strip(), [], MAX_DOCS)
         # for unknown reasons, these docs lack the 'text' field - refetching...
-        docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
+        docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
         infoline = '"' + query.strip() + '"'
     else: # the start page, called without query parameter
         if 'history' in session and len(session['history']) > 0:
             history_docs = list(map(lambda uuid:
-                    collection.find_one({ "uuid" : uuid },
+                    collection().find_one({ "uuid" : uuid },
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
                     session['history']))
             concatenated_titles = ""
@@ -278,10 +299,10 @@ def index():
                 i += 1
             docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
             # for unknown reasons, these docs lack the 'text' field - refetching...
-            docs = list(map(lambda doc: collection.find_one({ "uuid" : doc['uuid'] }), docs))
+            docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
             infoline = "Personalized content"
         else: # no personalization possible - shuffle some items to start with
-            docs = collection.aggregate([
+            docs = collection().aggregate([
                 { "$sample": { "size": MAX_DOCS } }
             ])
             infoline = "Random content - no history yet"
@@ -302,7 +323,7 @@ def post():
     if query and query != "":
         return index()
     if style and style == "summary":
-        doc = collection.find_one({ "uuid" : session['uuid'] })
+        doc = collection().find_one({ "uuid" : session['uuid'] })
         if not doc:
             return render_template('404.html')
         sdate = doc["published"]
@@ -337,11 +358,11 @@ def post():
                                fdoc=fdoc, recommendations=recommendations)
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
-            doc = collection.find_one({ "uuid" : uuid })
+            doc = collection().find_one({ "uuid" : uuid })
         elif 'uuid' in session: # session-saved uuid as the second choice
-            doc = collection.find_one({ "uuid" : session['uuid'] })
+            doc = collection().find_one({ "uuid" : session['uuid'] })
         else: # TODO: use a personalized doc, if history is not empty
-            doc = list(collection.aggregate([
+            doc = list(collection().aggregate([
                 { "$sample": { "size": 1 } }
             ]))[0]
         if not doc:
@@ -366,7 +387,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        collection.update_one({ "_id" : doc["_id"] },
+        collection().update_one({ "_id" : doc["_id"] },
                               { "$inc" : { "visit_count" : 1 }})
         return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
                                recommendations=recommendations, keywords=keywords,
@@ -386,7 +407,7 @@ def about():
     if not 'history' in session:
         session['history'] = []
     docs = list(map(lambda uuid:
-                    collection.find_one({ "uuid" : uuid },
+                    collection().find_one({ "uuid" : uuid },
                                         { "uuid" : 1, "title" : 1, "_id" : 0 }),
                     reversed(session['history'])))
     try:
@@ -471,6 +492,7 @@ def about():
         path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
+                           news_source=session['news_source'] if 'news_source' in session else 'business_news',
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
 
 
@@ -518,7 +540,7 @@ def insights():
         return render_template('insights.html',
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
-        most_read_articles = collection.find().sort({ 'read_count' : -1 }).limit(10)
+        most_read_articles = collection().find().sort({ 'read_count' : -1 }).limit(10)
         return render_template('insights.html',
                                title="AI-Generated Insights (RAG)",
                                content="""<p>Please enter your question in the form above.
@@ -569,7 +591,7 @@ def submit_post():
     published = datetime.utcnow().isoformat()
     author = 'Benjamin Lorenz'
     image_file.save(os.path.join('/home/bjjl/content/images', uuid + '.jpg'))
-    collection.insert_one({ 'uuid' : uuid, 'published' : published, 'author' : author,
+    collection().insert_one({ 'uuid' : uuid, 'published' : published, 'author' : author,
                             'title' : session['title'], 'text' : session['text'] })
     session.pop('title')
     session.pop('text')
