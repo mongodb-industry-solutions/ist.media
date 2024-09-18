@@ -28,13 +28,7 @@ response = requests.get(search_url, params=params)
 data = response.json()
 
 if response.status_code == 200:
-    try:
-        collection.delete_many({})
-    except Exception as e:
-        print(e)
-        exit(1)
-    articles = data['response']['results']
-    for article in articles:
+    for article in data['response']['results']:
         imageURL = None
         bodyHTML = ""
         rawText = ""
@@ -70,36 +64,35 @@ if response.status_code == 200:
                 collection.insert_one(raw_article)
             except DuplicateKeyError:
                 print("d", end="", flush=True)
-            except Exception as e:
-                print(e)
+            except Exception:
+                print("e")
                 exit(1)
             else:
                 print(".", end="", flush=True)
         else:
             print("x", end="", flush=True)
-
 else:
     print(f"Error: {response.status_code} - {data}")
 
-try:
-    os.mkdir(tmp_dir)
-except Exception as e:
-    pass
+#try:
+#    os.mkdir(tmp_dir)
+#except Exception as e:
+#    pass
 
 
-i = 0
-try:
-    for doc in collection.find():
-        i += 1
-        if i % 50 == 0:
-            print("\n" + str(i))
-        img_data = requests.get(doc['imageurl']).content
-        with open(tmp_dir + '/' + doc['uuid'] + '.png', 'wb') as handler:
-            handler.write(img_data)
-        print("-", end="", flush=True)
-        sleep(0.5)
-except Exception as e:
-    print(e)
-    exit(1)
+#i = 0
+#try:
+#    for doc in collection.find():
+#        i += 1
+#        if i % 50 == 0:
+#            print("\n" + str(i))
+#        img_data = requests.get(doc['imageurl']).content
+#        with open(tmp_dir + '/' + doc['uuid'] + '.png', 'wb') as handler:
+#            handler.write(img_data)
+#        print("-", end="", flush=True)
+#        sleep(0.5)
+#except Exception as e:
+#    print(e)
+#    exit(1)
 
 print("")
