@@ -16,19 +16,19 @@ ai = OpenAI()
 
 def gen(text):
     prompt_title = f"Create a title of max 12 words, only capitalize the first word, never use surrounding quotes, for this text:\n\n{text}"
-    prompt_text = f"Write five paragraphs in your own words based on the following text:\n\n{text}"
+    prompt_text = f"Write three paragraphs in your own words based on the following text:\n\n{text}"
     try:
-        response = ai.chat.completions.create(
-            model = "gpt-4o",
-            messages = [
-                { "role" : "system", "content" : "You are a helpful assistant." },
-                { "role" : "user", "content" : prompt_title }
-            ],
-            max_tokens = 2000,
-            n = 1,
-            temperature = 0.7
-        )
-        title = response.choices[0].message.content.strip()
+        #response = ai.chat.completions.create(
+        #    model = "gpt-4o",
+        #    messages = [
+        #        { "role" : "system", "content" : "You are a helpful assistant." },
+        #        { "role" : "user", "content" : prompt_title }
+        #    ],
+        #    max_tokens = 2000,
+        #    n = 1,
+        #    temperature = 0.7
+        #)
+        #title = response.choices[0].message.content.strip()
         
         response = ai.chat.completions.create(
             model = "gpt-4o",
@@ -42,7 +42,8 @@ def gen(text):
         )
         text = response.choices[0].message.content.strip()
 
-        return title, text
+        #return title, text
+        return text
     
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -54,12 +55,13 @@ try:
         i += 1
         if i % 50 == 0:
             print("\n" + str(i))
-        title, text = gen(doc['text'])
-        doc['title'] = title
+        #title, text = gen(doc['text'])
+        text = gen(doc['text'])
+        #doc['title'] = title
         doc['text'] = text
         del doc['_id']
         news.insert_one(doc)
-        print("-", end="", flush=True)
+        print(".", end="", flush=True)
         sleep(0.5)
 except Exception as e:
     print(e)
