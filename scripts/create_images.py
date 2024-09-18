@@ -25,26 +25,19 @@ try:
         if i % 50 == 0:
             print("\n" + str(i))
 
-        long_prompt  = "Never show people, organizations, or copyrighted elements. " + doc['title'] + " " + doc['text'][:350]
-        short_prompt = "Never show people, organizations, or copyrighted elements. " + doc['title']
-        try:
-            response = client.images.generate(
-                model = "dall-e-3",
-                prompt = long_prompt,
-                size = "1792x1024",
-                #quality = "hd",
-                quality = "standard",
-                n = 1,
-            )
-        except Exception:
-            response = client.images.generate(
-                model = "dall-e-3",
-                prompt = short_prompt,
-                size = "1792x1024",
-                #quality = "hd",
-                quality = "standard",
-                n = 1,
-            )
+        prompt  = """Never show people, organizations, or copyrighted elements.
+        If the following contains text that is not allowed by your safety system
+        then please create a compliant image that is close to
+        what the text says. """ + doc['title'] + " " + doc['text'][:350]
+
+        response = client.images.generate(
+            model = "dall-e-3",
+            prompt = prompt,
+            size = "1792x1024",
+            #quality = "hd",
+            quality = "standard",
+            n = 1,
+        )
         img_data = requests.get(response.data[0].url).content
         with open(tmp_dir + '/' + doc['uuid'] + '.png', 'wb') as handler:
             handler.write(img_data)
