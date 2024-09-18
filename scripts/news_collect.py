@@ -68,10 +68,13 @@ if response.status_code == 200:
             }
             try:
                 collection.insert_one(raw_article)
+            except DuplicateKeyError:
+                print("d", end="", flush=True)
             except Exception as e:
                 print(e)
                 exit(1)
-            print(".", end="", flush=True)
+            else:
+                print(".", end="", flush=True)
         else:
             print("x", end="", flush=True)
 
