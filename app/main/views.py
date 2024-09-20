@@ -22,17 +22,23 @@ from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+from requests.auth import HTTPBasicAuth
 import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder, pycountry
 
 
+IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
+                   os.environ.get('IST_MEDIA_AUTH_PASSWORD', '') ]
+
 MONGO_URI = os.environ['MONGODB_IST_MEDIA']
 
-client = MongoClient(MONGO_URI)
-dbName = "1_media_demo"
+DB_NAME = "1_media_demo"
+DEFAULT_NEWS_COLLECTION = 'news'
 
-gen_ai_cache_collection = client[dbName]["gen_ai_cache"]
-ip_info_cache_collection = client[dbName]["ip_info_cache"]
-access_log_collection = client[dbName]["access_log"]
+client = MongoClient(MONGO_URI)
+
+gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
+ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
+access_log_collection = client[DB_NAME]["access_log"]
 
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 8      # number of articles on the home page
@@ -46,12 +52,12 @@ def debug(msg: str):
 
 def read_collection_from_session():
     if not 'news_source' in session:
-        session['news_source'] = 'business_news' # that's the default for now
+        session['news_source'] = DEFAULT_NEWS_COLLECTION
     return session['news_source']
 
 
 def collection():
-    return client[dbName][read_collection_from_session()]
+    return client[DB_NAME][read_collection_from_session()]
 
 
 def log(request):
@@ -86,7 +92,7 @@ def log(request):
 def vector_search():
     return MongoDBAtlasVectorSearch.from_connection_string(
         MONGO_URI,
-        dbName + "." + read_collection_from_session(),
+        DB_NAME + "." + read_collection_from_session(),
         OpenAIEmbeddings(disallowed_special=()),
         index_name="vector_index")
 
@@ -110,6 +116,7 @@ def calculate_recommendations(embedding: list[float],
 def calculate_keywords(doc: dict) -> list[str]:
     service_url = app.config['API_BASE_URL'] + '/keywords'
     response = requests.post(service_url,
+                             auth = HTTPBasicAuth(IST_MEDIA_AUTH[0], IST_MEDIA_AUTH[1]),
                              json = { "text" : doc['text'],
                                       "llm" : app.config['AVAILABLE_LLMS']['OpenAI GPT-3.5'] })
     try:
@@ -225,7 +232,7 @@ def check_for_quality_read():
 @main.route('/select_news_source', methods=['POST'])
 def select_news_source():
     selected_option = request.form['news_option']
-    session['news_source'] = 'business_news' if selected_option == 'traditional' else 'news'
+    session['news_source'] = 'business_news' if selected_option == 'traditional' else DEFAULT_NEWS_COLLECTION
     # need to reset some stuff when switching source
     delete_articles_history()
     if 'uuid' in session:
@@ -495,7 +502,7 @@ def about():
         path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
-                           news_source=session['news_source'] if 'news_source' in session else 'business_news',
+                           news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
 
 

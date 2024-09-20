@@ -174,14 +174,14 @@
 			</h2>
 			<form method="POST" action="/select_news_source">
 			    <div class="radio-container">
-				<input type="radio" id="traditional" name="news_option" value="traditional"
-				       {% if news_source == "business_news" %}checked="checked"{% endif %}>
-				<label for="traditional">Traditional, used at .local NYC 2024</label>
-			    </div>
-			    <div class="radio-container">
 				<input type="radio" id="artificial" name="news_option" value="artificial"
 				       {% if news_source == "news" %}checked="checked"{% endif %}>
 				<label for="artificial">Artificial, updated regularly</label>
+			    </div>
+			    <div class="radio-container">
+				<input type="radio" id="traditional" name="news_option" value="traditional"
+				       {% if news_source == "business_news" %}checked="checked"{% endif %}>
+				<label for="traditional">Traditional, used at .local NYC 2024</label>
 			    </div>
 			    <div class="form-group row text-right">
 				<div class="col-12">
