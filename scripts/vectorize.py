@@ -13,7 +13,7 @@ import keyparams
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
-collectionName = "business_news"
+collectionName = "news"
 collection = client[dbName][collectionName]
 
 openai = OpenAI(api_key=keyparams.openai_api_key)
@@ -41,4 +41,4 @@ except Exception as e:
     print(e)
     exit(1)
 
-print("\nDone")
+print("")
