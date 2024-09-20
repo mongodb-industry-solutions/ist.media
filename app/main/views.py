@@ -301,11 +301,14 @@ def index():
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
             infoline = "Personalized content"
-        else: # no personalization possible - shuffle some items to start with
-            docs = collection().aggregate([
-                { "$sample": { "size": MAX_DOCS } }
-            ])
-            infoline = "Random content - no history yet"
+        else:
+            docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
+            infoline = "Sorted by time - no history yet"
+        #else: # no personalization possible - shuffle some items to start with
+        #    docs = collection().aggregate([
+        #        { "$sample": { "size": MAX_DOCS } }
+        #    ])
+        #    infoline = "Random content - no history yet"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
@@ -333,7 +336,7 @@ def post():
             Document(page_content=doc['text'], metadata={"source": "local"})
         ]
         # Define prompt
-        prompt_template = """Summarize in around 200 words the key facts of the following:
+        prompt_template = """Summarize in around 150 words the key facts of the following:
         "{text}"
         CONCISE SUMMARY:"""
         try:

@@ -110,16 +110,14 @@
 				{{ doc.title }}
 			    </h2>
                             <p class="tm-mb-40">
-				{{ fdate }}, by {{ doc.author }}
-				{% if not request.args.get('style') %}
-				<br/><a style="text-align: right" href="/post?style=summary"
-					class="tm-color-primary">&#10145; Create summary</a>
-				<br/>
+				{{ fdate }}{% if not request.args.get('style') %},
 				Visits: <strong>{{ visit_count }}</strong>
 				&nbsp;Reads: <strong>{{ read_count }}</strong>
+				<br/><a style="text-align: right" href="/post?style=summary"
+				   class="tm-color-primary">&#10145; Create summary</a>
 				{% else %}
 				<br/><a style="text-align: right" href="/post"
-					class="tm-color-primary">&#10145; Back to full article</a>
+				   class="tm-color-primary">&#10145; Back to full article</a>
 				{% endif %}
 			    </p>
 			    {{ fdoc | safe }}
