@@ -41,7 +41,7 @@ ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
 
 MAX_DOCS_VS = 30  # number of results for vector search
-MAX_DOCS = 8      # number of articles on the home page
+MAX_DOCS = 10     # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
 
 
