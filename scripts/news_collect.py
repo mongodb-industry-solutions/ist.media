@@ -28,6 +28,7 @@ response = requests.get(search_url, params=params)
 data = response.json()
 
 if response.status_code == 200:
+    collection.delete_many({}) # erase incoming
     for article in data['response']['results']:
         imageURL = None
         bodyHTML = ""
