@@ -9,19 +9,26 @@ from pymongo.errors import DuplicateKeyError
 from time import sleep
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
-import keyparams, os, requests, json, uuid, feedparser
+import keyparams, os, sys, requests, json, uuid, feedparser
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
 collectionName = "news_incoming"
 collection = client[dbName][collectionName]
 
+try:
+    sector_id = sys.argv[1]
+except:
+    print("No sector ID provided - exiting.")
+    exit(1)
+
 # Define the URL of the RSS feed
 base_url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01'
 #url = base_url + '&id=19854910' # technology
-url = base_url + '&id=10001147' # business
+#url = base_url + '&id=10001147' # business
 #url = base_url + '&id=10000664' # finance
 #url = base_url + '&id=10000101' # auto
+url = base_url + '&id=' + sector_id
 
 # Parse the RSS feed
 feed = feedparser.parse(url)
