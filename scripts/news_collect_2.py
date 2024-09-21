@@ -1,0 +1,92 @@
+#
+# Collect articles from a news service
+#
+# Copyright (c) 2024 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+
+from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
+from time import sleep
+from bs4 import BeautifulSoup
+from dateutil import parser as date_parser
+import keyparams, os, requests, json, uuid, feedparser
+
+client = MongoClient(keyparams.MONGO_URI)
+dbName = "1_media_demo"
+collectionName = "news_incoming"
+collection = client[dbName][collectionName]
+
+# Define the URL of the RSS feed
+url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19854910'
+
+# Parse the RSS feed
+feed = feedparser.parse(url)
+
+# Clean-up incoming collection
+collection.delete_many({}) # erase incoming
+
+# Function to extract full text from an article page
+def get_full_text(article_url):
+    try:
+        # Fetch the article page
+        response = requests.get(article_url, headers={'User-Agent': 'Mozilla/5.0'})
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Parse the page content
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # Find all div elements with class 'group' and extract p tags inside them
+            group_divs = soup.find_all('div', class_='group')
+
+            # Initialize a variable to store the full text
+            full_text = ''
+
+            # Loop through each div with class 'group'
+            for div in group_divs:
+                # Find all p tags within the div and concatenate their text
+                p_tags = div.find_all('p')
+                for p in p_tags:
+                    full_text += p.get_text().strip() + ' '
+
+            return full_text.strip()
+        else:
+            return "Failed to fetch full article"
+    except Exception as e:
+        return f"Error occurred: {e}"
+
+# Loop through each article entry in the RSS feed
+for entry in feed.entries:  # Limit to the first 3 articles
+    # Extract the title and link
+    title = entry.title if 'title' in entry else ''
+    article_url = entry.link if 'link' in entry else ''
+
+    # Parse and format the published date as ISO 8601 for MongoDB
+    date = entry.published if 'published' in entry else ''
+    if date:
+        try:
+            date = date_parser.parse(date)  # Convert the date string into a datetime object
+        except Exception as e:
+            date = None  # Handle date parsing errors
+
+    # Fetch the full text from the article's page
+    full_text = get_full_text(article_url) if article_url else ''
+
+    raw_article = {
+        'uuid' : str(uuid.uuid5(uuid.NAMESPACE_DNS, full_text)),
+        'weburl' : article_url,
+        'title' : title,
+        'published' : date,
+        'text' : full_text
+    }
+    try:
+        collection.insert_one(raw_article)
+    except DuplicateKeyError:
+        print("d", end="", flush=True)
+    except Exception:
+        print("e")
+        exit(1)
+    else:
+        print(".", end="", flush=True)
+
+print("")
