@@ -19,7 +19,9 @@ collection = client[dbName][collectionName]
 # Define the URL of the RSS feed
 base_url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01'
 #url = base_url + '&id=19854910' # technology
-url = base_url + '&id=10000664' # finance
+url = base_url + '&id=10001147' # business
+#url = base_url + '&id=10000664' # finance
+#url = base_url + '&id=10000101' # auto
 
 # Parse the RSS feed
 feed = feedparser.parse(url)
@@ -73,6 +75,9 @@ for entry in feed.entries[:3]:
 
     # Fetch the full text from the article's page
     full_text = get_full_text(article_url) if article_url else ''
+
+    if len(full_text) < 500: # skip articles without (sufficiently long) text body
+        continue
 
     raw_article = {
         'uuid' : str(uuid.uuid5(uuid.NAMESPACE_DNS, full_text)),
