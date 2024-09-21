@@ -343,7 +343,7 @@ def post():
             Document(page_content=doc['text'], metadata={"source": "local"})
         ]
         # Define prompt
-        prompt_template = """Summarize in around 150 words the key facts of the following:
+        prompt_template = """Summarize in around 90 words the key facts of the following:
         "{text}"
         CONCISE SUMMARY:"""
         try:
