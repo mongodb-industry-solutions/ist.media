@@ -24,10 +24,6 @@ except:
 
 # Define the URL of the RSS feed
 base_url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01'
-#url = base_url + '&id=19854910' # technology
-#url = base_url + '&id=10001147' # business
-#url = base_url + '&id=10000664' # finance
-#url = base_url + '&id=10000101' # auto
 url = base_url + '&id=' + sector_id
 
 # Parse the RSS feed
@@ -67,7 +63,7 @@ def get_full_text(article_url):
         return f"Error occurred: {e}"
 
 # Loop through each article entry in the RSS feed
-for entry in feed.entries[:3]:
+for entry in feed.entries[:2]:
     # Extract the title and link
     title = entry.title if 'title' in entry else ''
     article_url = entry.link if 'link' in entry else ''
