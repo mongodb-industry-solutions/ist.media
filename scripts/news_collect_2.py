@@ -17,7 +17,9 @@ collectionName = "news_incoming"
 collection = client[dbName][collectionName]
 
 # Define the URL of the RSS feed
-url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19854910'
+base_url = 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01'
+#url = base_url + '&id=19854910' # technology
+url = base_url + '&id=10000664' # finance
 
 # Parse the RSS feed
 feed = feedparser.parse(url)
@@ -56,7 +58,7 @@ def get_full_text(article_url):
         return f"Error occurred: {e}"
 
 # Loop through each article entry in the RSS feed
-for entry in feed.entries[:5]:
+for entry in feed.entries[:3]:
     # Extract the title and link
     title = entry.title if 'title' in entry else ''
     article_url = entry.link if 'link' in entry else ''
@@ -65,7 +67,7 @@ for entry in feed.entries[:5]:
     date = entry.published if 'published' in entry else ''
     if date:
         try:
-            date = date_parser.parse(date)  # Convert the date string into a datetime object
+            date = date_parser.parse(date).strftime('%Y-%m-%dT%H:%M:%SZ')
         except Exception as e:
             date = None  # Handle date parsing errors
 
