@@ -29,7 +29,7 @@ data = response.json()
 
 if response.status_code == 200:
     collection.delete_many({}) # erase incoming
-    for article in data['response']['results'][:5]:
+    for article in data['response']['results'][:9]:
         imageURL = None
         bodyHTML = ""
         rawText = ""
