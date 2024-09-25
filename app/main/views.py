@@ -41,7 +41,7 @@ ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
 
 MAX_DOCS_VS = 30  # number of results for vector search
-MAX_DOCS = 10     # number of articles on the home page
+MAX_DOCS = 12     # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
 
 
@@ -142,7 +142,7 @@ def calculate_insights(text: str) -> str:
     INSIGHTS:"""
     try:
         prompt = PromptTemplate.from_template(prompt_template)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         stuff_chain = StuffDocumentsChain(
             llm_chain=llm_chain,
