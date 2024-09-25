@@ -21,6 +21,7 @@ tmp_dir = '/var/tmp/images.ist.media'
 params = {
     'api-key' : api_key,
     'type' : 'article',
+    'section' : 'world',
     'show-blocks' : 'all'
 }
 
