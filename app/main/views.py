@@ -139,7 +139,7 @@ def calculate_insights(text: str) -> str:
     lcdocs = [ Document(page_content=text, metadata={"source": "local"}) ]
     prompt_template = """Tell me about the following, writing three paragraphs:
     "{text}"
-    INSIGHTS:"""
+    """
     try:
         prompt = PromptTemplate.from_template(prompt_template)
         llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
