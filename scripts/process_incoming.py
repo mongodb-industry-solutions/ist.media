@@ -52,6 +52,11 @@ def gen(text):
 i = 0
 try:
     for doc in incoming.find():
+
+        if news.find_one({ 'uuid' : doc['uuid'] }):
+            print("k", end="", flush=True)
+            continue
+
         i += 1
         if i % 50 == 0:
             print("\n" + str(i))
@@ -60,8 +65,11 @@ try:
         #doc['title'] = title
         doc['text'] = text
         del doc['_id']
-        news.insert_one(doc)
-        print(".", end="", flush=True)
+        try:
+            news.insert_one(doc)
+            print(".", end="", flush=True)
+        except DuplicateKeyError:
+            print("k", end="", flush=True)
         sleep(0.5)
 except Exception as e:
     print(e)
