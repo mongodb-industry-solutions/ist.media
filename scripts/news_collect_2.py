@@ -83,7 +83,7 @@ for entry in feed.entries[:5]:
         continue
 
     raw_article = {
-        'uuid' : str(uuid.uuid5(uuid.NAMESPACE_DNS, full_text)),
+        'uuid' : str(uuid.uuid5(uuid.NAMESPACE_DNS, entry.id)),
         'weburl' : article_url,
         'title' : title,
         'published' : date,
