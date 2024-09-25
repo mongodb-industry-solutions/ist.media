@@ -63,7 +63,7 @@ def get_full_text(article_url):
         return f"Error occurred: {e}"
 
 # Loop through each article entry in the RSS feed
-for entry in feed.entries[:3]:
+for entry in feed.entries[:5]:
     # Extract the title and link
     title = entry.title if 'title' in entry else ''
     article_url = entry.link if 'link' in entry else ''
