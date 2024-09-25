@@ -120,7 +120,7 @@
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">{{ doc.title }}</h2>
                     </a>
                     <p class="tm-pt-10">
-		        {{ doc.fdate }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
+		        {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
                     </p>
                 </article>
 		{% endfor %}

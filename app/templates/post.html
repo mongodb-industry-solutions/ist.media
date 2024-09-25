@@ -110,7 +110,7 @@
 				{{ doc.title }}
 			    </h2>
                             <p class="tm-mb-40">
-				{{ fdate }}{% if not request.args.get('style') %},
+				{{ doc.published | format_datetime('full') }}{% if not request.args.get('style') %},
 				Visits: <strong>{{ visit_count }}</strong>
 				&nbsp;Reads: <strong>{{ read_count }}</strong>
 				<br/><a style="text-align: right" href="/post?style=summary"
@@ -156,7 +156,8 @@
                                 <img src="/content/images/{{ rc.0.uuid }}.webp"
 				     style="aspect-ratio: 1200/675" class="mb-3 img-fluid" alt="">
                                 <figcaption class="tm-color-primary">
-				    {{ rc.0.title }} ({{ "%.2f" | format(rc.1) }})
+				    {{ rc.0.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;
+				    {{ rc.0.title }}&nbsp;&nbsp;({{ "%.2f" | format(rc.1) }})
 				</figcaption>
                             </figure>
                         </a>

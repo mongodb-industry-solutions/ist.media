@@ -318,9 +318,16 @@ def index():
         #    infoline = "Random content - no history yet"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
-        'fdate' : datetime.fromisoformat(doc["published"]).strftime("%d %b %Y"),
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
     return render_template('index.html', docs=docs, infoline=infoline)
+
+
+@main.route('/delete')
+def delete():
+    uuid = request.args.get('uuid')
+    collection().delete_one({ "uuid" : uuid })
+    session['history'] = []
+    return redirect('/')
 
 
 @main.route('/post')
@@ -336,9 +343,7 @@ def post():
         doc = collection().find_one({ "uuid" : session['uuid'] })
         if not doc:
             return render_template('404.html')
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
-        fdoc=doc['text']
+        fdoc = doc['text']
         lcdocs = [
             Document(page_content=doc['text'], metadata={"source": "local"})
         ]
@@ -364,8 +369,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        return render_template('post.html', doc=doc, fdate=fdate,
-                               fdoc=fdoc, recommendations=recommendations)
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
             doc = collection().find_one({ "uuid" : uuid })
@@ -377,8 +381,6 @@ def post():
             ]))[0]
         if not doc:
             return render_template('404.html')
-        sdate = doc["published"]
-        fdate = datetime.fromisoformat(sdate).strftime("%a %d %b %Y %H:%M")
         fdoc = html(doc['text'].replace("\n", "\n\n"))
         session['uuid'] = doc['uuid']
         session['uuid_since'] = int(time.time())
@@ -399,7 +401,7 @@ def post():
             recommendations = []
         collection().update_one({ "_id" : doc["_id"] },
                               { "$inc" : { "visit_count" : 1 }})
-        return render_template('post.html', doc=doc, fdate=fdate, fdoc=fdoc,
+        return render_template('post.html', doc=doc, fdoc=fdoc,
                                recommendations=recommendations, keywords=keywords,
                                visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,
                                read_count=doc['read_count'] if 'read_count' in doc else 0)
