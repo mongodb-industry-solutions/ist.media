@@ -12,8 +12,8 @@ import keyparams, requests
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
-collectionName = "news_incoming"
-collection = client[dbName][collectionName]
+incoming = client[dbName]["news_incoming"]
+news = client[dbName]["news"]
 
 tmp_dir = '/var/tmp/images.ist.media'
 client = OpenAI()
@@ -21,9 +21,9 @@ client = OpenAI()
 i = 0
 uuids_to_delete = []
 try:
-    for doc in collection.find():
+    for doc in incoming.find():
 
-        if client[dbName]["news"].find_one({ 'uuid' : doc['uuid'] }):
+        if news.find_one({ 'uuid' : doc['uuid'] }):
             print("k", end="", flush=True)
             continue
 
@@ -31,10 +31,10 @@ try:
         if i % 50 == 0:
             print("\n" + str(i))
 
-        prompt  = """Never show people, organizations, or copyrighted
+        prompt = """Never show people, organizations, or copyrighted
         elements. If the following contains text that is not allowed by
         your safety system then please create a compliant image that
-        comes close""" + doc['title'] + " " + doc['text'][:350]
+        comes close: """ + doc['title'] + " " + doc['text'][:350]
 
         try:
             response = client.images.generate(
@@ -55,7 +55,7 @@ try:
         sleep(10) # let's be gentle - don't rush
 
     for uuid in uuids_to_delete:
-        collection.delete_one({ 'uuid' : uuid })
+        incoming.delete_one({ 'uuid' : uuid })
         print("d", end="", flush=True)
 
 except Exception as e:
