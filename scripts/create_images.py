@@ -16,7 +16,7 @@ incoming = client[dbName]["news_incoming"]
 news = client[dbName]["news"]
 
 tmp_dir = '/var/tmp/images.ist.media'
-client = OpenAI()
+ai = OpenAI()
 
 i = 0
 uuids_to_delete = []
@@ -37,7 +37,7 @@ try:
         comes close: """ + doc['title'] + " " + doc['text'][:350]
 
         try:
-            response = client.images.generate(
+            response = ai.images.generate(
                 model = "dall-e-3",
                 prompt = prompt,
                 size = "1792x1024",
