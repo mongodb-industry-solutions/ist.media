@@ -13,7 +13,7 @@ from . import views, errors
 
 def format_datetime(value: str, format='medium') -> str:
     if format == 'full':
-        format= "%a %d %b %Y %H:%M"
+        format= "%A, %d %B %Y, %H:%M"
     elif format == 'medium':
         format = "%d %b %Y"
     return datetime.fromisoformat(value).strftime(format)

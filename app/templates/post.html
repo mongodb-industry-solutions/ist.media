@@ -110,13 +110,25 @@
 				{{ doc.title }}
 			    </h2>
                             <p class="tm-mb-40">
-				{{ doc.published | format_datetime('full') }}{% if not request.args.get('style') %},
-				Visits: <strong>{{ visit_count }}</strong>
-				&nbsp;Reads: <strong>{{ read_count }}</strong>
-				<br/><a style="text-align: right" href="/post?style=summary"
+				{{ doc.published | format_datetime('full') }}<br/>
+				{% if not request.args.get('style') %}
+				Visits: <strong>{{ visit_count }}</strong>,
+				&nbsp;Reads: <strong>{{ read_count }}</strong>,
+				&nbsp;Sentiment:&nbsp;
+				{% if doc.sentiment == "+" %}
+				&#128578;
+				{% elif doc.sentiment == "-" %}
+				&#128577;
+				{% elif doc.sentiment == "o" %}
+				&#128528;
+				{% else %}
+				<strong>?</strong>
+				{% endif %}
+				<br/>
+				<a style="text-align: right" href="/post?style=summary"
 				   class="tm-color-primary">&#10145; Create summary</a>
 				{% else %}
-				<br/><a style="text-align: right" href="/post"
+				<a style="text-align: right" href="/post"
 				   class="tm-color-primary">&#10145; Back to full article</a>
 				{% endif %}
 			    </p>
