@@ -1,5 +1,5 @@
 #
-# Add meta data to news documents
+# Add sentiment to news documents
 #
 # Copyright (c) 2024 MongoDB Inc.
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
@@ -18,7 +18,7 @@ ai = OpenAI()
 
 def sentiment(text):
     prompt = f"""
-    
+
     I want you to detect the sentiment of an article, which can be one
     of '+' (positive), 'o' (neutral), or '-' (negative).  Please
     return as a single char without quotes that can be processed
@@ -38,7 +38,7 @@ def sentiment(text):
             temperature = 0.7
         )
         return response.choices[0].message.content.strip()
-    
+
     except Exception as e:
         print(f"An error occurred: {e}")
         exit(1)
@@ -51,10 +51,9 @@ try:
         if i % 50 == 0:
             print("\n" + str(i))
         try:
-            print(sentiment(doc['text']))
-            #collection.update_one({ "_id" : doc["_id"] },
-            #                      { "$set" : { "sentiment" : sentiment(doc['text']) }})
-            #print(".", end="", flush=True)
+            collection.update_one({ "_id" : doc["_id"] },
+                                  { "$set" : { "sentiment" : sentiment(doc['text']) }})
+            print(".", end="", flush=True)
         except:
             print("e", end="", flush=True)
 
