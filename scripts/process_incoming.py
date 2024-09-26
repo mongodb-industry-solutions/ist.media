@@ -15,7 +15,7 @@ ai = OpenAI()
 
 def gen(text):
     prompt = f"""
-    Write four paragraphs, in total around 2000 characters,
+    Write four paragraphs, in total around 1500 characters,
     in your own words based on the following text:
 
     {text}
