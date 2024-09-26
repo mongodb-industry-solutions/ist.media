@@ -14,7 +14,13 @@ target_dir = '/var/tmp/images.ist.media'
 ai = OpenAI()
 
 def gen(text):
-    prompt = f"Write four paragraphs in your own words based on the following text:\n\n{text}"
+    prompt = f"""
+    Write four paragraphs, in total around 2000 characters,
+    in your own words based on the following text:
+
+    {text}
+    """
+
     try:
         response = ai.chat.completions.create(
             model = "gpt-4o",
