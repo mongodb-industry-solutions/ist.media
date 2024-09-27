@@ -163,7 +163,7 @@ def calculate_using_rag(question: str) -> str:
     """
     try:
         prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search().as_retriever()
+        retriever = vector_search().as_retriever(search_kwargs = { "k" : 9 })
         model = ChatOpenAI(model_name="gpt-4o")
         chain = (
             { "context": retriever, "question": RunnablePassthrough() }
