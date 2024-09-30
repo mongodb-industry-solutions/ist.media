@@ -43,6 +43,7 @@ access_log_collection = client[DB_NAME]["access_log"]
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 12     # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
+MAX_RAG = 7       # number of articles for RAG context - 128k token limit
 
 
 def debug(msg: str):
@@ -163,7 +164,7 @@ def calculate_using_rag(question: str) -> str:
     """
     try:
         prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search().as_retriever(search_kwargs = { "k" : 9 })
+        retriever = vector_search().as_retriever(search_kwargs = { "k" : MAX_RAG })
         model = ChatOpenAI(model_name="gpt-4o")
         chain = (
             { "context": retriever, "question": RunnablePassthrough() }
