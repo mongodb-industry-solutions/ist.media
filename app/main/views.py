@@ -311,6 +311,7 @@ def index():
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
+        docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
         for doc in docs:
             timestamp_str = doc['published']
             timestamp_dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
