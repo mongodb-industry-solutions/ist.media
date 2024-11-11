@@ -155,13 +155,24 @@
 		    </h2>
 		    <p>
 			On the <a href="/" class="tm-color-primary">Home Page</a> and on the
-			<a href="/post" class="tm-color-primary">Single Post Page</a>, you find a search
-			form at the top:<br/>
-			<img style="width: 40%" src="/img/vsform.png"><br/>
+			<a href="/post" class="tm-color-primary">Single Post Page</a>, you find a
+			search form at the top.
+		    </p>
+		    <p>
+			<!--<img style="width: 40%" src="/img/vsform.png"><br/>-->
 			Whatever you send through this form will trigger
 			<a href="https://www.mongodb.com/products/platform/atlas-vector-search"
-			   class="tm-color-primary">Vector Search</a> to find
-			semantically close news articles. Don't just use keywords for your search,
+			   class="tm-color-primary">Vector Search</a>
+			and
+			<a href="https://www.mongodb.com/resources/basics/full-text-search"
+			   class="tm-color-primary">Full-Text Search</a>
+			in parallel, to find matching articles.
+			This functionality is implemented using the new LangChain
+			<a href="https://api.python.langchain.com/en/latest/mongodb/retrievers/langchain_mongodb.retrievers.hybrid_search.MongoDBAtlasHybridSearchRetriever.html"
+			   class="tm-color-primary">Hybrid Search Retriever</a> for MongoDB.
+		    </p>
+		    <p>
+			Don't just use keywords for your search,
 			but also experiment with sending multiple words, or even complete sentences!
 		    </p>
 		    <h2 class="pt-2 tm-color-primary tm-post-title">
