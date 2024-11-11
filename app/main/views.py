@@ -10,20 +10,20 @@ from .. import mongo, logger
 from . import main
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-from langchain.docstore.document import Document
-from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.chains.llm import LLMChain
+from openai import OpenAI
+from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnableParallel, RunnablePassthrough
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_community.document_loaders import DirectoryLoader
-from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
-from langchain.chains import RetrievalQA
-from datetime import datetime, timedelta
+from langchain.chains.combine_documents.stuff import StuffDocumentsChain
+from langchain.chains.llm import LLMChain
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_mongodb import MongoDBAtlasVectorSearch
+from langchain_mongodb.retrievers.hybrid_search import MongoDBAtlasHybridSearchRetriever
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from requests.auth import HTTPBasicAuth
-import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder, pycountry
+import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder, pycountry, math
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -40,8 +40,10 @@ gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
 ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
 
+ai = OpenAI()
+
 MAX_DOCS_VS = 30  # number of results for vector search
-MAX_DOCS = 24     # number of articles on the home page
+MAX_DOCS = 16     # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
 MAX_RAG = 7       # number of articles for RAG context - 128k token limit
 
@@ -106,9 +108,20 @@ def similarity_search(text: str,
     return list(filter(lambda r: not r['uuid'] in history, docs))[:count]
 
 
+def hybrid_search(query: str, count=MAX_DOCS) -> list[Document]:
+    retriever = MongoDBAtlasHybridSearchRetriever(
+        vectorstore = vector_search(),
+        search_index_name = "fulltext_index",
+        top_k = count,
+        vector_penalty = 45.0,
+        fulltext_penalty = 60.0
+    )
+    return retriever.invoke(query)
+
+
 def calculate_recommendations(embedding: list[float],
                               history: list[str], count=MAX_DOCS_VS) -> list[tuple]:
-    results = vector_search()._similarity_search_with_score(embedding=embedding, k=MAX_DOCS_VS)
+    results = vector_search()._similarity_search_with_score(query_vector=embedding, k=MAX_DOCS_VS)
     tuples = map(lambda r: (r[0].metadata, r[1]), results)
     # don't recommend history items, and limit to count
     return list(filter(lambda t: not t[0]['uuid'] in history, tuples))[:count]
@@ -281,6 +294,12 @@ def welcome():
     return render_template('welcome.html')
 
 
+def adjusted_score(original_score, age_in_seconds, half_life=86400*21):
+    lambda_ = math.log(2) / half_life
+    time_decay = math.exp(-lambda_ * age_in_seconds)
+    return original_score * time_decay, time_decay
+
+
 @main.route('/')
 def index():
     if not 'was_here_before' in session:
@@ -290,9 +309,16 @@ def index():
     check_for_quality_read()
     query = request.args.get('query')
     if query and query != "":
-        docs = similarity_search(query.strip(), [], MAX_DOCS)
-        # for unknown reasons, these docs lack the 'text' field - refetching...
-        docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
+        docs = hybrid_search(query.strip(), MAX_DOCS)
+        docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
+        for doc in docs:
+            timestamp_str = doc['published']
+            timestamp_dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
+            timestamp_dt = timestamp_dt.replace(tzinfo=timezone.utc)
+            current_time = datetime.now(timezone.utc)
+            time_difference = (timestamp_dt - current_time).total_seconds()
+            seconds_away = abs(time_difference)
+            doc['score'], doc['time_decay'] = adjusted_score(doc['score'], seconds_away)
         infoline = '"' + query.strip() + '"'
     else: # the start page, called without query parameter
         if 'history' in session and len(session['history']) > 0:

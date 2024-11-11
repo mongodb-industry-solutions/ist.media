@@ -87,7 +87,7 @@
                 <div class="col-12">
                     <form method="GET" class="form-inline tm-mb-25 tm-search-form">
                         <input class="form-control tm-search-input"
-			       name="query" type="text" placeholder="Vector Search..."
+			       name="query" type="text" placeholder="Hybrid Search..."
 			       aria-label="Search">
                         <button class="tm-search-button" type="submit">
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
@@ -108,7 +108,7 @@
                 </div>
             </div>
             <div class="row tm-row">
-		{% for doc in docs %}
+		{% for doc in docs | sort(attribute = 'score', reverse = True) %}
                 <article class="col-12 col-md-6 tm-post">
                     <hr class="tm-hr-primary">
                     <a href="/post?uuid={{ doc.uuid }}"
@@ -122,6 +122,14 @@
                     <p class="tm-pt-10">
 		        {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
                     </p>
+		    {% if doc.score is defined %}
+		    <p>
+			<strong>Vector Score</strong>: {{ doc.vector_score | round(5) }}<br/>
+			<strong>Fulltext Score</strong>: {{ doc.fulltext_score | round(5) }}<br/>
+			<strong>Time Decay</strong>: {{ doc.time_decay | round(5) }}<br/>
+			<strong>Score</strong>: {{ doc.score | round(5) }}
+		    </p>
+		    {% endif %}
                 </article>
 		{% endfor %}
             </div>
