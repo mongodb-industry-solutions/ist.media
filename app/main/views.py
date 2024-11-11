@@ -113,7 +113,7 @@ def hybrid_search(query: str, count=MAX_DOCS) -> list[Document]:
         vectorstore = vector_search(),
         search_index_name = "fulltext_index",
         top_k = count,
-        vector_penalty = 45.0,
+        vector_penalty = 60.0,
         fulltext_penalty = 60.0
     )
     return retriever.invoke(query)
