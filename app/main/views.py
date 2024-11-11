@@ -294,7 +294,7 @@ def welcome():
     return render_template('welcome.html')
 
 
-def adjusted_score(original_score, age_in_seconds, half_life=86400*21):
+def adjusted_score(original_score, age_in_seconds, half_life=86400*42):
     lambda_ = math.log(2) / half_life
     time_decay = math.exp(-lambda_ * age_in_seconds)
     return original_score * time_decay, time_decay
