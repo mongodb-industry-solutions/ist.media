@@ -109,9 +109,9 @@
                             <h2 class="pt-2 tm-color-primary tm-post-title">
 				{{ doc.title }}
 			    </h2>
-                            <p class="tm-mb-40">
+			    {% if not request.args.get('style') %}
+                            <p style="margin: 0; padding: 0">
 				{{ doc.published | format_datetime('full') }}<br/>
-				{% if not request.args.get('style') %}
 				Visits: <strong>{{ visit_count }}</strong>,
 				&nbsp;Reads: <strong>{{ read_count }}</strong>,
 				&nbsp;Sentiment:&nbsp;
@@ -124,14 +124,45 @@
 				{% else %}
 				<strong>?</strong>
 				{% endif %}
-				<br/>
+			    </p>
+			    {% else %}
+			    <p style="margin: 0; padding: 0">
+				<a style="text-align: right" href="/post"
+				   class="tm-color-primary">&#10145; Back to original</a>
+			    </p>
+			    {% endif %}
+			    {% if not request.args.get('style') %}
+			    <div style="display: flex;
+					align-items: center">
 				<a style="text-align: right" href="/post?style=summary"
 				   class="tm-color-primary">&#10145; Create summary</a>
-				{% else %}
-				<a style="text-align: right" href="/post"
-				   class="tm-color-primary">&#10145; Back to full article</a>
-				{% endif %}
-			    </p>
+				&nbsp;&nbsp;&nbsp;
+				<form action="/post" method="GET"
+				      style="display: inline-flex; align-items: center">
+				    <input type="hidden" name="style" value="translated">
+				    <button type="submit"
+					    class="tm-color-primary"
+					    style="display: inline-flex;
+						   align-items: center;
+						   background: none;
+						   border: none;
+						   cursor: pointer">
+					&#10145; Translate to
+				    </button>
+				    <select name="lang"
+					    style="border: 1px solid #dcdcdc;
+						   border-radius: 4px;
+						   padding: 1px 8px;
+						   margin-left: 8px">
+					<option value="German">German</option>
+					<option value="Lithuanian">Lithuanian</option>
+					<option value="French">French</option>
+					<option value="Spanish">Spanish</option>
+				    </select>
+				</form>
+			    </div>
+			    {% endif %}
+			    <p style="margin: 0; padding: 0">&nbsp;</p>
 			    {{ fdoc | safe }}
                         </div>
                     </div>

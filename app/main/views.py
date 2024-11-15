@@ -365,6 +365,7 @@ def post():
     style = request.args.get('style')
     query = request.args.get('query')
     uuid = request.args.get('uuid')
+    lang = request.args.get('lang')
     if query and query != "":
         return index()
     if style and style == "summary":
@@ -376,19 +377,54 @@ def post():
             Document(page_content=doc['text'], metadata={"source": "local"})
         ]
         # Define prompt
-        prompt_template = """Summarize in around 150 words the key facts of the following:
+        prompt_template = """Summarize in around 250 words the key facts of the following:
         "{text}"
         CONCISE SUMMARY:"""
         try:
             prompt = PromptTemplate.from_template(prompt_template)
             # Define LLM chain
-            llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+            llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
             llm_chain = LLMChain(llm=llm, prompt=prompt)
             # Define StuffDocumentsChain
             stuff_chain = StuffDocumentsChain(
                 llm_chain=llm_chain,
                 document_variable_name="text")
             fdoc = "SUMMARY: " + stuff_chain.invoke(lcdocs)['output_text']
+            fdoc = html(fdoc.replace("\n", "\n\n"))
+        except Exception as e:
+            fdoc = "OpenAI crashed - you should try again (later)"
+            print(e) # will be printed in the log file that is residing in /tmp
+        if 'embedding' in doc:
+            recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
+        else:
+            recommendations = []
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
+    if style and style == "translated":
+        target_lang = lang if lang else "German"
+        doc = collection().find_one({ "uuid" : session['uuid'] })
+        if not doc:
+            return render_template('404.html')
+        fdoc = doc['text']
+        lcdocs = [
+            Document(page_content=doc['text'], metadata={"source": "local"})
+        ]
+        # Define prompt
+        prompt_template = f"""Translate the following text into {target_lang}, use a language
+        that is reflecting the style of a conservative newspaper, and be free in the way
+        you translate -- don't do it sentence by sentence, but rather create a comprehensive flow
+        of information:
+        "{{text}}"
+        TRANSLATION:"""
+        try:
+            prompt = PromptTemplate.from_template(prompt_template)
+            # Define LLM chain
+            llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
+            llm_chain = LLMChain(llm=llm, prompt=prompt)
+            # Define StuffDocumentsChain
+            stuff_chain = StuffDocumentsChain(
+                llm_chain=llm_chain,
+                document_variable_name="text")
+            fdoc = target_lang.upper() + ": " + stuff_chain.invoke(lcdocs)['output_text']
             fdoc = html(fdoc.replace("\n", "\n\n"))
         except Exception as e:
             fdoc = "OpenAI crashed - you should try again (later)"
