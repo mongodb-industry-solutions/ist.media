@@ -113,8 +113,8 @@ def hybrid_search(query: str, count=MAX_DOCS) -> list[Document]:
         vectorstore = vector_search(),
         search_index_name = "fulltext_index",
         top_k = count,
-        vector_penalty = 60.0,
-        fulltext_penalty = 60.0
+        vector_penalty = 50.0,
+        fulltext_penalty = 70.0
     )
     return retriever.invoke(query)
 
@@ -294,7 +294,7 @@ def welcome():
     return render_template('welcome.html')
 
 
-def adjusted_score(original_score, age_in_seconds, half_life=86400*42):
+def adjusted_score(original_score, age_in_seconds, half_life=86400*90):
     lambda_ = math.log(2) / half_life
     time_decay = math.exp(-lambda_ * age_in_seconds)
     return original_score * time_decay, time_decay
@@ -311,7 +311,7 @@ def index():
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
-        docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
+        #docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
         for doc in docs:
             timestamp_str = doc['published']
             timestamp_dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
