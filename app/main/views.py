@@ -424,20 +424,8 @@ def post():
         articles (e.g., "die Initiative" instead of "diese Initiative") when the context already
         makes the reference clear. This ensures a more natural and fluent translation.
 
-        Example Sentence:
-
-        English: "The project will be implemented in three phases."
-        German (Preferred): "Das Projekt wird in drei Phasen umgesetzt."
-        Not Preferred: "Dieses Projekt wird in drei Phasen umgesetzt."
-
-        Use demonstrative pronouns only when you need to emphasize or differentiate:
-
-        English: "This project is unlike anything we've done before."
-        German (Appropriate): "Dieses Projekt unterscheidet sich von allem, was wir zuvor gemacht
-        haben."
-
         Paraphrase and summarize in your own words. Don't translate sentence by
-        sentence. Make the text 20% shorter.
+        sentence. Make the text 40% shorter.
 
         "{{text}}"
         TRANSLATION:"""
