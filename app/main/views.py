@@ -339,11 +339,6 @@ def index():
         else:
             docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
             infoline = "Sorted by time - no history yet"
-        #else: # no personalization possible - shuffle some items to start with
-        #    docs = collection().aggregate([
-        #        { "$sample": { "size": MAX_DOCS } }
-        #    ])
-        #    infoline = "Random content - no history yet"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
@@ -369,6 +364,8 @@ def post():
     if query and query != "":
         return index()
     if style and style == "summary":
+        if not 'uuid' in session:
+            return redirect('/')
         doc = collection().find_one({ "uuid" : session['uuid'] })
         if not doc:
             return render_template('404.html')
@@ -400,6 +397,8 @@ def post():
             recommendations = []
         return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
     if style and style == "translated":
+        if not 'uuid' in session:
+            return redirect('/')
         target_lang = lang if lang else "German"
         doc = collection().find_one({ "uuid" : session['uuid'] })
         if not doc:
@@ -409,10 +408,37 @@ def post():
             Document(page_content=doc['text'], metadata={"source": "local"})
         ]
         # Define prompt
-        prompt_template = f"""Translate the following text into {target_lang}, use a language
-        that is reflecting the style of a conservative newspaper, and be free in the way
-        you translate -- don't do it sentence by sentence, but rather create a comprehensive flow
-        of information:
+        prompt_template = f"""Translate the following English news article into {target_lang}.
+
+        Ensure the translation reflects the tone, structure, and sophistication typical of a
+        conservative newspaper, such as "Frankfurter Allgemeine Zeitung" or "Die Welt". Use formal
+        language, precise vocabulary, and a balanced perspective while maintaining journalistic
+        integrity. Ensure cultural nuances are appropriately adapted to {target_lang}.
+
+        Avoid deeply nested sentences. Rather break them up in several independent sentences. Do not
+        use appositions such as "Orange, ein Telco-Unternehmen, hat angekündigt."  Instead, rephrase
+        such sentences to structures like "Das Telco-Unternehmen Orange hat angekündigt."
+
+        Avoid the overuse of demonstrative pronouns like "dieser/diese/dieses" unless they are
+        necessary for clarity or emphasis. In most cases, prefer simpler structures with definite
+        articles (e.g., "die Initiative" instead of "diese Initiative") when the context already
+        makes the reference clear. This ensures a more natural and fluent translation.
+
+        Example Sentence:
+
+        English: "The project will be implemented in three phases."
+        German (Preferred): "Das Projekt wird in drei Phasen umgesetzt."
+        Not Preferred: "Dieses Projekt wird in drei Phasen umgesetzt."
+
+        Use demonstrative pronouns only when you need to emphasize or differentiate:
+
+        English: "This project is unlike anything we've done before."
+        German (Appropriate): "Dieses Projekt unterscheidet sich von allem, was wir zuvor gemacht
+        haben."
+
+        Paraphrase and summarize in your own words. Don't translate sentence by
+        sentence. Make the text 20% shorter.
+
         "{{text}}"
         TRANSLATION:"""
         try:
