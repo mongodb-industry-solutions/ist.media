@@ -633,23 +633,23 @@ def insights():
         most_read_articles = collection().find().sort({ 'read_count' : -1 }).limit(10)
         return render_template('insights.html',
                                title="AI-Generated Insights (RAG)",
-                               content="""<p>Please enter your question in the form above.
-                               Answer will be provided based only on the documents
-                               stored in MongoDB, using Vector Search and OpenAI GPT-4.</p>
+                               content="""
 
-                               <p>This page is also used to display AI-generated insights
-                               when clicking on a keyword in the Single Post page. In
-                               that case, general knowledge from GPT-3.5 is being used,
-                               without RAG.</p>
+                               <p>Please enter your question in the form above.
+                               Answers are provided based only on the documents
+                               stored in MongoDB, using Vector Search and GPT-4o.</p>
 
-                               <p>GPT-4 is currently still a very expensive model,
-                               so please use this part of the demo with care. Also,
-                               calculation can take some time. You have to be patient, and
-                               please avoid refreshing the page or re-entering the question.</p>
+                               <p>This page also serves to display AI-generated insights
+                               when clicking on a keyword in the Single Post page. In that
+                               case, general knowledge of the LLM is used, without RAG.</p>
 
-                               <p>Most recent insights are cached, and can be accessed
-                               from the right column of this page. Consider using these
-                               examples when conducting a demo!</p>
+                               <p>The generation of answers usually takes some time
+                               (5-20 seconds). You have to be patient. Please don't
+                               refresh the page or re-enter the question.</p>
+
+                               <p>Most recent insights are cached and can be accessed from
+                               the right column of this page, e.g. when conducting a demo.</p>
+
                                """,
                                gen_ai_cache=gen_ai_cache,
                                most_read_articles=most_read_articles)
