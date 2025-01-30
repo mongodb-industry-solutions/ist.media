@@ -9,7 +9,7 @@ from pymongo.errors import DuplicateKeyError
 from openai import OpenAI
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
-import keyparams
+import sys, keyparams
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
