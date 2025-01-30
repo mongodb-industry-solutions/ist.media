@@ -21,10 +21,16 @@ def generate_openai_embeddings(text: str) -> list[float]:
     response = openai.embeddings.create(model="text-embedding-ada-002", input=text)
     return response.data[0].embedding
 
+process_all = len(sys.argv) > 1 and sys.argv[1].lower() == "all"
+
 i = 0
 try:
-    #for doc in collection.find():
-    for doc in collection.find({ "embedding" : { "$exists" : False }}):
+    if process_all:
+        docs = collection.find()
+    else:
+        docs = collection.find({ "embedding" : { "$exists" : False }})
+
+    for doc in docs:
         i += 1
         if i % 50 == 0:
             print("\n" + str(i))
@@ -32,7 +38,8 @@ try:
             embedding = generate_openai_embeddings(doc['text'])
         except Exception as e:
             print("e", end="", flush=True)
-            collection.delete_one({ "_id" : doc["_id"] })
+            if not process_all:
+                collection.delete_one({ "_id" : doc["_id"] })
             continue
         collection.update_one({ "_id" : doc["_id"] },
                               { "$set" : { "embedding" : embedding }})
