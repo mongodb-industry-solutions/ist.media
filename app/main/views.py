@@ -39,6 +39,7 @@ client = MongoClient(MONGO_URI)
 gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
 ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
+daily_collection = client[DB_NAME]["daily"]
 
 ai = OpenAI()
 
@@ -584,6 +585,26 @@ def about():
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
                            news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
+
+
+@main.route('/daily')
+def daily():
+    log(request)
+    check_for_quality_read()
+
+    now = datetime.utcnow()
+    if now.hour < 11:
+        now = now - timedelta(days=1) # not enough news yet - fallback to yesterday
+    formatted_date = now.strftime("%d %B %Y")
+
+    try:
+        doc = daily_collection.find_one({ "day" : formatted_date })
+        summary = html(doc['summary']) if 'summary' in doc else None
+        entities = doc['entities'] if 'entities' in doc else []
+    except Exception as e:
+        summary = None
+        print(e) # will be printed in the log file that is residing in /tmp
+    return render_template('daily.html', day=formatted_date, summary=summary, entities=entities)
 
 
 @main.route('/insights')

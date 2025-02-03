@@ -204,6 +204,18 @@ ul, ol {
     padding-right: 1.15em;
 }
 
+.ai-gen a {
+    color: #00684A;
+}
+
+.ai-gen a::before {
+    content: "[";
+}
+
+.ai-gen a::after {
+    content: "]";
+}
+
 .tm-nav { margin-left: -30px; }
 
 .tm-social-link {
