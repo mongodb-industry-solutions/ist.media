@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        a {
+            color: #00684A;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00684A;
+            text-align: center;
+        }
+        .content {
+            text-align: left;
+            font-size: 16px;
+            color: #666;
+            line-height: 1.7;
+            padding: 5px;
+        }
+        .card {
+            padding: 0px;
+            border-radius: 10px;
+            text-align: left;
+            margin-top: 10px;
+        }
+        .card p {
+            margin: 8px 0;
+        }
+        .footer {
+            font-size: 14px;
+            color: #888;
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #888;
+            text-decoration: none;
+        }
+        .button {
+            display: inline-block;
+            background-color: #000;
+            color: #fff;
+            padding: 12px 24px;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">IST Media</div>
+        <div class="content">
+            <p style="font-size: 140%; color: #00684A; text-align: center">
+                Summary for <strong>{{formatted_date}}</strong>
+            </p>
+            <div class="card">
+                {{summary_html}}
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2025 MongoDB Inc.</p>
+            <p>
+                <a style="font-weight: normal" href="#">Unsubscribe</a> |
+                <a style="font-weight: normal" href="#">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
