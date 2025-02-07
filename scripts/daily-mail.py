@@ -25,9 +25,9 @@ try:
     SMTP_PORT = 587
 
     sender_email = "noreply@ist.media"
-    receiver_email = "istdaily@mx.plus"
+    receiver_email = "istdaily@ist.media"
     subject = f"IST.Media - {formatted_date}"
-    
+
     msg = MIMEMultipart("alternative")
     msg["From"] = sender_email
     msg["To"] = receiver_email
