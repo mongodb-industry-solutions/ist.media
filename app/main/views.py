@@ -603,7 +603,8 @@ def daily():
         entities = doc['entities'] if 'entities' in doc else []
     except Exception as e:
         summary = None
-        print(e) # will be printed in the log file that is residing in /tmp
+        entities = []
+        #print(e) # will be printed in the log file that is residing in /tmp
     return render_template('daily.html', day=formatted_date, summary=summary, entities=entities)
 
 
