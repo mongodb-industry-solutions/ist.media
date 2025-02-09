@@ -43,7 +43,7 @@ cd <dir>; source ./bin/activate
 #### Install Python packages
 
 ```
-pip install -r ist.media/requirements/python-packages
+pip install -r requirements.txt
 ```
 
 #### Populate your MongoDB database with news articles
