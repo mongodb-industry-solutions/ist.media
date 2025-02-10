@@ -1,13 +1,7 @@
-Flask
 Flask-PyMongo
 geocoder
-langchain
-langchain_core
 langchain_mongodb
 langchain_openai
 mistune
-openai
 pycountry
-pymongo
-requests
 uwsgi
