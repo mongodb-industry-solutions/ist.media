@@ -7,8 +7,8 @@
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from time import sleep
-from openai import OpenAI
-import keyparams, requests
+from openai import AzureOpenAI
+import keyparams, os, requests
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
@@ -16,7 +16,12 @@ incoming = client[dbName]["news_incoming"]
 news = client[dbName]["news"]
 
 tmp_dir = '/var/tmp/images.ist.media'
-ai = OpenAI()
+
+ai = AzureOpenAI(
+    api_version="2024-02-01",
+    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+    azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT']
+)
 
 i = 0
 uuids_to_delete = []
