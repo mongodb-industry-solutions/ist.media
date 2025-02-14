@@ -593,7 +593,7 @@ def daily():
     check_for_quality_read()
 
     now = datetime.utcnow()
-    if now.hour < 11:
+    if now.hour < 15: # aligned with cronjob config "21 14,23 * * 1-6" CE(S)T timezone
         now = now - timedelta(days=1) # not enough news yet - fallback to yesterday
     formatted_date = now.strftime("%d %B %Y")
 
