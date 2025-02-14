@@ -23,7 +23,7 @@ from langchain_mongodb.retrievers.hybrid_search import MongoDBAtlasHybridSearchR
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from requests.auth import HTTPBasicAuth
-import re, textwrap, string, os, time, uuid as python_uuid, requests, geocoder, pycountry, math
+import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -585,6 +585,63 @@ def about():
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
                            news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
+
+
+def get_mongodb_date_filter(natural_language_date):
+    today = datetime.utcnow()
+
+    prompt = f"""
+    Convert the following time expression into a MongoDB-compatible filter format.
+
+    Example:
+    - "last week" → {{ "$gte": "<YYYY-MM-DD>", "$lt": "<YYYY-MM-DD>" }}
+    - "in January 2024" → {{ "$gte": "2024-01-01", "$lt": "2024-02-01" }}
+    - "yesterday" → {{ "$gte": "<YYYY-MM-DD>", "$lt": "<YYYY-MM-DD>" }}
+
+    Time expression: "{natural_language_date}"
+
+    Never create date expressions that point to the future. Never do!
+
+    If no conversion is possible, return the universal time filter that goes
+    from January 2024 to "{today}".
+
+    Return **only** a valid JSON object, without explanations or comments.
+    No wrap of ```json.
+    Today is "{today}"
+    """
+
+    response = ai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+
+    raw_text = response.choices[0].message.content.strip()
+
+    # Ensure the response is valid JSON
+    try:
+        json_text = raw_text.strip("`")  # Remove possible markdown code block formatting
+        date_filter = json.loads(json_text)
+        return date_filter
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        print(f"Raw response: {raw_text}")
+        return None  # Return None if parsing fails
+
+
+def get_news_for_today():
+    pipeline = [
+        { "$match" : { "published" : get_mongodb_date_filter("yesterday") } },
+        { "$project" : { "title" : 1, "published" : 1, "text" : 1 } }
+    ]
+    results = list(collection().aggregate(pipeline))
+    return results
+
+
+@main.route('/feed')
+def feed():
+    docs = get_news_for_today()
+    return render_template('feed.html', docs=docs)
 
 
 @main.route('/daily')
