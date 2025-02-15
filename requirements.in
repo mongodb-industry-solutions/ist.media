@@ -4,4 +4,5 @@ langchain_mongodb
 langchain_openai
 mistune
 pycountry
+pydub
 uwsgi
