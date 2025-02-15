@@ -650,10 +650,14 @@ def daily():
     check_for_quality_read()
 
     now = datetime.utcnow()
-    if now.hour < 15: # aligned with cronjob config "21 14,23 * * 1-6" CE(S)T timezone
-        now = now - timedelta(days=1) # not enough news yet - fallback to yesterday
-    formatted_date = now.strftime("%d %B %Y")
+    if now.hour < 14: # aligned with cronjob config "21 14,23 * * 1-6" CE(S)T timezone
+        now -= timedelta(days=1) # not enough news yet - fallback to yesterday
 
+    # for Saturday (5) or Sunday (6), go back to the previous Friday
+    if now.weekday() >= 5:
+        now -= timedelta(days=(now.weekday() - 4))
+
+    formatted_date = now.strftime("%d %B %Y")
     try:
         doc = daily_collection.find_one({ "day" : formatted_date })
         summary = html(doc['summary']) if 'summary' in doc else None
@@ -661,7 +665,6 @@ def daily():
     except Exception as e:
         summary = None
         entities = []
-        #print(e) # will be printed in the log file that is residing in /tmp
     return render_template('daily.html', day=formatted_date, summary=summary, entities=entities)
 
 
