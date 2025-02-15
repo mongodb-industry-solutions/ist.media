@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+          rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -28,33 +28,33 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="tm-site-header">
-		<div class="mb-3 mx-auto tm-site-logo">
-		    <img style="width: 100%; border-radius: 50%;"
-			 src="img/leaf.png"/>
-		</div>
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
                     <li class="tm-nav-item active"><a href="/" class="tm-nav-link">
-                        <i class="fas fa-home"></i>
-                        Home
+                            <i class="fas fa-home"></i>
+                            Home
                     </a></li>
                     <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
-                        <i class="fas fa-pen"></i>
-                        Single Post
+                            <i class="fas fa-pen"></i>
+                            Single Post
                     </a></li>
                     <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
-                        <i class="fas fa-stream"></i>
-                        Daily Summary
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
                     </a></li>
                     <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
-                        <i class="fas fa-camera-retro"></i>
-                        Insights
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
                     </a></li>
                     <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
-                        <i class="fas fa-tools"></i>
-                        Backstage Area
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
                     </a></li>
                 </ul>
             </nav>
@@ -73,10 +73,10 @@
                 </a>
             </div>
             <p class="tm-mb-80 pr-5 text-white">
-	      <br/>
-	      Benjamin Lorenz
-	      <br/>
-	      MongoDB Inc. &copy; 2025
+                <br/>
+                Benjamin Lorenz
+                <br/>
+                MongoDB Inc. &copy; 2025
             </p>
         </div>
     </header>
@@ -87,57 +87,57 @@
                 <div class="col-12">
                     <form method="GET" class="form-inline tm-mb-25 tm-search-form">
                         <input class="form-control tm-search-input"
-			       name="query" type="text" placeholder="Hybrid Search..."
-			       aria-label="Search">
+                               name="query" type="text" placeholder="Hybrid Search..."
+                               aria-label="Search">
                         <button class="tm-search-button" type="submit">
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
                         </button>
                     </form>
-		    <div style="background: #f1f1f1">
-			<span style="padding-left: 0.2em" class="tm-color-primary">
-			    {{ infoline }}
-			    {% if infoline == "Personalized content" %}
-			    &nbsp;
-			    <a href="/delete_articles_history_from_homepage"
-			       class="tm-color-primary"
-			       style="font-size: smaller">[ delete history ]</a>
-			    {% endif %}
-			</span>
-		    </div>
-		    <div style="padding-bottom: 5px"></div>
+                    <div style="background: #f1f1f1">
+                        <span style="padding-left: 0.2em" class="tm-color-primary">
+                            {{ infoline }}
+                            {% if infoline == "Personalized content" %}
+                            &nbsp;
+                            <a href="/delete_articles_history_from_homepage"
+                               class="tm-color-primary"
+                               style="font-size: smaller">[ delete history ]</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div style="padding-bottom: 5px"></div>
                 </div>
             </div>
             <div class="row tm-row">
-		{% for doc in docs | sort(attribute = 'score', reverse = True) %}
+                {% for doc in docs | sort(attribute = 'score', reverse = True) %}
                 <article class="col-12 col-md-6 tm-post">
                     <hr class="tm-hr-primary">
                     <a href="/post?uuid={{ doc.uuid }}"
-		       class="tm-post-link tm-pt-20 tm-color-primary">
+                       class="tm-post-link tm-pt-20 tm-color-primary">
                         <div class="tm-post-link-inner">
                             <img src="/content/images/{{ doc.uuid }}.webp"
-				 style="aspect-ratio: 1200/675" class="img-fluid" alt="">
+                                 style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">{{ doc.title }}</h2>
                     </a>
                     <p class="tm-pt-10">
-		        {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
+                        {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
                     </p>
-		    {% if doc.score is defined %}
-		    <p>
-			<strong>Vector Score</strong>: {{ doc.vector_score | round(5) }}<br/>
-			<strong>Fulltext Score</strong>: {{ doc.fulltext_score | round(5) }}<br/>
-			<strong>Time Decay</strong>: {{ doc.time_decay | round(5) }}<br/>
-			<strong>Score</strong>: {{ doc.score | round(5) }}
-		    </p>
-		    {% endif %}
+                    {% if doc.score is defined %}
+                    <p>
+                        <strong>Vector Score</strong>: {{ doc.vector_score | round(5) }}<br/>
+                        <strong>Fulltext Score</strong>: {{ doc.fulltext_score | round(5) }}<br/>
+                        <strong>Time Decay</strong>: {{ doc.time_decay | round(5) }}<br/>
+                        <strong>Score</strong>: {{ doc.score | round(5) }}
+                    </p>
+                    {% endif %}
                 </article>
-		{% endfor %}
+                {% endfor %}
             </div>
-	    <footer class="row tm-row">
+            <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
-                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			     rel="noopener" target="_blank"
-			     class="tm-external-link">TemplateMo</a>
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2025 MongoDB Inc.

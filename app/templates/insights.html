@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+          rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -28,33 +28,33 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="tm-site-header">
-		<div class="mb-3 mx-auto tm-site-logo">
-		    <img style="width: 100%; border-radius: 50%;"
-			 src="img/leaf.png"/>
-		</div>
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
                     <li class="tm-nav-item"><a href="/" class="tm-nav-link">
-                        <i class="fas fa-home"></i>
-                        Home
+                            <i class="fas fa-home"></i>
+                            Home
                     </a></li>
                     <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
-                        <i class="fas fa-pen"></i>
-                        Single Post
+                            <i class="fas fa-pen"></i>
+                            Single Post
                     </a></li>
                     <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
-                        <i class="fas fa-stream"></i>
-                        Daily Summary
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
                     </a></li>
                     <li class="tm-nav-item active"><a href="/insights" class="tm-nav-link">
-                        <i class="fas fa-camera-retro"></i>
-                        Insights
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
                     </a></li>
                     <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
-                        <i class="fas fa-tools"></i>
-                        Backstage Area
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
                     </a></li>
                 </ul>
             </nav>
@@ -73,22 +73,22 @@
                 </a>
             </div>
             <p class="tm-mb-80 pr-5 text-white">
-	      <br/>
-	      Benjamin Lorenz
-	      <br/>
-	      MongoDB Inc. &copy; 2025
+                <br/>
+                Benjamin Lorenz
+                <br/>
+                MongoDB Inc. &copy; 2025
             </p>
         </div>
     </header>
     <div class="container-fluid">
         <main class="tm-main">
-	    <!-- Search form -->
+            <!-- Search form -->
             <div class="row tm-row">
                 <div class="col-12">
                     <form method="GET" class="form-inline tm-mb-60 tm-search-form">
                         <input class="form-control tm-rag-input"
-			       name="query" type="text" placeholder="Ask Question..."
-			       aria-label="Search">
+                               name="query" type="text" placeholder="Ask Question..."
+                               aria-label="Search">
                         <button class="tm-search-button" type="submit">
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
                         </button>
@@ -101,76 +101,76 @@
                 </div>
             </div>
             <div class="row tm-row">
-		<div class="col-lg-8 tm-post-col">
-		    <div class="tm-post-full">
-			<div class="mb-4 ai-gen">
+                <div class="col-lg-8 tm-post-col">
+                    <div class="tm-post-full">
+                        <div class="mb-4 ai-gen">
                             <h2 class="pt-2 tm-mb-40 tm-color-primary tm-post-title">
-				{{ title }}
-		            </h2>
-			    {{ content | safe }}
-			    {% if context is defined and context|length > 0 %}
-			    <p>&nbsp;</p>
-			    <p style="font-size: 80%; margin-bottom: 0.3rem">
-				<strong>Sources:</strong>
-			    </p>
-			    <ul>
-				{% for c in context %}
-				<li style="margin-bottom: 0; line-height: 1.4em">
-				    <a href="/post?uuid={{ c.uuid }}"
-				       class="tm-color-primary" style="font-size: 80%">
-					{{ c.title | truncate(72) }}
-				    </a>
-				</li>
-				{% endfor %}
-			    </ul>
-			    {% endif %}
-			    {% if most_read_articles is defined %}
-			    <p>&nbsp;</p>
-			    <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
-				Top Articles (Most Read)
-		            </h2>
-			    <p>
-				<table style="font-size: 15px">
-				    {% for doc in most_read_articles %}
-				    <tr>
-					<td style="text-align: right; vertical-align: top">
-					    {{ doc.read_count }}
-					</td>
-					<td>
-					    <a href="/post?uuid={{ doc.uuid }}"
-					       class="tm-color-primary">
-						{{ doc.title | truncate(80) }}
-					    </a>
-					</td>
-				    </tr>
-				    {% endfor %}
-				</table>
-			    </p>
-			    <p>&nbsp;</p>
-			    {% endif %}
-			</div>
+                                {{ title }}
+                            </h2>
+                            {{ content | safe }}
+                            {% if context is defined and context|length > 0 %}
+                            <p>&nbsp;</p>
+                            <p style="font-size: 80%; margin-bottom: 0.3rem">
+                                <strong>Sources:</strong>
+                            </p>
+                            <ul>
+                                {% for c in context %}
+                                <li style="margin-bottom: 0; line-height: 1.4em">
+                                    <a href="/post?uuid={{ c.uuid }}"
+                                       class="tm-color-primary" style="font-size: 80%">
+                                        {{ c.title | truncate(72) }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            {% if most_read_articles is defined %}
+                            <p>&nbsp;</p>
+                            <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
+                                Top Articles (Most Read)
+                            </h2>
+                            <p>
+                                <table style="font-size: 15px">
+                                    {% for doc in most_read_articles %}
+                                    <tr>
+                                        <td style="text-align: right; vertical-align: top">
+                                            {{ doc.read_count }}
+                                        </td>
+                                        <td>
+                                            <a href="/post?uuid={{ doc.uuid }}"
+                                               class="tm-color-primary">
+                                                {{ doc.title | truncate(80) }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </p>
+                            <p>&nbsp;</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-		{% if gen_ai_cache|length > 0 %}
-		<aside class="col-lg-4 tm-aside-col">
+                {% if gen_ai_cache|length > 0 %}
+                <aside class="col-lg-4 tm-aside-col">
                     <div class="tm-post-sidebar tm-insights">
-			{% for entry in gen_ai_cache %}
-			<p style="padding: 0.6em 0 0 0; margin: 0">
-			    <a class="tm-color-primary" style="font-size: 90%"
-			       href="/insights?_id={{ entry._id | string }}">
-				{{ entry.question | truncate(250) }}
-			    </a>
-			</p>
-			{% endfor %}
-		    </div>
-		</aside>
-		{% endif %}
+                        {% for entry in gen_ai_cache %}
+                        <p style="padding: 0.6em 0 0 0; margin: 0">
+                            <a class="tm-color-primary" style="font-size: 90%"
+                               href="/insights?_id={{ entry._id | string }}">
+                                {{ entry.question | truncate(250) }}
+                            </a>
+                        </p>
+                        {% endfor %}
+                    </div>
+                </aside>
+                {% endif %}
             </div>
-	    <footer class="row tm-row tm-pt-45">
+            <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
-                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			     rel="noopener" target="_blank"
-			     class="tm-external-link">TemplateMo</a>
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2025 MongoDB Inc.

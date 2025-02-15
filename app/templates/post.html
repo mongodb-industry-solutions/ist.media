@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+          rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -28,33 +28,33 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="tm-site-header">
-		<div class="mb-3 mx-auto tm-site-logo">
-		    <img style="width: 100%; border-radius: 50%;"
-			 src="img/leaf.png"/>
-		</div>
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
                     <li class="tm-nav-item"><a href="/" class="tm-nav-link">
-                        <i class="fas fa-home"></i>
-                        Home
+                            <i class="fas fa-home"></i>
+                            Home
                     </a></li>
                     <li class="tm-nav-item active"><a href="/post" class="tm-nav-link">
-                        <i class="fas fa-pen"></i>
-                        Single Post
+                            <i class="fas fa-pen"></i>
+                            Single Post
                     </a></li>
                     <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
-                        <i class="fas fa-stream"></i>
-                        Daily Summary
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
                     </a></li>
                     <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
-                        <i class="fas fa-camera-retro"></i>
-                        Insights
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
                     </a></li>
                     <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
-                        <i class="fas fa-tools"></i>
-                        Backstage Area
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
                     </a></li>
                 </ul>
             </nav>
@@ -73,10 +73,10 @@
                 </a>
             </div>
             <p class="tm-mb-80 pr-5 text-white">
-	      <br/>
-	      Benjamin Lorenz
-	      <br/>
-	      MongoDB Inc. &copy; 2025
+                <br/>
+                Benjamin Lorenz
+                <br/>
+                MongoDB Inc. &copy; 2025
             </p>
         </div>
     </header>
@@ -86,9 +86,9 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <form method="GET" class="form-inline tm-mb-60 tm-search-form">
-			<input class="form-control tm-search-input"
-			       name="query" type="text" placeholder="Hybrid Search..."
-			       aria-label="Search">
+                        <input class="form-control tm-search-input"
+                               name="query" type="text" placeholder="Hybrid Search..."
+                               aria-label="Search">
                         <button class="tm-search-button" type="submit">
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
                         </button>
@@ -97,9 +97,9 @@
             </div>
             <div class="row tm-row">
                 <div class="col-12">
-                  <hr class="tm-hr-primary tm-mb-55">
-		  <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
-		       src="/content/images/{{ doc.uuid }}.webp" alt="">
+                    <hr class="tm-hr-primary tm-mb-55">
+                    <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
+                         src="/content/images/{{ doc.uuid }}.webp" alt="">
                 </div>
             </div>
             <div class="row tm-row">
@@ -107,115 +107,115 @@
                     <div class="tm-post-full">
                         <div class="mb-4">
                             <h2 class="pt-2 tm-color-primary tm-post-title">
-				{{ doc.title }}
-			    </h2>
-			    {% if not request.args.get('style') %}
+                                {{ doc.title }}
+                            </h2>
+                            {% if not request.args.get('style') %}
                             <p style="margin: 0; padding: 0">
-				{{ doc.published | format_datetime('full') }}<br/>
-				Visits: <strong>{{ visit_count }}</strong>,
-				&nbsp;Reads: <strong>{{ read_count }}</strong>,
-				&nbsp;Sentiment:&nbsp;
-				{% if doc.sentiment == "+" %}
-				&#128578;
-				{% elif doc.sentiment == "-" %}
-				&#128577;
-				{% elif doc.sentiment == "o" %}
-				&#128528;
-				{% else %}
-				<strong>?</strong>
-				{% endif %}
-			    </p>
-			    {% else %}
-			    <p style="margin: 0; padding: 0">
-				<a style="text-align: right" href="/post"
-				   class="tm-color-primary">&#10145; Back to original</a>
-			    </p>
-			    {% endif %}
-			    {% if not request.args.get('style') %}
-			    <div style="display: flex;
-					align-items: center">
-				<a style="text-align: right" href="/post?style=summary"
-				   class="tm-color-primary">&#10145; Create summary</a>
-				&nbsp;&nbsp;&nbsp;
-				<form action="/post" method="GET"
-				      style="display: inline-flex; align-items: center">
-				    <input type="hidden" name="style" value="translated">
-				    <button type="submit"
-					    class="tm-color-primary"
-					    style="display: inline-flex;
-						   align-items: center;
-						   background: none;
-						   border: none;
-						   cursor: pointer">
-					&#10145; Translate to
-				    </button>
-				    <select name="lang"
-					    style="border: 1px solid #dcdcdc;
-						   border-radius: 4px;
-						   padding: 1px 8px;
-						   margin-left: 8px">
-					<option value="German">German</option>
-					<option value="Spanish">Spanish</option>
-					<option value="French">French</option>
-					<option value="Lithuanian">Lithuanian</option>
-					<option value="Hebrew">Hebrew</option>
-					<option value="Arabic">Arabic</option>
-				    </select>
-				</form>
-			    </div>
-			    {% endif %}
-			    <p style="margin: 0; padding: 0">&nbsp;</p>
-			    {{ fdoc | safe }}
+                                {{ doc.published | format_datetime('full') }}<br/>
+                                Visits: <strong>{{ visit_count }}</strong>,
+                                &nbsp;Reads: <strong>{{ read_count }}</strong>,
+                                &nbsp;Sentiment:&nbsp;
+                                {% if doc.sentiment == "+" %}
+                                &#128578;
+                                {% elif doc.sentiment == "-" %}
+                                &#128577;
+                                {% elif doc.sentiment == "o" %}
+                                &#128528;
+                                {% else %}
+                                <strong>?</strong>
+                                {% endif %}
+                            </p>
+                            {% else %}
+                            <p style="margin: 0; padding: 0">
+                                <a style="text-align: right" href="/post"
+                                   class="tm-color-primary">&#10145; Back to original</a>
+                            </p>
+                            {% endif %}
+                            {% if not request.args.get('style') %}
+                            <div style="display: flex;
+                                        align-items: center">
+                                <a style="text-align: right" href="/post?style=summary"
+                                   class="tm-color-primary">&#10145; Create summary</a>
+                                &nbsp;&nbsp;&nbsp;
+                                <form action="/post" method="GET"
+                                      style="display: inline-flex; align-items: center">
+                                    <input type="hidden" name="style" value="translated">
+                                    <button type="submit"
+                                            class="tm-color-primary"
+                                            style="display: inline-flex;
+                                                   align-items: center;
+                                                   background: none;
+                                                   border: none;
+                                                   cursor: pointer">
+                                        &#10145; Translate to
+                                    </button>
+                                    <select name="lang"
+                                            style="border: 1px solid #dcdcdc;
+                                                   border-radius: 4px;
+                                                   padding: 1px 8px;
+                                                   margin-left: 8px">
+                                        <option value="German">German</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="Lithuanian">Lithuanian</option>
+                                        <option value="Hebrew">Hebrew</option>
+                                        <option value="Arabic">Arabic</option>
+                                    </select>
+                                </form>
+                            </div>
+                            {% endif %}
+                            <p style="margin: 0; padding: 0">&nbsp;</p>
+                            {{ fdoc | safe }}
                         </div>
                     </div>
                 </div>
                 <aside class="col-lg-4 tm-aside-col">
                     <div class="tm-post-sidebar">
-			{% if keywords is defined and keywords|length > 0 %}
+                        {% if keywords is defined and keywords|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="mb-4 tm-post-title tm-color-primary">
-			    Keywords
-			    <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
-			       href="/recalculate_keywords/{{ doc.uuid }}">
-				[recalculate]
-			    </a>
-			</h2>
-			<div style="line-height: 1.6em; padding-left: 0.9em">
-			    {% for keyword in keywords %}
-			    <a href="/insights?keyword={{ keyword | urlencode }}"
-			       class="tm-color-primary" style="font-size: 90%">
-				{{ keyword }}
-			    </a><br/>
-			    {% endfor %}
-			    &nbsp;<br/>
-			    &nbsp;
-			</div>
-			{% endif %}
-			{% if recommendations is defined and recommendations|length > 0 %}
+                            Keywords
+                            <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
+                               href="/recalculate_keywords/{{ doc.uuid }}">
+                                [recalculate]
+                            </a>
+                        </h2>
+                        <div style="line-height: 1.6em; padding-left: 0.9em">
+                            {% for keyword in keywords %}
+                            <a href="/insights?keyword={{ keyword | urlencode }}"
+                               class="tm-color-primary" style="font-size: 90%">
+                                {{ keyword }}
+                            </a><br/>
+                            {% endfor %}
+                            &nbsp;<br/>
+                            &nbsp;
+                        </div>
+                        {% endif %}
+                        {% if recommendations is defined and recommendations|length > 0 %}
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
-			{% for rc in recommendations %}
+                        {% for rc in recommendations %}
                         <a href="/post?uuid={{ rc.0.uuid }}"
-			   class="d-block tm-mb-40 tm-color-primary">
+                           class="d-block tm-mb-40 tm-color-primary">
                             <figure>
                                 <img src="/content/images/{{ rc.0.uuid }}.webp"
-				     style="aspect-ratio: 1200/675" class="mb-3 img-fluid" alt="">
+                                     style="aspect-ratio: 1200/675" class="mb-3 img-fluid" alt="">
                                 <figcaption class="tm-color-primary">
-				    {{ rc.0.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;
-				    {{ rc.0.title }}&nbsp;&nbsp;({{ "%.2f" | format(rc.1) }})
-				</figcaption>
+                                    {{ rc.0.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;
+                                    {{ rc.0.title }}&nbsp;&nbsp;({{ "%.2f" | format(rc.1) }})
+                                </figcaption>
                             </figure>
                         </a>
-			{% endfor %}
-			{% endif %}
+                        {% endfor %}
+                        {% endif %}
                     </div>
                 </aside>
             </div>
             <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
-                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			     rel="noopener" target="_blank"
-			     class="tm-external-link">TemplateMo</a>
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2025 MongoDB Inc.

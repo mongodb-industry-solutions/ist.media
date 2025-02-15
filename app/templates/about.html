@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+          rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -21,25 +21,25 @@
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
     <style>
-	table {
+        table {
             width: 100%;
             border-collapse: collapse;
-	}
-	th, td {
+        }
+        th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-	}
-	th {
-	    color: white;
+        }
+        th {
+            color: white;
             background-color: #007D59;
-	}
-	tr:nth-child(even) {
+        }
+        tr:nth-child(even) {
             background-color: #f9f9f9;
-	}
-	tr:hover {
+        }
+        tr:hover {
             background-color: #e8e8e8;
-	}
+        }
     </style>
 </head>
 <body>
@@ -49,33 +49,33 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="tm-site-header">
-		<div class="mb-3 mx-auto tm-site-logo">
-		    <img style="width: 100%; border-radius: 50%;"
-			 src="img/leaf.png"/>
-		</div>
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
                     <li class="tm-nav-item"><a href="/" class="tm-nav-link">
-                        <i class="fas fa-home"></i>
-                        Home
+                            <i class="fas fa-home"></i>
+                            Home
                     </a></li>
                     <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
-                        <i class="fas fa-pen"></i>
-                        Single Post
+                            <i class="fas fa-pen"></i>
+                            Single Post
                     </a></li>
                     <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
-                        <i class="fas fa-stream"></i>
-                        Daily Summary
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
                     </a></li>
                     <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
-                        <i class="fas fa-camera-retro"></i>
-                        Insights
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
                     </a></li>
                     <li class="tm-nav-item active"><a href="/backstage" class="tm-nav-link">
-                        <i class="fas fa-tools"></i>
-                        Backstage Area
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
                     </a></li>
                 </ul>
             </nav>
@@ -94,10 +94,10 @@
                 </a>
             </div>
             <p class="tm-mb-80 pr-5 text-white">
-	      <br/>
-	      Benjamin Lorenz
-	      <br/>
-	      MongoDB Inc. &copy; 2025
+                <br/>
+                Benjamin Lorenz
+                <br/>
+                MongoDB Inc. &copy; 2025
             </p>
         </div>
     </header>
@@ -111,231 +111,216 @@
             <div class="row tm-row tm-mb-40">
                 <div class="col-12">
                     <div class="mb-4">
-			<h1 class="tm-color-primary tm-mb-30">
-			    Backstage Area
-		        </h1>
+                        <h1 class="tm-color-primary tm-mb-30">
+                            Backstage Area
+                        </h1>
                         <p>
-			    First and foremost &mdash; help about how to use this demo
-			    <a href="/welcome" class="tm-color-primary">is available here</a>.
+                            First and foremost &mdash; help about how to use this demo
+                            <a href="/welcome" class="tm-color-primary">is available here</a>.
                         </p>
-			<p>
-			    Furthermore, I have
-			    <a href="/content/ist.media.mp4" class="tm-color-primary">created a video</a>
-			    where I walk you through its various elements, helping you with the flow.
-			</p>
-			<div style="padding: 2px"></div>
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    Change Log
-			</h2>
-			<p class="tm-pt-10">
-			    CAUTION: The most recent changes might not yet be reflected in the
-			    <a href="/content/ist.media.mp4" class="tm-color-primary">help video</a>.
-			</p>
-			<div class="ai-gen">
-			    <ul>
-				<li style="margin-bottom: 0">NEW:
-				    <span style="font-weight: bold; color: #555">Hybrid Search</span>
-				    &mdash; use on Home / Single Post pages (Nov 2024)</li>
-				<li style="margin-bottom: 0">NEW:
-				    <span style="font-weight: bold; color: #555">Article Translation</span>
-				    &mdash; use on Single Post page (Nov 2024)</li>
-				<li style="margin-bottom: 0">NEW:
-				    <span style="font-weight: bold; color: #555">Article Sentiment</span>
-				    &mdash; indication with smiley on Single Post page (Oct 2024)</li>
-				<li style="margin-bottom: 0">Continuous RSS news feed;
-				    <a href="https://openai.com/index/dall-e-3/" class="tm-color-primary">DALL·E 3</a>
-				    generates the article images (Sep 2024)</li>
-			    </ul>
-			</div>
-			<div style="padding: 7px"></div>
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    History of Visited Articles
-			</h2>
-			{% if history|length > 0 %}
-			<p class="tm-pt-10">
-			    {% for doc in history %}
-			    <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
-				{{ doc.title | truncate(80) }}
-			    </a>
-			    <br/>
-			    {% endfor %}
-			</p>
-			<form method="POST" action="/delete_articles_history"
-			      class="mb-5 ml-auto mr-0 tm-contact-form">
-			    <div class="form-group row text-right">
-				<div class="col-12">
-				    <button class="tm-btn tm-btn-primary tm-btn-small">
-					Delete History
-				    </button>
-				</div>
+                        <p>
+                            Furthermore, I have
+                            <a href="/content/ist.media.mp4" class="tm-color-primary">created a video</a>
+                            where I walk you through its various elements, helping you with the flow.
+                        </p>
+                        <div style="padding: 2px"></div>
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            Change Log
+                        </h2>
+                        <p class="tm-pt-10">
+                            CAUTION: The most recent changes might not yet be reflected in the
+                            <a href="/content/ist.media.mp4" class="tm-color-primary">help video</a>.
+                        </p>
+                        <div class="ai-gen">
+                            <ul>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Text to Podcast</span>
+                                    &mdash; Daily Summary page with Podcast audio controls (Feb 2025)</li>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Daily Summary</span>
+                                    &mdash; access from the main menu (Jan 2025)</li>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Hybrid Search</span>
+                                    &mdash; use on Home / Single Post pages (Nov 2024)</li>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Article Translation</span>
+                                    &mdash; use on Single Post page (Nov 2024)</li>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Article Sentiment</span>
+                                    &mdash; indication with smiley on Single Post page (Oct 2024)</li>
+                                <li style="margin-bottom: 0">Continuous RSS news feed;
+                                    <a href="https://openai.com/index/dall-e-3/" class="tm-color-primary">
+                                        DALL·E 3
+                                    </a>
+                                    generates the article images (Sep 2024)</li>
+                            </ul>
+                        </div>
+                        <div style="padding: 7px"></div>
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            History of Visited Articles
+                        </h2>
+                        {% if history|length > 0 %}
+                        <p class="tm-pt-10">
+                            {% for doc in history %}
+                            <a class="tm-color-primary" href="/post?uuid={{ doc.uuid }}">
+                                {{ doc.title | truncate(80) }}
+                            </a>
+                            <br/>
+                            {% endfor %}
+                        </p>
+                        <form method="POST" action="/delete_articles_history"
+                              class="mb-5 ml-auto mr-0 tm-contact-form">
+                            <div class="form-group row text-right">
+                                <div class="col-12">
+                                    <button class="tm-btn tm-btn-primary tm-btn-small">
+                                        Delete History
+                                    </button>
+                                </div>
                             </div>
-			</form>
-			{% else %}
-			<p class="tm-pt-10">
-			    <i>List is empty</i>
-			</p>
-			{% endif %}
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    AI-Generated Insights
-			</h2>
-			{% if gen_ai_cache|length > 0 %}
-			<p class="tm-pt-10">
-			    {% for entry in gen_ai_cache %}
-			    {{ entry.question | truncate(80) }}
-			    &nbsp;
-			    <a class="tm-color-primary" style="font-size: smaller"
-			       href="/delete_insights_history_item/{{ entry._id | string }}">
-				[delete]
-			    </a>
-			    <br/>
-			    {% endfor %}
-			</p>
-			{% else %}
-			<p class="tm-pt-10">
-			    <i>List is empty</i>
-			</p>
-			{% endif %}
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40 tm-mb-25">
-			    Content to be used
-			</h2>
-			<form method="POST" action="/select_news_source">
-			    <div class="radio-container">
-				<input type="radio" id="artificial" name="news_option" value="artificial"
-				       {% if news_source == "news" %}checked="checked"{% endif %}>
-				<label for="artificial">Artificial, updated regularly</label>
-			    </div>
-			    <div class="radio-container">
-				<input type="radio" id="traditional" name="news_option" value="traditional"
-				       {% if news_source == "business_news" %}checked="checked"{% endif %}>
-				<label for="traditional">Traditional, used at .local NYC 2024</label>
-			    </div>
-			    <div class="form-group row text-right">
-				<div class="col-12">
-				    <button type="submit" class="tm-btn tm-btn-primary tm-btn-small">
-					Select Content
-				    </button>
-				</div>
+                        </form>
+                        {% else %}
+                        <p class="tm-pt-10">
+                            <i>List is empty</i>
+                        </p>
+                        {% endif %}
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            AI-Generated Insights
+                        </h2>
+                        {% if gen_ai_cache|length > 0 %}
+                        <p class="tm-pt-10">
+                            {% for entry in gen_ai_cache %}
+                            {{ entry.question | truncate(80) }}
+                            &nbsp;
+                            <a class="tm-color-primary" style="font-size: smaller"
+                               href="/delete_insights_history_item/{{ entry._id | string }}">
+                                [delete]
+                            </a>
+                            <br/>
+                            {% endfor %}
+                        </p>
+                        {% else %}
+                        <p class="tm-pt-10">
+                            <i>List is empty</i>
+                        </p>
+                        {% endif %}
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40 tm-mb-25">
+                            Content to be used
+                        </h2>
+                        <form method="POST" action="/select_news_source">
+                            <div class="radio-container">
+                                <input type="radio" id="artificial" name="news_option" value="artificial"
+                                       {% if news_source == "news" %}checked="checked"{% endif %}>
+                                <label for="artificial">Artificial, updated regularly</label>
                             </div>
-			</form>
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    Current IP Address
-			</h2>
-			<p class="tm-pt-10">
-			    {{ loc.ip }}
-			    {% if loc.country != " - " %}
-			    <br/>{{ loc.city }}, {{ loc.country }}
-			    {% endif %}
-			</p>
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    Access Statistics per Country
-			</h2>
-			{% if country_stats|length > 0 %}
-			<p class="tm-pt-10">
-			    <table>
-				<thead>
-				    <tr>
-					<th>ISO</th>
-					<th>Country</th>
-					<th>Count</th>
-				    </tr>
-				</thead>
-				<tbody>
-				    {% for entry in country_stats %}
-				    <tr>
-					<td>{{ entry._id }}</td>
-					<td>
-					    <span style="font-weight: bold">
-						{{ entry.country }}
-					    </span>
-					</td>
-					<td>
-					    <span style="font-weight: bold">
-						{{ entry.access_count }}
-					    </span>
-					</td>
-				    </tr>
-				    {% for city in entry.top_cities %}
-				    <tr>
-					<td></td>
-					<td>
-					    <span style="font-size: smaller">
-						&nbsp;&nbsp;&nbsp;&nbsp;{{ city.city }}
-					    </span>
-					</td>
-					<td>
-					    <span style="font-size: smaller">
-						{{ city.access_count }}
-					    </span>
-					</td>
-				    </tr>
-				    {% endfor %}
-				    {% endfor %}
-				</tbody>
-			    </table>
-			</p>
-			{% else %}
-			<p class="tm-pt-10">
-			    <i>List is empty</i>
-			</p>
-			{% endif %}
-
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    Access Statistics per Path
-			</h2>
-			{% if path_stats|length > 0 %}
-			<p class="tm-pt-10">
-			    <table>
-				<thead>
-				    <tr>
-					<th>Path</th>
-					<th>Count</th>
-				    </tr>
-				</thead>
-				<tbody>
-				    {% for entry in path_stats %}
-				    <tr>
-					<td>{{ entry._id | truncate(45) }}</td>
-					<td>{{ entry.access_count }}</td>
-				    </tr>
-				    {% endfor %}
-				</tbody>
-			    </table>
-			</p>
-			{% else %}
-			<p class="tm-pt-10">
-			    <i>List is empty</i>
-			</p>
-			{% endif %}
-
-
-			{#
-			<h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-			    Usage Stats (nginx/uwsgi)
-			</h2>
-			<p class="tm-pt-10">
-			    The following chart was calculated by GPT-4, based on the
-			    uploaded nginx access.log file. Snapshot contains all data
-			    until April 19th 2024 18:00 CEST.
-			</p>
-			<img style="width: 100%; margin-top: 20px"
-			     src="img/nginx-up-to-week-16.png" alt="Image">
-			#}
-
-
+                            <div class="radio-container">
+                                <input type="radio" id="traditional" name="news_option" value="traditional"
+                                       {% if news_source == "business_news" %}checked="checked"{% endif %}>
+                                <label for="traditional">Traditional, used at .local NYC 2024</label>
+                            </div>
+                            <div class="form-group row text-right">
+                                <div class="col-12">
+                                    <button type="submit" class="tm-btn tm-btn-primary tm-btn-small">
+                                        Select Content
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            Current IP Address
+                        </h2>
+                        <p class="tm-pt-10">
+                            {{ loc.ip }}
+                            {% if loc.country != " - " %}
+                            <br/>{{ loc.city }}, {{ loc.country }}
+                            {% endif %}
+                        </p>
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            Access Statistics per Country
+                        </h2>
+                        {% if country_stats|length > 0 %}
+                        <p class="tm-pt-10">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ISO</th>
+                                        <th>Country</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in country_stats %}
+                                    <tr>
+                                        <td>{{ entry._id }}</td>
+                                        <td>
+                                            <span style="font-weight: bold">
+                                                {{ entry.country }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span style="font-weight: bold">
+                                                {{ entry.access_count }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% for city in entry.top_cities %}
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <span style="font-size: smaller">
+                                                &nbsp;&nbsp;&nbsp;&nbsp;{{ city.city }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: smaller">
+                                                {{ city.access_count }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </p>
+                        {% else %}
+                        <p class="tm-pt-10">
+                            <i>List is empty</i>
+                        </p>
+                        {% endif %}
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                            Access Statistics per Path
+                        </h2>
+                        {% if path_stats|length > 0 %}
+                        <p class="tm-pt-10">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Path</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in path_stats %}
+                                    <tr>
+                                        <td>{{ entry._id | truncate(45) }}</td>
+                                        <td>{{ entry.access_count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </p>
+                        {% else %}
+                        <p class="tm-pt-10">
+                            <i>List is empty</i>
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-	    <footer class="row tm-row">
+            <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
-                  Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			     rel="noopener" target="_blank"
-			     class="tm-external-link">TemplateMo</a>
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2025 MongoDB Inc.

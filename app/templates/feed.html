@@ -4,17 +4,17 @@
     Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 -->
 <html lang="en">
-    <head>
-	<meta charset="UTF-8">
-	<title>News of today</title>
-    </head>
-    <body>
-	{% for doc in docs %}
-	<div>
-	    <h2>{{ doc.title }}</h2>
-	    <h4>{{ doc.published }}</h4>
-	    {{ doc.text }}
-	</div>
-	{% endfor %}
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>News of today</title>
+</head>
+<body>
+    {% for doc in docs %}
+    <div>
+        <h2>{{ doc.title }}</h2>
+        <h4>{{ doc.published }}</h4>
+        {{ doc.text }}
+    </div>
+    {% endfor %}
+</body>
 </html>

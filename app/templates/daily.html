@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+          rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -106,40 +106,40 @@
                                 Summary &amp; Entity Extraction by <strong>OpenAI</strong>,
                                 Podcast by <strong>Google</strong>
                             </span>
-		                </h2>
+                        </h2>
                         <div style="padding-bottom: 10px">
                             <audio controls>
                                 <source src="/content/audio/podcast-14.2.2025.mp3" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
                         </div>
-			            {% if summary is none %}
-			            No news summary for the day (yet).
-			            {% else %}
-			            {{ summary | safe }}
-			            {% endif %}
-		            </div>
+                        {% if summary is none %}
+                        No news summary for the day (yet).
+                        {% else %}
+                        {{ summary | safe }}
+                        {% endif %}
+                    </div>
                 </div>
-		        {% if entities|length > 0 %}
-		        <aside class="col-lg-4 tm-aside-col">
+                {% if entities|length > 0 %}
+                <aside class="col-lg-4 tm-aside-col">
                     <div class="tm-post-sidebar tm-insights">
-			            {% for entity in entities %}
-			            <p style="padding: 0.6em 0 0 0; margin: 0">
-			                <a class="tm-color-primary" style="font-size: 90%"
-			                   href="/insights?keyword={{ entity }}">
-				                {{ entity }}
-			                </a>
-			            </p>
-			            {% endfor %}
-		            </div>
-		        </aside>
-		        {% endif %}
+                        {% for entity in entities %}
+                        <p style="padding: 0.6em 0 0 0; margin: 0">
+                            <a class="tm-color-primary" style="font-size: 90%"
+                               href="/insights?keyword={{ entity }}">
+                                {{ entity }}
+                            </a>
+                        </p>
+                        {% endfor %}
+                    </div>
+                </aside>
+                {% endif %}
             </div>
-	        <footer class="row tm-row tm-pt-45">
+            <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
                     Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			                   rel="noopener" target="_blank"
-			                   class="tm-external-link">TemplateMo</a>
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2025 MongoDB Inc.
