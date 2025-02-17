@@ -631,7 +631,7 @@ def get_mongodb_date_filter(natural_language_date):
 
 def get_news_for_today():
     pipeline = [
-        { "$match" : { "published" : get_mongodb_date_filter("yesterday") } },
+        { "$match" : { "published" : get_mongodb_date_filter("today") } },
         { "$project" : { "title" : 1, "published" : 1, "text" : 1 } }
     ]
     results = list(collection().aggregate(pipeline))
