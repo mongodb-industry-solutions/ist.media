@@ -662,10 +662,13 @@ def daily():
         doc = daily_collection.find_one({ "day" : formatted_date })
         summary = html(doc['summary']) if 'summary' in doc else None
         entities = doc['entities'] if 'entities' in doc else []
+        podcast = f"/content/audio/podcast-{now:%d.%m.%Y}.mp3"
     except Exception as e:
         summary = None
         entities = []
-    return render_template('daily.html', day=formatted_date, summary=summary, entities=entities)
+        podcast = None
+    return render_template('daily.html', day=formatted_date, summary=summary,
+                           entities=entities, podcast=podcast)
 
 
 @main.route('/insights')

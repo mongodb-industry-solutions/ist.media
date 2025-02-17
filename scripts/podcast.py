@@ -5,22 +5,29 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 
 import os, time, requests
+from pydub import AudioSegment
+from datetime import datetime
+
+audio_dir = '/usr/local/share/content/audio'
+podcast_tmp_file = '/var/tmp/podcast_tmp.wav'
 
 token = os.getenv('AUTOCONTENT_API_KEY')
-
 create_url = 'https://api.autocontentapi.com/Content/Create'
 status_base_url = 'https://api.autocontentapi.com/content/status/'
 poll_interval = 10
+today = datetime.utcnow()
 
 request_data = {
     "resources": [
         { "content": "https://istmedia.demo.mongodb-industry-solutions.com/feed",
           "type": "website" }
     ],
-    "text": """
+    "text": f"""
     Create a summary of the news for the day. Don't speak about each item individually,
     but try to merge topics of similar category into one talk track, to get a smoother
-    listener experience. Do not mention deepdive, but speak of news summary of the day.
+    listener experience. Do not mention deepdive, but speak of news summary of today,
+    which is "{today}". Explicitely mention the current date "{today}", please. So the
+    audience knows of which day you talk and discuss news about.
     """,
     "outputType": "audio"
 }
@@ -61,6 +68,14 @@ def poll_status(request_id):
             print('Content creation complete!')
             print('Audio URL:', audio_url)
             print('Audio Title:', audio_title)
+
+            podcast_data = requests.get(audio_url).content
+            with open(podcast_tmp_file, 'wb') as handler:
+                handler.write(podcast_data)
+
+            audio = AudioSegment.from_wav(podcast_tmp_file)
+            filename = f"{audio_dir}/podcast-{today:%d.%m.%Y}.mp3"
+            audio.export(filename, format="mp3", bitrate="192k")
             return
 
         print(f'Current status: {status}. Waiting for 100...')
