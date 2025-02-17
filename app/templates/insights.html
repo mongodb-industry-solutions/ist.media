@@ -20,6 +20,24 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    <style>
+        table {
+            font-size: 17px;
+            line-height: 1.45em;
+            margin-bottom: 1em;
+        }
+        thead th {
+            color: #666;
+            font-weight: bold;
+        }
+        tbody td strong {
+            color: #777;
+            font-weight: normal;
+        }
+        td, th {
+            padding-right: 1.15em;
+        }
+    </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -124,9 +142,11 @@
                                 {% endfor %}
                             </ul>
                             {% endif %}
+                        </div>
+                        <div class="mb-4">
                             {% if most_read_articles is defined %}
                             <p>&nbsp;</p>
-                            <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
+                            <h2 class="tm-mb-30 tm-color-primary tm-post-title">
                                 Top Articles (Most Read)
                             </h2>
                             <p>
