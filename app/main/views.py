@@ -664,7 +664,7 @@ def daily():
         entities = doc['entities'] if 'entities' in doc else []
         podcast = f"/content/audio/podcast-{now:%d.%m.%Y}.mp3"
 
-        full_path = os.path.join("/usr/local/share", podcast)
+        full_path = os.path.join("/usr/local/share", podcast.lstrip('/'))
         if not os.path.exists(full_path):
             podcast = None # no podcast produced for the day
 
