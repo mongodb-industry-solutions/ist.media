@@ -87,13 +87,15 @@
                 background: none;
             }
             .header {
-                font-size: 24px;
-                margin-bottom: 10px;
+                display: none;
+            }
+            .dateheader {
+                margin-top: 2px;
             }
             .content {
                 font-size: 16px;
                 line-height: 1.6;
-                padding: 0 10px;
+                padding: 0 2px;
             }
             .footer {
                 font-size: 14px;
@@ -107,8 +109,8 @@
     <div class="container">
         <div class="header">IST Media</div>
         <div class="content">
-            <p style="font-size: 140%; color: #00684A; text-align: center">
-                Summary for <strong>{{formatted_date}}</strong>
+            <p class="dateheader" style="font-size: 140%; color: #00684A; text-align: center">
+                {{formatted_date}}
             </p>
             <div class="card">
                 {{summary_html}}
