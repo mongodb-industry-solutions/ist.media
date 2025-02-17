@@ -663,6 +663,11 @@ def daily():
         summary = html(doc['summary']) if 'summary' in doc else None
         entities = doc['entities'] if 'entities' in doc else []
         podcast = f"/content/audio/podcast-{now:%d.%m.%Y}.mp3"
+
+        full_path = os.path.join("/usr/local/share", podcast)
+        if not os.path.exists(full_path):
+            podcast = None # no podcast produced for the day
+
     except Exception as e:
         summary = None
         entities = []
