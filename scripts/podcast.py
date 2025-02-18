@@ -17,6 +17,7 @@ status_base_url = 'https://api.autocontentapi.com/content/status/'
 poll_interval = 10
 today = datetime.utcnow()
 
+spoken_today = today.strftime("%B %-d %Y") # e.g. September 7 2025
 request_data = {
     "resources": [
         { "content": "https://istmedia.demo.mongodb-industry-solutions.com/feed",
@@ -26,8 +27,8 @@ request_data = {
     Create a summary of the news for the day. Don't speak about each item individually,
     but try to merge topics of similar category into one talk track, to get a smoother
     listener experience. Do not mention deepdive, but speak of news summary of today,
-    which is "{today}". Explicitely mention the current date "{today}", please. So the
-    audience knows of which day you talk and discuss news about.
+    which is "{spoken_today}". Explicitely mention the current date "{spoken_today}", please.
+    So the audience knows of which day you talk and discuss news about.
     """,
     "outputType": "audio"
 }
