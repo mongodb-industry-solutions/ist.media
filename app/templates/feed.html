@@ -10,11 +10,9 @@
 </head>
 <body>
     {% for doc in docs %}
-    <div>
-        <h2>{{ doc.title }}</h2>
-        <h4>{{ doc.published }}</h4>
+    <p>
         {{ doc.text }}
-    </div>
+    </p>
     {% endfor %}
 </body>
 </html>
