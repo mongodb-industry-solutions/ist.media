@@ -5,6 +5,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 
 import os, time, requests
+from bs4 import BeautifulSoup
 from pydub import AudioSegment
 from datetime import datetime
 
@@ -17,18 +18,27 @@ status_base_url = 'https://api.autocontentapi.com/content/status/'
 poll_interval = 10
 today = datetime.utcnow()
 
+response = requests.get("https://ist.media/feed")
+response.raise_for_status()
+soup = BeautifulSoup(response.content, "html.parser")
+paragraphs = [p.get_text() for p in soup.body.find_all("p", recursive=False)]
+news_content = "\n\n*** end of news article -- next article follows ***\n\n".join(paragraphs)
+
 spoken_today = today.strftime("%B %-d %Y") # e.g. September 7 2025
 request_data = {
-    "resources": [
-        { "content": "https://istmedia.demo.mongodb-industry-solutions.com/feed",
-          "type": "website" }
-    ],
+    "resources": [ { "content": news_content, "type": "text" } ],
     "text": f"""
     Create a summary of the news for the day. Don't speak about each item individually,
     but try to merge topics of similar category into one talk track, to get a smoother
     listener experience. Do not mention deepdive, but speak of news summary of today,
     which is "{spoken_today}". Explicitely mention the current date "{spoken_today}", please.
     So the audience knows of which day you talk and discuss news about.
+
+    For each topic you include in the conversation, start with a quick summary of what
+    has happened, and only then dive into a conversation about the topic.
+
+    Don't be woke, and don't become philosophic, please never do!
+    Rather, stick to the facts of the news stories.
     """,
     "outputType": "audio"
 }
