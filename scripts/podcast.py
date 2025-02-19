@@ -29,16 +29,11 @@ request_data = {
     "resources": [ { "content": news_content, "type": "text" } ],
     "text": f"""
     Create a summary of the news for the day. Don't speak about each item individually,
-    but try to merge topics of similar category into one talk track, to get a smoother
-    listener experience. Do not mention deepdive, but speak of news summary of today,
-    which is "{spoken_today}". Explicitely mention the current date "{spoken_today}", please.
-    So the audience knows of which day you talk and discuss news about.
-
-    For each topic you include in the conversation, start with a quick summary of what
-    has happened, and only then dive into a conversation about the topic.
-
-    Don't be woke, and don't become philosophic, please never do!
-    Rather, stick to the facts of the news stories.
+    but merge topics of similar category into one talk track. Do not mention deepdive, but
+    speak of news summary of today, which is "{spoken_today}". Explicitely mention the
+    current date "{spoken_today}", so the audience knows of which day you talk and discuss
+    news about. For each topic, start with a quick summary of what has happened, and only then
+    dive into a conversation about the topic.
     """,
     "outputType": "audio"
 }
