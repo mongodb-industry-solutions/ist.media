@@ -22,7 +22,7 @@ response = requests.get("https://ist.media/feed")
 response.raise_for_status()
 soup = BeautifulSoup(response.content, "html.parser")
 paragraphs = [p.get_text() for p in soup.body.find_all("p", recursive=False)]
-news_content = "\n\n*** end of news article -- next article follows ***\n\n".join(paragraphs)
+news_content = "\n\n".join(paragraphs)
 
 spoken_today = today.strftime("%B %-d %Y") # e.g. September 7 2025
 request_data = {
