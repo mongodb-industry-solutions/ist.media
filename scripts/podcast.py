@@ -24,16 +24,15 @@ soup = BeautifulSoup(response.content, "html.parser")
 paragraphs = [p.get_text() for p in soup.body.find_all("p", recursive=False)]
 news_content = "\n\n".join(paragraphs)
 
-spoken_today = today.strftime("%B %-d %Y") # e.g. September 7 2025
+spoken_today = today.strftime("%B %-d") # e.g. September 7
 request_data = {
     "resources": [ { "content": news_content, "type": "text" } ],
     "text": f"""
-    Create a summary of the news for the day. Don't speak about each item individually,
-    but merge topics of similar category into one talk track. Do not mention deepdive, but
-    speak of news summary of today, which is "{spoken_today}". Explicitely mention the
-    current date "{spoken_today}", so the audience knows of which day you talk and discuss
-    news about. For each topic, start with a quick summary of what has happened, and only then
-    dive into a conversation about the topic.
+    Create a summary of the news for the day. Merge topics of similar category
+    into one talk track. Do not mention deepdive. Explicitely mention the current
+    date "{spoken_today}", so the audience knows of which day you talk and discuss
+    news about. For each topic, start with a quick summary of what has happened,
+    and only then dive into a conversation about the topic.
     """,
     "outputType": "audio"
 }
