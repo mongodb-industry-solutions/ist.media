@@ -18,6 +18,8 @@ anyio==4.8.0
     #   openai
 attrs==25.1.0
     # via aiohttp
+beautifulsoup4==4.13.3
+    # via -r requirements.in
 blinker==1.9.0
     # via flask
 certifi==2025.1.31
@@ -49,8 +51,6 @@ future==1.0.0
     # via geocoder
 geocoder==1.38.1
     # via -r requirements.in
-greenlet==3.1.1
-    # via sqlalchemy
 h11==0.14.0
     # via httpcore
 httpcore==1.0.7
@@ -75,9 +75,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.3.18
+langchain==0.3.19
     # via langchain-mongodb
-langchain-core==0.3.35
+langchain-core==0.3.37
     # via
     #   langchain
     #   langchain-mongodb
@@ -99,7 +99,7 @@ markupsafe==3.0.2
     # via
     #   jinja2
     #   werkzeug
-mistune==3.1.1
+mistune==3.1.2
     # via -r requirements.in
 multidict==6.1.0
     # via
@@ -109,7 +109,7 @@ numpy==1.26.4
     # via
     #   langchain
     #   langchain-mongodb
-openai==1.63.0
+openai==1.63.2
     # via langchain-openai
 orjson==3.10.15
     # via langsmith
@@ -158,6 +158,8 @@ sniffio==1.3.1
     # via
     #   anyio
     #   openai
+soupsieve==2.6
+    # via beautifulsoup4
 sqlalchemy==2.0.38
     # via langchain
 tenacity==9.0.0
@@ -171,6 +173,7 @@ tqdm==4.67.1
 typing-extensions==4.12.2
     # via
     #   anyio
+    #   beautifulsoup4
     #   langchain-core
     #   openai
     #   pydantic
