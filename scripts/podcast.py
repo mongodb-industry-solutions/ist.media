@@ -79,6 +79,7 @@ def poll_status(request_id):
                 handler.write(podcast_data)
 
             audio = AudioSegment.from_wav(podcast_tmp_file)
+            audio = audio.set_frame_rate(44100)
             filename = f"{audio_dir}/podcast-{today:%d.%m.%Y}.mp3"
             audio.export(filename, format="mp3", bitrate="192k")
             return
