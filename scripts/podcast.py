@@ -28,11 +28,11 @@ spoken_today = today.strftime("%B %-d") # e.g. September 7
 request_data = {
     "resources": [ { "content": news_content, "type": "text" } ],
     "text": f"""
-    Create a summary of the news for the day. Merge topics of similar category
-    into one talk track. Do not mention deepdive. Explicitely mention the current
-    date "{spoken_today}", so the audience knows of which day you talk and discuss
-    news about. For each topic, start with a quick summary of what has happened,
-    and only then dive into a conversation about the topic.
+    Create a summary of the news for the day. Merge topics
+    of similar category into one talk track. Explicitely mention
+    the current date "{spoken_today}", so the audience knows of
+    which day you talk and discuss news about. No social grunting,
+    no "uh", "aha", "wow", "ok", "mhmm". Never!
     """,
     "outputType": "audio"
 }
