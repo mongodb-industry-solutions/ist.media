@@ -104,6 +104,10 @@ as the `title`.  Never invent or mix UUIDs.
 Do not create a list of links, rather, include them in the floating
 text where appropriate and where they match.
 
+At the very beginning of the news dossier, add a comprehensive short
+summary of headlines in this format: Headline 1 | Headline 2 | ...
+Each Headline shall have a length between 20 and 60 characters.
+
 "{ get_context() }"
 
 """
