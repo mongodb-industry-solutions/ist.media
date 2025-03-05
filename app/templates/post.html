@@ -37,7 +37,9 @@
         }
         @media (max-width: 580px) {
             .delimiter::after {
-                content: "\00a0\00a0\00a0|\00a0\00a0";
+                content: "\00a0\00a0\00a0\00a0|\00a0\00a0";
+                vertical-align: middle; /* Aligns it to text baseline */
+                display: inline-block; /* Ensures proper positioning */
             }
         }
 
