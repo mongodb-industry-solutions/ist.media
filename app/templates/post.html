@@ -20,6 +20,45 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    <style>
+        button {
+            font-weight: normal;
+            -webkit-appearance: none; /* Removes default styles on iOS */
+        }
+
+        @media (max-width: 580px) {
+            .arrow {
+                display: none;
+            }
+        }
+
+        .delimiter::after {
+            content: "\00a0\00a0\00a0";
+        }
+        @media (max-width: 580px) {
+            .delimiter::after {
+                content: "\00a0\00a0\00a0|\00a0\00a0";
+            }
+        }
+
+        .summary::after {
+            content: "Create summary";
+        }
+        @media (max-width: 580px) {
+            .summary::after {
+                content: "Summary";
+            }
+        }
+
+        .translate::after {
+            content: "Translate to";
+        }
+        @media (max-width: 580px) {
+            .translate::after {
+                content: "Translate";
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -135,19 +174,20 @@
                             <div style="display: flex;
                                         align-items: center">
                                 <a style="text-align: right" href="/post?style=summary"
-                                   class="tm-color-primary">&#10145; Create summary</a>
-                                &nbsp;&nbsp;&nbsp;
+                                   class="tm-color-primary summary">
+                                    <span class="arrow">&#10145;&nbsp;</span></a>
+                                <span class="delimiter"></span>
                                 <form action="/post" method="GET"
                                       style="display: inline-flex; align-items: center">
                                     <input type="hidden" name="style" value="translated">
                                     <button type="submit"
-                                            class="tm-color-primary"
+                                            class="tm-color-primary translate"
                                             style="display: inline-flex;
                                                    align-items: center;
                                                    background: none;
                                                    border: none;
                                                    cursor: pointer">
-                                        &#10145; Translate to
+                                        <span class="arrow">&#10145;&nbsp;</span>
                                     </button>
                                     <select name="lang"
                                             style="border: 1px solid #dcdcdc;

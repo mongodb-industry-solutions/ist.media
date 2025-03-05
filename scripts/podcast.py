@@ -32,7 +32,8 @@ request_data = {
     of similar category into one talk track. Explicitely mention
     the current date "{spoken_today}", so the audience knows of
     which day you talk and discuss news about. No social grunting,
-    no "uh", "aha", "wow", "ok", "mhmm". Never!
+    no "uh", "aha", "wow", "ok", "mhmm". Never! No intro with
+    commenting how everything is interconnected. No mention of deepdive.
     """,
     "outputType": "audio"
 }
