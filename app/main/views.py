@@ -288,6 +288,13 @@ def recalculate_keywords(uuid):
     return redirect('/post?uuid=' + uuid)
 
 
+@main.route('/howto')
+def howto():
+    log(request)
+    check_for_quality_read()
+    return render_template('howto.html')
+
+
 @main.route('/welcome')
 def welcome():
     log(request)

@@ -464,6 +464,8 @@ figcaption { line-height: 1.4; }
 .tm-pt-30 { padding-top: 30px; }
 .tm-pt-45 { padding-top: 45px; }
 .tm-pt-60 { padding-top: 60px; }
+.tm-mb-15 { margin-bottom: 15px; }
+.tm-mb-20 { margin-bottom: 20px; }
 .tm-mb-25 { margin-bottom: 25px; }
 .tm-mb-30 { margin-bottom: 30px; }
 .tm-mb-40 { margin-bottom: 40px; }
@@ -474,7 +476,9 @@ figcaption { line-height: 1.4; }
 .tm-mb-75 { margin-bottom: 75px; }
 .tm-mb-80 { margin-bottom: 80px; }
 .tm-mb-120 { margin-bottom: 120px; }
+.tm-mt-20 { margin-top: 20px; }
 .tm-mt-40 { margin-top: 40px; }
+.tm-mt-60 { margin-top: 60px; }
 .tm-mt-100 { margin-top: 100px; }
 .tm-mr-20 { margin-right: 20px; }
 .tm-color-primary, span.tm-color-primary { color: #00684A; }
