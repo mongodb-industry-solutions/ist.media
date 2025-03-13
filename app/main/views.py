@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import render_template, redirect, request, session, url_for
+from flask import render_template, redirect, request, session, url_for, send_file
 from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
@@ -21,9 +21,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_mongodb.retrievers.hybrid_search import MongoDBAtlasHybridSearchRetriever
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 from requests.auth import HTTPBasicAuth
 import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
+import io, qrcode
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -40,6 +41,9 @@ gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
 ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
 daily_collection = client[DB_NAME]["daily"]
+
+solana_collection_tx = client[DB_NAME]["solana_tx"]
+solana_collection_tmp = client[DB_NAME]["solana_tmp"]
 
 ai = OpenAI()
 
@@ -300,6 +304,113 @@ def welcome():
     log(request)
     check_for_quality_read()
     return render_template('welcome.html')
+
+
+@main.route('/profile')
+def profile():
+    log(request)
+    check_for_quality_read()
+    return render_template('profile.html')
+
+
+def get_sol_price():
+    url = "https://min-api.cryptocompare.com/data/price"
+    params = {
+        "fsym": "SOL",
+        "tsyms": "USD"
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data["USD"]
+
+
+def calculate_sol_amount(usd_amount):
+    sol_price = get_sol_price()
+    sol_amount = usd_amount / sol_price
+    return sol_price, sol_amount
+
+
+def generate_solana_pay_uri(recipient, amount, memo, label):
+    params = {
+        "amount": f"{amount:.9f}",
+        "memo": memo,
+        "label": label
+    }
+    query_string = urlencode(params)
+    return f"solana:{recipient}?{query_string}"
+
+
+def create_qr_code(payment_uri):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=5,
+        border=0,
+    )
+    qr.add_data(payment_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#00684A", back_color="white")
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_byte_arr.seek(0)
+    return img_byte_arr
+
+
+@main.route('/payment')
+def payment():
+    log(request)
+    check_for_quality_read()
+    usd_amount = 5.0 # top up of 5 USD hardcoded for now
+    sol_price, sol_amount = calculate_sol_amount(usd_amount)
+    return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
+                           usd_amount=usd_amount)
+
+
+@main.route('/payment-stage-2')
+def payment_stage_2():
+    log(request)
+    check_for_quality_read()
+    signature = request.args.get('tx')
+    return render_template("payment-stage-2.html", signature=signature)
+
+
+@main.route('/payment-final')
+def payment_final():
+    log(request)
+    check_for_quality_read()
+    amount = request.args.get('amount')
+    return render_template("payment-final.html", amount=amount)
+
+
+@main.route('/qr_image/<float:amount>')
+def qr_image(amount):
+    SOLANA_RECIPIENT_ADDRESS = "918Y2TZvy386gXLWxGM9sBVutviT77xJriCDQsZeheEF"
+    memo = "bjjl"
+    label = "IST.Media"
+    payment_uri = generate_solana_pay_uri(SOLANA_RECIPIENT_ADDRESS, amount, memo, label)
+    qr_image = create_qr_code(payment_uri)
+    return send_file(qr_image, mimetype='image/png')
+
+
+@main.route('/status')
+def payment_status():
+    tx_tmp = solana_collection_tmp.find_one({ "memo" : "bjjl" })
+    if tx_tmp:
+        session['tx_in_progress'] = tx_tmp["signature"]
+        return tx_tmp["signature"]
+    else:
+        return "waiting"
+
+
+@main.route('/status-stage-2')
+def payment_status_stage_2():
+    signature = session['tx_in_progress']
+    tx = solana_collection_tx.find_one({ "signature" : signature, "memo" : "bjjl" })
+    if tx:
+        session.pop('tx_in_progress')
+        return str(tx["amount"])
+    else:
+        return "waiting"
 
 
 def adjusted_score(original_score, age_in_seconds, half_life=86400*90):
