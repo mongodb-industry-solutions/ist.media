@@ -144,6 +144,30 @@ input[type='radio'] {
 
 .tm-nav-link i { margin-right: 37px; }
 
+.user-info {
+    line-height: 1.4;
+}
+
+.user-info a {
+    font-size: 70%;
+    color: #fff;
+    margin: 0 0.1em;
+    padding: 0 0.2em 0.1em 0.2em;
+}
+
+.user-info a:hover {
+    font-size: 70%;
+    background: #fff;
+    color: #666;
+    margin: 0 0.1em;
+    padding: 0 0.2em 0.1em 0.2em;
+}
+
+.credit-info {
+    font-size: 70%;
+    line-height: 1.4;
+}
+
 ul, ol {
     margin: 0;
     padding: 0;
