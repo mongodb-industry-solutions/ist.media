@@ -419,6 +419,12 @@ def adjusted_score(original_score, age_in_seconds, half_life=86400*90):
     return original_score * time_decay, time_decay
 
 
+@main.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/')
+
+
 @main.route('/')
 def index():
     if not 'was_here_before' in session:
@@ -427,6 +433,11 @@ def index():
     log(request)
     check_for_quality_read()
     query = request.args.get('query')
+    # hack for user session - will be replaced by login process
+    userid = request.args.get('userid')
+    if userid:
+        session['user'] = { 'id' : userid, 'name' : 'Benjamin Lorenz' }
+    ### end of hack
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))

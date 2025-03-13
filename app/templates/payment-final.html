@@ -27,14 +27,18 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
+	    {% set user = session.get("user") %}
+	    {% if user %}
 	    <div class="user-info">
-		Benjamin Lorenz&nbsp;&nbsp;<a href="">[ View Profile ]</a>
+		<span class="coin-count">
+		    <i class="fas fa-coins"></i>&nbsp;&nbsp;<strong>874</strong> Media Coins
+		</span>
+		<span class="article-count">
+		    <i class="fas fa-file-alt"></i>&nbsp;&nbsp;<strong>12</strong> Articles
+		    <br/>&nbsp;<br/>&nbsp;
+		</span>
 	    </div>
-	    <div class="credit-info">
-		<strong>874</strong> Media Coins&nbsp;&nbsp;&nbsp;
-		&#8960; <strong>2.7</strong> / Article
-		<br/>&nbsp;
-	    </div>
+	    {% endif %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
@@ -80,12 +84,15 @@
                     <i class="fab fa-linkedin tm-social-icon"></i>
                 </a>
             </div>
-            <p class="tm-mb-80 pr-5 text-white">
-                <br/>
-                Benjamin Lorenz
-                <br/>
-                MongoDB Inc. &copy; 2025
+	    {% if user %}
+            <p class="tm-mb-40 pr-5 text-white">
+		<div class="user-info">
+		    <span class="user-name">{{ user.name }}</span>
+		    <span>[</span> <a href="/profile">Profile</a> <span>|</span>
+		    <a href="/logout">Logout</a> <span>]<br/>&nbsp;<br/>&nbsp;</span>
+		</div>
             </p>
+	    {% endif %}
         </div>
     </header>
     <div class="container-fluid">
