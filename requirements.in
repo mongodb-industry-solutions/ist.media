@@ -6,4 +6,6 @@ langchain_openai
 mistune
 pycountry
 pydub
+qrcode
 uwsgi
+websocket-client
