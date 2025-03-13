@@ -4,6 +4,7 @@ geocoder
 langchain_mongodb
 langchain_openai
 mistune
+pillow
 pycountry
 pydub
 qrcode
