@@ -86,40 +86,48 @@ def on_message(ws, message):
         if "method" in data and data["method"] == "logsNotification":
             logs = data["params"]["result"]["value"]["logs"]
             signature = data["params"]["result"]["value"]["signature"]
-            
-            # Look for memo data in logs
+
+            # Look for memo data in logs with more flexibility
             memo = None
-            for i, log in enumerate(logs):
+            for log in logs:
                 if "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke" in log:
-                    # Check the next line for the memo
-                    if i + 1 < len(logs) and "Program log:" in logs[i + 1]:
-                        memo = logs[i + 1].replace("Program log:", "").strip()
+                    # Memo program invoked; look for memo in subsequent logs
+                    continue
+                if "Program log:" in log:
+                    # Extract potential memo text from any "Program log:" entry
+                    potential_memo = log.replace("Program log:", "").strip()
+                    if "Memo (len" in potential_memo and '"' in potential_memo:
+                        # Matches format like 'Memo (len 4): "bjjl"'
+                        memo = potential_memo
                         break
-                elif "Program log:" in log:
-                    # Fallback: directly check for Program log
-                    memo = log.replace("Program log:", "").strip()
-                    break
-            
+                    elif potential_memo:  # Any non-empty log entry as a fallback
+                        memo = potential_memo
+                        # Don't break here; keep looking for a more specific memo format
+
             if memo:
                 cleaned_memo = clean_memo(memo)
                 print(f"Signature: {signature}")
                 print(f"Memo: {cleaned_memo}")
                 tx_tmp = { "signature" : signature, "memo" : cleaned_memo }
                 solana_collection_tmp.insert_one(tx_tmp)
-                tx = { }
-                while (True):
+
+                tx = {}
+                while True:
                     time.sleep(15)
                     tx = get_tx_details(signature)
                     if "status" in tx and tx["status"] == 100:
                         print("tx details not yet available -- waiting...")
-                        pass
+                        continue
                     else:
                         break
                 print(tx)
 
                 solana_collection_tmp.delete_one(tx_tmp)
                 solana_collection_tx.insert_one(tx)
-                    
+
+            else:
+                print(f"Signature: {signature}")
+                print("No memo found in logs")
 
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
