@@ -27,6 +27,16 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
+	    {% if user is defined %}
+	    <div class="user-info">
+		Benjamin Lorenz&nbsp;&nbsp;<a href="">[ View Profile ]</a>
+	    </div>
+	    <div class="credit-info">
+		<strong>874</strong> Media Coins&nbsp;&nbsp;&nbsp;
+		&#8960; <strong>2.7</strong> / Article
+		<br/>&nbsp;
+	    </div>
+	    {% endif %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
