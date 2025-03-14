@@ -144,6 +144,36 @@ input[type='radio'] {
 
 .tm-nav-link i { margin-right: 37px; }
 
+.profile-attribute {
+    line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.list-key {
+    min-width: 190px;
+    margin-right: 5px;
+    display: block;
+    font-weight: bold;
+}
+
+.list-small {
+    color: #777;
+    font-size: 75%;
+}
+
+.list-anchor {
+    font-size: 90%;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+
+.list-value {
+    flex: 1;
+}
+
 .user-info {
     line-height: 1.1;
     display: flex;
@@ -162,12 +192,12 @@ input[type='radio'] {
 .coin-count {
     flex: 1;
     min-width: 150px;
-    font-size: 90% !important;
+    font-size: 85% !important;
     display: block;
 }
 
 .article-count {
-    font-size: 90% !important;
+    font-size: 85% !important;
     color: #fff;
 }
 
@@ -529,6 +559,7 @@ figcaption { line-height: 1.4; }
 .tm-mt-10 { margin-top: 10px; }
 .tm-mt-15 { margin-top: 15px; }
 .tm-mt-20 { margin-top: 20px; }
+.tm-mt-25 { margin-top: 25px; }
 .tm-mt-30 { margin-top: 30px; }
 .tm-mt-40 { margin-top: 40px; }
 .tm-mt-60 { margin-top: 60px; }
