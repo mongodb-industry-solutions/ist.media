@@ -49,10 +49,23 @@
 	    {% if user %}
 	    <div class="user-info">
 		<span class="coin-count">
-		    <i class="fas fa-coins"></i>&nbsp;&nbsp;<strong>874</strong> Media Coins
+		    <i class="fas fa-coins"></i>
+		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+		       href="/profile"><strong>874</strong> Media Coins</a>
 		</span>
 		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>&nbsp;&nbsp;<strong>12</strong> Articles
+		    <i class="fas fa-file-alt"></i>
+		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+		       href="/profile"><strong>127</strong> Articles</a>
+		    <br/>&nbsp;<br/>&nbsp;
+		</span>
+	    </div>
+	    {% else %}
+	    <div class="user-info">
+		<span class="coin-count">
+		    <i class="fas fa-user"></i>
+		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+		       href="/profile">Login</a>
 		    <br/>&nbsp;<br/>&nbsp;
 		</span>
 	    </div>
