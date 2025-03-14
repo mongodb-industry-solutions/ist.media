@@ -31,10 +31,14 @@
 	    {% if user %}
 	    <div class="user-info">
 		<span class="coin-count">
-		    <i class="fas fa-coins"></i>&nbsp;&nbsp;<strong>874</strong> Media Coins
+		    <i class="fas fa-coins"></i>
+		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+		       href="/profile"><strong>874</strong> Media Coins</a>
 		</span>
 		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>&nbsp;&nbsp;<strong>12</strong> Articles
+		    <i class="fas fa-file-alt"></i>
+		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+		       href="/profile"><strong>127</strong> Articles</a>
 		    <br/>&nbsp;<br/>&nbsp;
 		</span>
 	    </div>
@@ -56,7 +60,7 @@
                             <i class="fas fa-pen"></i>
                             Single Post
                     </a></li>
-                    <li class="tm-nav-item active"><a href="/daily" class="tm-nav-link">
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
                             <i class="fas fa-stream"></i>
                             Daily Summary
                     </a></li>
@@ -101,63 +105,63 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <div class="tm-color-primary text-right" style="font-size: 140%">
-                        {{ day }}
+                        {{ user.name }}
                     </div>
                 </div>
             </div>
             <div class="row tm-row">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
+		    <!--
                     <img style="width: 100%; margin-bottom: 50px; aspect-ratio: 1784/782"
                          src="/content/images/summary-header.jpg" alt="">
+		    -->
                 </div>
             </div>
             <div class="row tm-row">
                 <div class="col-lg-8 tm-post-col">
                     <div class="mb-4 ai-gen">
-                        <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
-                            {{ day }}<br/>
-                            <span style="color: grey; font-size: 60%">
-                                Summary &amp; Entity Extraction by <strong>OpenAI</strong>,
-                                Podcast by <strong>Google</strong>
-                            </span>
-                        </h2>
-                        {% if podcast %}
-                        <div style="padding-bottom: 10px">
-                            <audio controls>
-                                <source src="{{ podcast }}" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
-			    <p style="font-size: 75%; padding-top: 5px">
-				You can subscribe to these Daily News in the
-				<a href="https://podcasts.apple.com/de/podcast/ist-daily-news/id1797795255">
-				    Apple Podcast
-				</a>
-				App
-			    </p>
-                        </div>
-                        {% endif %}
-                        {% if summary is none %}
-                        No news summary for the day (yet).
-                        {% else %}
-                        {{ summary | safe }}
-                        {% endif %}
+			<h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
+			    The Basics
+			</h2>
+			<div class="profile-attribute">
+			    <span class="list-key">Username</span>
+			    <span class="list-value">bjjl</span>
+			</div>
+			<div class="profile-attribute">
+			    <span class="list-key">Email Address</span>
+			    <span class="list-value">bl@mx.plus</span>
+			</div>
+			<h2 class="pt-2 tm-mb-30 tm-mt-40 tm-color-primary tm-post-title">
+			    My Usage Metrics
+			</h2>
+			<div class="profile-attribute">
+			    <span class="list-key">Media Coins
+				<span class="list-small">purchased</span>
+			    </span>
+			    <span class="list-value">1000</span>
+			    [<a class="list-anchor" href="/payment">buy more</a>]
+			</div>
+			<div class="profile-attribute">
+			    <span class="list-key">Media Coins
+				<span class="list-small">available</span>
+			    </span>
+			    <span class="list-value">874</span>
+			</div>
+			<div class="profile-attribute tm-mt-25">
+			    <span class="list-key">Articles
+				<span class="list-small">read</span>
+			    </span>
+			    <span class="list-value">472</span>
+			</div>
+			<div class="profile-attribute">
+			    <span class="list-key">Articles
+				<span class="list-small">purchased</span>
+			    </span>
+			    <span class="list-value">28</span>
+			</div>
                     </div>
                 </div>
-                {% if entities|length > 0 %}
-                <aside class="col-lg-4 tm-aside-col">
-                    <div class="tm-post-sidebar tm-insights">
-                        {% for entity in entities %}
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                {{ entity }}
-                            </a>
-                        </p>
-                        {% endfor %}
-                    </div>
-                </aside>
-                {% endif %}
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">

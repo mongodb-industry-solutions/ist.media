@@ -335,6 +335,7 @@ def generate_solana_pay_uri(recipient, amount, memo, label):
         "amount": f"{amount:.9f}",
         "memo": memo,
         "label": label
+        #"spl-token": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB" # USDT
     }
     query_string = urlencode(params)
     return f"solana:{recipient}?{query_string}"
