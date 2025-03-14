@@ -57,6 +57,18 @@
 	.spacer {
             margin-bottom: 40px;
         }
+	.spacer-large {
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+	.spacer-large .error:empty {
+	    visibility: visible;
+	}
+	.error {
+	    margin-left: 2px;
+	    visibility: hidden;
+	    color: red;
+	}
     </style>
 </head>
 <body>
@@ -166,13 +178,22 @@
                 </div>
             </div>
             <div class="row tm-row">
-                <div class="col-lg-6 tm-post-col">
-                    <div class="mb-4 ai-gen">
-			<h1 class="pt-2 tm-mb-30 tm-color-primary">
-			    Login
-			</h1>
-			<div class="spacer"></div>
-			<form action="/do_login" method="POST">
+		<form action="/do_login" method="POST">
+                    <div class="col-lg-8 tm-post-col">
+			<div class="mb-4 ai-gen">
+			    <h1 class="pt-2 tm-mb-30 tm-color-primary">
+				Login
+			    </h1>
+			    <p>
+				Welcome back! You can log into the system to
+				enjoy explicit personalisation, targeted content suggestions,
+				and much more!
+			    </p>
+			    <div class="spacer-large">
+				<span class="error {% if badlogin is defined %}visible{% endif %}">
+				    Authentication failed &mdash; please try again
+				</span>
+			    </div>
 			    <div class="login-attribute">
 				<label for="username" class="login-list-key">Username</label>
 				<input type="text" id="username" name="username" class="list-value" required>
@@ -182,12 +203,14 @@
 				<input type="password" id="password" name="password" class="list-value" required>
 			    </div>
 			    <div class="spacer"></div>
-			    <div class="button-container">
-				<button type="submit">Login</button>
-			    </div>
-			</form>
+			</div>
+		    </div>
+		    <div class="col-lg-12 tm-post-col">
+			<div class="button-container">
+			    <button type="submit">Login</button>
+			</div>
                     </div>
-                </div>
+		</form>
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
@@ -203,5 +226,10 @@
     </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
+    <script>
+	document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("username").focus();
+	});
+    </script>
 </body>
 </html>

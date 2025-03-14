@@ -10,6 +10,8 @@ anyio==4.8.0
     # via
     #   httpx
     #   openai
+bcrypt==4.3.0
+    # via -r requirements.in
 beautifulsoup4==4.13.3
     # via -r requirements.in
 blinker==1.9.0
@@ -39,8 +41,6 @@ future==1.0.0
     # via geocoder
 geocoder==1.38.1
     # via -r requirements.in
-greenlet==3.1.1
-    # via sqlalchemy
 h11==0.14.0
     # via httpcore
 httpcore==1.0.7
@@ -66,7 +66,7 @@ jsonpointer==3.0.0
     # via jsonpatch
 langchain==0.3.20
     # via langchain-mongodb
-langchain-core==0.3.44
+langchain-core==0.3.45
     # via
     #   langchain
     #   langchain-mongodb
@@ -80,7 +80,7 @@ langchain-text-splitters==0.3.6
     # via
     #   langchain
     #   langchain-mongodb
-langsmith==0.3.13
+langsmith==0.3.14
     # via
     #   langchain
     #   langchain-core

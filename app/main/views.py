@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, urlencode
 from requests.auth import HTTPBasicAuth
 import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
-import io, qrcode
+import io, qrcode, bcrypt
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -41,7 +41,7 @@ gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
 ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
 access_log_collection = client[DB_NAME]["access_log"]
 daily_collection = client[DB_NAME]["daily"]
-
+users_collection = client[DB_NAME]["users"]
 solana_collection_tx = client[DB_NAME]["solana_tx"]
 solana_collection_tmp = client[DB_NAME]["solana_tmp"]
 
@@ -323,7 +323,30 @@ def login():
     if "user" in session:
         return redirect('/profile')
     else:
-        return render_template('login.html')
+        if 'badlogin' in session:
+            session.pop('badlogin')
+            return render_template('login.html', badlogin=True)
+        else:
+            return render_template('login.html')
+
+
+@main.route('/do_login', methods=['POST'])
+def do_login():
+    username = request.form.get('username')
+    password = request.form.get('password').encode('utf-8')
+
+    # for register
+    #hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+
+
+    user = users_collection.find_one({'username': username})
+
+    if user and bcrypt.checkpw(password, user['password']):
+        session['user'] = username
+        return redirect('/profile')
+    else:
+        session['badlogin'] = True
+        return redirect('/login')
 
 
 def get_sol_price():
