@@ -311,9 +311,35 @@ def profile():
     log(request)
     check_for_quality_read()
     if "user" in session:
-        return render_template('profile.html')
+        user_dict = users_collection.find_one( { 'username' : session['user'] } )
+        return render_template('profile.html', user_dict=user_dict)
     else:
         return redirect('/login')
+
+
+@main.route('/register')
+def register():
+    log(request)
+    check_for_quality_read()
+    if "user" in session:
+        return redirect('/profile')
+    else:
+        return render_template('register.html')
+
+
+@main.route('/do_register', methods=['POST'])
+def do_register():
+    username = request.form.get('username')
+    password = request.form.get('password').encode('utf-8')
+
+    fullname = request.form.get('fullname')
+    email = request.form.get('email')
+
+    hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+    users_collection.insert_one( { 'username' : username, 'password' : hashed_password,
+                                   'fullname' : fullname, 'email' : email } )
+    session['user'] = username
+    return redirect('/profile')
 
 
 @main.route('/login')
@@ -335,11 +361,7 @@ def do_login():
     username = request.form.get('username')
     password = request.form.get('password').encode('utf-8')
 
-    # for register
-    #hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-
-
-    user = users_collection.find_one({'username': username})
+    user = users_collection.find_one( { 'username' : username } )
 
     if user and bcrypt.checkpw(password, user['password']):
         session['user'] = username
