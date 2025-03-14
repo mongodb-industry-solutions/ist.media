@@ -310,7 +310,20 @@ def welcome():
 def profile():
     log(request)
     check_for_quality_read()
-    return render_template('profile.html')
+    if "user" in session:
+        return render_template('profile.html')
+    else:
+        return redirect('/login')
+
+
+@main.route('/login')
+def login():
+    log(request)
+    check_for_quality_read()
+    if "user" in session:
+        return redirect('/profile')
+    else:
+        return render_template('login.html')
 
 
 def get_sol_price():

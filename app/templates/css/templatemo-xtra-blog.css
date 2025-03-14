@@ -152,11 +152,27 @@ input[type='radio'] {
     margin-bottom: 10px;
 }
 
+.login-attribute {
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
 .list-key {
     min-width: 190px;
     margin-right: 5px;
     display: block;
     font-weight: bold;
+}
+
+.login-list-key {
+    min-width: 100px;
+    margin-right: 20px;
+    display: block;
+    font-weight: bold;
+    text-align: right;
 }
 
 .list-small {
