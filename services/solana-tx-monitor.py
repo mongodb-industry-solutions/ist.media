@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2024, 2025 MongoDB Inc.
+# Copyright (c) 2025 MongoDB Inc.
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
@@ -8,6 +8,7 @@ import websocket, json, pymongo, os, requests, time, datetime
 SOLANA_WS_URL = "wss://api.mainnet-beta.solana.com"
 SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
 ACCOUNT_ADDRESS = "918Y2TZvy386gXLWxGM9sBVutviT77xJriCDQsZeheEF"
+USDT_TOKEN_ADDRESS = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
 
 solana_collection_tx = pymongo.MongoClient(os.getenv('MONGODB_IST_MEDIA'))["1_media_demo"]["solana_tx"]
 solana_collection_tmp = pymongo.MongoClient(os.getenv('MONGODB_IST_MEDIA'))["1_media_demo"]["solana_tmp"]
@@ -151,7 +152,7 @@ def on_open(ws):
             {"commitment": "confirmed"}
         ]
     }
-    
+
     try:
         ws.send(json.dumps(subscription))
         print("Subscribed to transaction logs")
@@ -167,7 +168,7 @@ if __name__ == "__main__":
             on_error=on_error,
             on_close=on_close
         )
-        
+
         ws.run_forever(
             ping_interval=30,
             ping_timeout=10,
