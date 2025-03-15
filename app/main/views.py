@@ -303,7 +303,7 @@ def recalculate_keywords(uuid):
 def howto():
     log(request)
     check_for_quality_read()
-    return render_template('howto.html')
+    return render_template('howto.html', user=get_user())
 
 
 @main.route('/welcome')
@@ -318,8 +318,7 @@ def profile():
     log(request)
     check_for_quality_read()
     if "user" in session:
-        user_dict = users_collection.find_one( { 'username' : session['user'] } )
-        return render_template('profile.html', user_dict=user_dict)
+        return render_template('profile.html', user=get_user())
     else:
         return redirect('/login')
 
@@ -429,7 +428,7 @@ def payment():
     usd_amount = 5.0 # top up of 5 USD hardcoded for now
     sol_price, sol_amount = calculate_sol_amount(usd_amount)
     return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
-                           usd_amount=usd_amount)
+                           usd_amount=usd_amount, user=get_user())
 
 
 @main.route('/payment-stage-2')
@@ -437,7 +436,7 @@ def payment_stage_2():
     log(request)
     check_for_quality_read()
     signature = request.args.get('tx')
-    return render_template("payment-stage-2.html", signature=signature)
+    return render_template("payment-stage-2.html", signature=signature, user=get_user())
 
 
 @main.route('/payment-final')
@@ -445,7 +444,7 @@ def payment_final():
     log(request)
     check_for_quality_read()
     amount = request.args.get('amount')
-    return render_template("payment-final.html", amount=amount)
+    return render_template("payment-final.html", amount=amount, user=get_user())
 
 
 @main.route('/qr_image/<float:amount>')
@@ -586,7 +585,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations, user=get_user())
     if style and style == "translated":
         if not 'uuid' in session:
             return redirect('/')
@@ -638,7 +637,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations, user=get_user())
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
             doc = collection().find_one({ "uuid" : uuid })
@@ -670,7 +669,7 @@ def post():
             recommendations = []
         collection().update_one({ "_id" : doc["_id"] },
                               { "$inc" : { "visit_count" : 1 }})
-        return render_template('post.html', doc=doc, fdoc=fdoc,
+        return render_template('post.html', doc=doc, fdoc=fdoc, user=get_user(),
                                recommendations=recommendations, keywords=keywords,
                                visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,
                                read_count=doc['read_count'] if 'read_count' in doc else 0)
@@ -772,7 +771,7 @@ def about():
         country_stats = []
         path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
-    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
+    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache, user=get_user(),
                            news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
 
@@ -863,7 +862,7 @@ def daily():
         entities = []
         podcast = None
     return render_template('daily.html', day=formatted_date, summary=summary,
-                           entities=entities, podcast=podcast)
+                           entities=entities, podcast=podcast, user=get_user())
 
 
 @main.route('/insights')
@@ -893,7 +892,7 @@ def insights():
         content = html(cached_entry['answer'])
         title = capitalize(cached_entry['question'])
         return render_template('insights.html',
-                               title=title, content=content, gen_ai_cache=gen_ai_cache)
+                               title=title, content=content, gen_ai_cache=gen_ai_cache, user=get_user())
     elif query and query != "":
         query = query.strip()
         cached_entry = None
@@ -908,7 +907,7 @@ def insights():
             content = html(calculate_using_rag(query))
             title = capitalize(query)
         return render_template('insights.html',
-                               title=title, content=content, gen_ai_cache=gen_ai_cache)
+                               title=title, content=content, gen_ai_cache=gen_ai_cache, user=get_user())
     else:
         most_read_articles = collection().find().sort({ 'read_count' : -1 }).limit(10)
         return render_template('insights.html',
@@ -932,7 +931,7 @@ def insights():
 
                                """,
                                gen_ai_cache=gen_ai_cache,
-                               most_read_articles=most_read_articles)
+                               most_read_articles=most_read_articles, user=get_user())
 
 
 @main.route('/new')

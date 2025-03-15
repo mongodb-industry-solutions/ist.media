@@ -91,28 +91,26 @@
                 </div>
             </div>
             <div class="row tm-row">
-                <div class="col-lg-8 tm-post-col">
+                <div class="col-lg-10 tm-post-col">
                     <div class="mb-4 ai-gen">
                         <h1 class="pt-2 tm-mb-30 tm-color-primary">
                             Media Coins Purchase
                         </h1>
                         <p>
-                            We support instand payment using Solana
-                            Pay. Our suggestion is to use the Phantom
-                            wallet, which guarantees low fees (around
-                            1 US cent per transaction) as well as an
-                            easy and convenient handling.
+                            We support instant payment using Solana Pay. You can use the Phantom
+                            wallet, which guarantees low fees (around 1 US Cent) and has a nice user
+                            interface.
                         </p>
                         <p style="margin-bottom: 0; padding-top: 1em">
-                            To pay: <strong style="font-size: 120%">{{ sol_amount | round(5) }} SOL</strong>
-                            ({{ usd_amount }} USD)
+                            <strong style="font-size: 120%">{{ sol_amount | round(5) }} SOL</strong>
+                            ({{ "%.2f" | format(usd_amount) }} USD)
                         </p>
                         <p style="font-size: 80%; margin-top: 0; padding-bottom: 0.2em">
-                            Market Price: 1 SOL = {{ sol_price }} USD
+                            Market Price: 1 SOL = {{ "%.2f" | format(sol_price) }} USD
                         </p>
                         <img src="/qr_image/{{ sol_amount }}" alt="Solana Pay QR Code">
                         <p style="padding-top: 2em; padding-bottom:3em">
-                            Scan the QR code with your phone</p>
+                            Scan the QR code with your phone to pay</p>
                         <script>
                             function checkPaymentStatus() {
                                 fetch('/status')
@@ -129,22 +127,6 @@
                         </script>
                     </div>
                 </div>
-                <aside class="col-lg-4 tm-aside-col">
-                    <div class="tm-post-sidebar tm-insights">
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 1
-                            </a>
-                        </p>
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 2
-                            </a>
-                        </p>
-                    </div>
-                </aside>
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
