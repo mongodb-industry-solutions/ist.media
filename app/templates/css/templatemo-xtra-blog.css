@@ -201,18 +201,18 @@ input[type='radio'] {
 .user-name {
     flex: 1;
     min-width: 150px;
+    font-size: 90% !important;
+    display: block;
+}
+
+.coin-fill-left {
+    flex: 1;
+    min-width: 20px;
     font-size: 85% !important;
     display: block;
 }
 
 .coin-count {
-    flex: 1;
-    min-width: 150px;
-    font-size: 85% !important;
-    display: block;
-}
-
-.article-count {
     font-size: 85% !important;
     color: #fff;
 }
@@ -223,14 +223,14 @@ input[type='radio'] {
 }
 
 .user-info a {
-    font-size: 70%;
+    font-size: 75%;
     color: #fff;
     margin: 0 0.1em;
     padding: 0 0.2em 0.1em 0.2em;
 }
 
 .user-info a:hover {
-    font-size: 70%;
+    font-size: 75%;
     background: #fff;
     color: #666;
     margin: 0 0.1em;

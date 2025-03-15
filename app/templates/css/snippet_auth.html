@@ -1,0 +1,50 @@
+<style>
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 3px 0 10px 0;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        color: #666;
+        transition: border-color 0.3s;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+        border-color: #00684A;
+        outline: none;
+    }
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+    button {
+        background-color: #00684A;
+        color: white;
+        padding: 10px 50px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 20px;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #00553A;
+    }
+    .spacer {
+        margin-bottom: 40px;
+    }
+    .spacer-large {
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+    .spacer-large .error:empty {
+        visibility: visible;
+    }
+    .error {
+        margin-left: 2px;
+        visibility: hidden;
+        color: red;
+    }
+</style>
