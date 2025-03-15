@@ -240,12 +240,19 @@ def check_for_quality_read():
     if 'uuid_since' in session:
         delta_seconds = int(time.time()) - session['uuid_since']
         session.pop('uuid_since')
-        if delta_seconds > 10 and delta_seconds < 300:
+        if delta_seconds > 8 and delta_seconds < 500:
             try:
                 collection().update_one({ "uuid" : session['uuid'] },
-                                      { "$inc" : { "read_count" : 1 }})
+                                        { "$inc" : { "read_count" : 1 }})
+                if 'user' in session:
+                    users_collection.update_one( { "username" : session['user'] },
+                                                 { "$inc" : { "articles_read" : 1 }})
             except Exception as e:
                 print(e)
+
+
+def get_user():
+    return users_collection.find_one({ 'username' : session['user'] }) if 'user' in session else {}
 
 
 @main.route('/select_news_source', methods=['POST'])
@@ -492,11 +499,6 @@ def index():
     log(request)
     check_for_quality_read()
     query = request.args.get('query')
-    # hack for user session - will be replaced by login process
-    userid = request.args.get('userid')
-    if userid:
-        session['user'] = { 'id' : userid, 'name' : 'Benjamin Lorenz' }
-    ### end of hack
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
@@ -531,7 +533,7 @@ def index():
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
-    return render_template('index.html', docs=docs, infoline=infoline)
+    return render_template('index.html', docs=docs, infoline=infoline, user=get_user())
 
 
 @main.route('/delete')
