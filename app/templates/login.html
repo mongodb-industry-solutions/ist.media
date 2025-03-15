@@ -20,56 +20,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
-    <style>
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-	    margin: 3px 0 10px 0;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-	    color: #666;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            border-color: #00684A;
-            outline: none;
-        }
-	.button-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        button {
-            background-color: #00684A;
-            color: white;
-	    padding: 10px 50px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 20px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #00553A;
-        }
-	.spacer {
-            margin-bottom: 40px;
-        }
-	.spacer-large {
-            margin-top: 25px;
-            margin-bottom: 20px;
-        }
-	.spacer-large .error:empty {
-	    visibility: visible;
-	}
-	.error {
-	    margin-left: 2px;
-	    visibility: hidden;
-	    color: red;
-	}
-    </style>
+    {% include "css/snippet_auth.html" %}
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -77,31 +28,7 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
-	    {% set user = session.get("user") %}
-	    {% if user %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-coins"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>874</strong> Media Coins</a>
-		</span>
-		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>127</strong> Articles</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% else %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-user"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile">Login</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% endif %}
+            {% include "snippet_main_nav_header.html" %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
@@ -147,15 +74,6 @@
                     <i class="fab fa-linkedin tm-social-icon"></i>
                 </a>
             </div>
-	    {% if user %}
-            <p class="tm-mb-40 pr-5 text-white">
-		<div class="user-info">
-		    <span class="user-name">{{ user.name }}</span>
-		    <span>[</span> <a href="/profile">Profile</a> <span>|</span>
-		    <a href="/logout">Logout</a> <span>]<br/>&nbsp;<br/>&nbsp;</span>
-		</div>
-            </p>
-	    {% endif %}
         </div>
     </header>
     <div class="container-fluid">
@@ -164,53 +82,46 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <div class="tm-color-primary text-right" style="font-size: 140%">
-                        {{ user.name }}
+                        Login
                     </div>
                 </div>
             </div>
             <div class="row tm-row">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
-		    <!--
-                    <img style="width: 100%; margin-bottom: 50px; aspect-ratio: 1784/782"
-                         src="/content/images/summary-header.jpg" alt="">
-		    -->
                 </div>
             </div>
             <div class="row tm-row">
-		<form action="/do_login" method="POST">
+                <form action="/do_login" method="POST">
                     <div class="col-lg-8 tm-post-col">
-			<div class="mb-4 ai-gen">
-			    <h1 class="pt-2 tm-mb-30 tm-color-primary">
-				Login
-			    </h1>
-			    <p>
-				Welcome back! You can log into the system to
-				enjoy explicit personalisation, targeted content suggestions,
-				and much more!
-			    </p>
-			    <div class="spacer-large">
-				<span class="error {% if badlogin is defined %}visible{% endif %}">
-				    Authentication failed &mdash; please try again
-				</span>
-			    </div>
-			    <div class="login-attribute">
-				<label for="username" class="login-list-key">Username</label>
-				<input type="text" id="username" name="username" class="list-value" required>
-			    </div>
-			    <div class="login-attribute">
-				<label for="password" class="login-list-key">Password</label>
-				<input type="password" id="password" name="password" class="list-value" required>
-			    </div>
-			    <div class="spacer"></div>
-			</div>
-		    </div>
-		    <div class="col-lg-12 tm-post-col">
-			<div class="button-container">
-			    <button type="submit">Login</button>
-			</div>
+                        <div class="mb-4 ai-gen">
+                            <p>
+                                Welcome back! You can log into the system to
+                                enjoy explicit personalisation, targeted content suggestions,
+                                and much more!
+                            </p>
+                            <div class="spacer-large">
+                                <span class="error {% if badlogin is defined %}visible{% endif %}">
+                                    Authentication failed &mdash; please try again
+                                </span>
+                            </div>
+                            <div class="login-attribute">
+                                <label for="username" class="login-list-key">Username</label>
+                                <input type="text" id="username" name="username" class="list-value" required>
+                            </div>
+                            <div class="login-attribute">
+                                <label for="password" class="login-list-key">Password</label>
+                                <input type="password" id="password" name="password" class="list-value" required>
+                            </div>
+                            <div class="spacer"></div>
+                        </div>
                     </div>
-		</form>
+                    <div class="col-lg-12 tm-post-col">
+                        <div class="button-container">
+                            <button type="submit">Login</button>
+                        </div>
+                    </div>
+                </form>
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
@@ -227,9 +138,9 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
     <script>
-	document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("username").focus();
-	});
+        });
     </script>
 </body>
 </html>

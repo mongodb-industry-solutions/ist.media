@@ -10,7 +10,7 @@
     <title>IST Media</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
-	  rel="stylesheet">
+      rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
     <!-- favicons of different sizes -->
@@ -28,10 +28,10 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="tm-site-header">
-		<div class="mb-3 mx-auto tm-site-logo">
-		    <img style="width: 100%; border-radius: 50%;"
-			 src="img/leaf.png"/>
-		</div>
+        <div class="mb-3 mx-auto tm-site-logo">
+            <img style="width: 100%; border-radius: 50%;"
+             src="img/leaf.png"/>
+        </div>
                 <h1 class="text-center">IST Media</h1>
             </div>
             <nav class="tm-nav" id="tm-nav">
@@ -73,10 +73,10 @@
                 </a>
             </div>
             <p class="tm-mb-80 pr-5 text-white">
-	      <br/>
-	      Benjamin Lorenz
-	      <br/>
-	      MongoDB Inc. &copy; 2024
+          <br/>
+          Benjamin Lorenz
+          <br/>
+          MongoDB Inc. &copy; 2024
             </p>
         </div>
     </header>
@@ -90,68 +90,68 @@
             <div class="row tm-row tm-mb-40">
                 <div class="col-12">
                     <div class="mb-4">
-			<h1 class="tm-color-primary tm-mb-30">
-			    New Post
-		        </h1>
-			<p class="tm-mb-60">
-			    You can write a new post here. Please include an image as well.
-			    Once the post has been submitted, it gets vectorized
-			    and indexed instantly, to be searchable from the Index or Single Post page.
-			</p>
-			<form method="POST" action="/submit_post" enctype="multipart/form-data"
-			      class="mb-5 ml-auto mr-0">
-			    <div class="form-group row mb-4">
-				<label for="title"
-				       class="col-sm-3 col-form-label text-right tm-color-primary">
-				    Title
-				</label>
-				<div class="col-sm-9">
+            <h1 class="tm-color-primary tm-mb-30">
+                New Post
+                </h1>
+            <p class="tm-mb-60">
+                You can write a new post here. Please include an image as well.
+                Once the post has been submitted, it gets vectorized
+                and indexed instantly, to be searchable from the Index or Single Post page.
+            </p>
+            <form method="POST" action="/submit_post" enctype="multipart/form-data"
+                  class="mb-5 ml-auto mr-0">
+                <div class="form-group row mb-4">
+                <label for="title"
+                       class="col-sm-3 col-form-label text-right tm-color-primary">
+                    Title
+                </label>
+                <div class="col-sm-9">
                                     <input class="form-control mr-0 ml-auto"
-					   name="title" id="title" type="text"
-					   value="{{ title }}" required>
-				</div>
+                       name="title" id="title" type="text"
+                       value="{{ title }}" required>
+                </div>
                             </div>
-			    <div class="form-group row mb-4">
-				<label for="text"
-				       class="col-sm-3 col-form-label text-right tm-color-primary">
-				    Content
-				</label>
-				<div class="col-sm-9">
+                <div class="form-group row mb-4">
+                <label for="text"
+                       class="col-sm-3 col-form-label text-right tm-color-primary">
+                    Content
+                </label>
+                <div class="col-sm-9">
                                     <textarea class="form-control mr-0 ml-auto"
-					      name="text" id="text" rows="12"
-					      type="text" required>{{ text }}</textarea>
-				</div>
+                          name="text" id="text" rows="12"
+                          type="text" required>{{ text }}</textarea>
+                </div>
                             </div>
-			    <div class="form-group row mb-4">
-				<label for="image"
-				       class="col-sm-3 col-form-label text-right tm-color-primary">
-				    {% if request.args.get('error') is defined and
-				    request.args.get('error') == 'missing_image' %}
-				    <span style="color: red">&rarr; Missing Image</span>
-				    {% else %}
-				    Image
-				    {% endif %}
-				</label>
-				<div class="col-sm-9 tm-pt-6">
-				    <input type="file" name="image" accept="image/*">
-				</div>
+                <div class="form-group row mb-4">
+                <label for="image"
+                       class="col-sm-3 col-form-label text-right tm-color-primary">
+                    {% if request.args.get('error') is defined and
+                    request.args.get('error') == 'missing_image' %}
+                    <span style="color: red">&rarr; Missing Image</span>
+                    {% else %}
+                    Image
+                    {% endif %}
+                </label>
+                <div class="col-sm-9 tm-pt-6">
+                    <input type="file" name="image" accept="image/*">
+                </div>
                             </div>
-			    <div class="form-group row text-right">
-				<div class="col-12">
-				    <button class="tm-btn tm-btn-primary tm-btn-small">
-					Submit
-				    </button>
-				</div>
+                <div class="form-group row text-right">
+                <div class="col-12">
+                    <button class="tm-btn tm-btn-primary tm-btn-small">
+                    Submit
+                    </button>
+                </div>
                             </div>
-			</form>
+            </form>
                     </div>
                 </div>
             </div>
-	    <footer class="row tm-row">
+        <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
                   Design: <a href="https://templatemo.com/tm-553-xtra-blog"
-			     rel="noopener" target="_blank"
-			     class="tm-external-link">TemplateMo</a>
+                 rel="noopener" target="_blank"
+                 class="tm-external-link">TemplateMo</a>
                 </div>
                 <div class="col-md-6 col-12 tm-color-gray tm-copyright">
                     Copyright &copy; 2024 MongoDB Inc.

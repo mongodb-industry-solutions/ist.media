@@ -27,31 +27,7 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
-	    {% set user = session.get("user") %}
-	    {% if user %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-coins"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>874</strong> Media Coins</a>
-		</span>
-		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>127</strong> Articles</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% else %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-user"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile">Login</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% endif %}
+            {% include "snippet_main_nav_header.html" %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
@@ -97,15 +73,6 @@
                     <i class="fab fa-linkedin tm-social-icon"></i>
                 </a>
             </div>
-	    {% if user %}
-            <p class="tm-mb-40 pr-5 text-white">
-		<div class="user-info">
-		    <span class="user-name">{{ user.name }}</span>
-		    <span>[</span> <a href="/profile">Profile</a> <span>|</span>
-		    <a href="/logout">Logout</a> <span>]<br/>&nbsp;<br/>&nbsp;</span>
-		</div>
-            </p>
-	    {% endif %}
         </div>
     </header>
     <div class="container-fluid">
@@ -126,33 +93,30 @@
             <div class="row tm-row">
                 <div class="col-lg-8 tm-post-col">
                     <div class="mb-4 ai-gen">
-
-
-			<h3>Pay with Solana</h3>
-			<p>
-			    Transaction initiated:<br/>
-			    <span style="font-size: 60%">{{ signature }}</span>
-			</p>
-			<p>
-			    Waiting for network confirmation...
-			</p>
-			<script>
-			    // JavaScript zum Polling des Servers
-			    function checkPaymentStatus() {
-				fetch('/status-stage-2')
-				    .then(response => response.text())
-				    .then(data => {
-					if (data === "waiting") {
-					    setTimeout(checkPaymentStatus, 2000);
-					} else {
-					    window.location.href = "/payment-final?amount=" + data;
-					}
-				    });
-			    }
-			    checkPaymentStatus();
-			</script>
-
-
+                        <h1 class="pt-2 tm-mb-30 tm-color-primary">
+                            Media Coins Purchase
+                        </h1>
+                        <p>
+                            Transaction has been initiated. &nbsp;Its signature is<br/>
+                            <span style="font-size: 55%">{{ signature }}</span>
+                        </p>
+                        <p style="padding-bottom: 5em">
+                            <strong>Waiting for network confirmation...</strong>
+                        </p>
+                        <script>
+                            function checkPaymentStatus() {
+                                fetch('/status-stage-2')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        if (data === "waiting") {
+                                            setTimeout(checkPaymentStatus, 2000);
+                                        } else {
+                                            window.location.href = "/payment-final?amount=" + data;
+                                        }
+                                    });
+                            }
+                            checkPaymentStatus();
+                        </script>
                     </div>
                 </div>
                 <aside class="col-lg-4 tm-aside-col">

@@ -20,40 +20,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
-    <style>
-        button {
-            font-weight: normal;
-            -webkit-appearance: none; /* Removes default styles on iOS */
-        }
-
-        @media (max-width: 580px) {
-            .arrow {
-                display: none;
-            }
-        }
-
-        .delimiter::after {
-            content: "\00a0\00a0\00a0";
-        }
-
-        .summary::after {
-            content: "Create summary";
-        }
-        @media (max-width: 580px) {
-            .summary::after {
-                content: "Summary";
-            }
-        }
-
-        .translate::after {
-            content: "Translate to";
-        }
-        @media (max-width: 580px) {
-            .translate::after {
-                content: "Translate";
-            }
-        }
-    </style>
+    {% include "css/snippet_post.html" %}
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -61,31 +28,7 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
-	    {% set user = session.get("user") %}
-	    {% if user %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-coins"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>874</strong> Media Coins</a>
-		</span>
-		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>127</strong> Articles</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% else %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-user"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile">Login</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% endif %}
+            {% include "snippet_main_nav_header.html" %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
@@ -131,15 +74,6 @@
                     <i class="fab fa-linkedin tm-social-icon"></i>
                 </a>
             </div>
-	    {% if user %}
-            <p class="tm-mb-40 pr-5 text-white">
-		<div class="user-info">
-		    <span class="user-name">{{ user.name }}</span>
-		    <span>[</span> <a href="/profile">Profile</a> <span>|</span>
-		    <a href="/logout">Logout</a> <span>]<br/>&nbsp;<br/>&nbsp;</span>
-		</div>
-            </p>
-	    {% endif %}
         </div>
     </header>
     <div class="container-fluid">

@@ -27,31 +27,7 @@
             <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
-	    {% set user = session.get("user") %}
-	    {% if user %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-coins"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>874</strong> Media Coins</a>
-		</span>
-		<span class="article-count">
-		    <i class="fas fa-file-alt"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile"><strong>127</strong> Articles</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% else %}
-	    <div class="user-info">
-		<span class="coin-count">
-		    <i class="fas fa-user"></i>
-		    <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
-		       href="/profile">Login</a>
-		    <br/>&nbsp;<br/>&nbsp;
-		</span>
-	    </div>
-	    {% endif %}
+            {% include "snippet_main_nav_header.html" %}
             <div class="tm-site-header">
                 <div class="mb-3 mx-auto tm-site-logo">
                     <img style="width: 100%; border-radius: 50%;"
@@ -97,15 +73,6 @@
                     <i class="fab fa-linkedin tm-social-icon"></i>
                 </a>
             </div>
-	    {% if user %}
-            <p class="tm-mb-40 pr-5 text-white">
-		<div class="user-info">
-		    <span class="user-name">{{ user.name }}</span>
-		    <span>[</span> <a href="/profile">Profile</a> <span>|</span>
-		    <a href="/logout">Logout</a> <span>]<br/>&nbsp;<br/>&nbsp;</span>
-		</div>
-            </p>
-	    {% endif %}
         </div>
     </header>
     <div class="container-fluid">
@@ -126,31 +93,40 @@
             <div class="row tm-row">
                 <div class="col-lg-8 tm-post-col">
                     <div class="mb-4 ai-gen">
-
-
-			<h3>Pay with Solana</h3>
-			{{ usd_amount }} USD<br/>
-			1 SOL = {{ sol_price }} USD<br/>
-			To pay: {{ sol_amount | round(5) }} SOL
-			<img src="/qr_image/{{ sol_amount }}" alt="Solana Pay QR Code">
-			<p>Scannen Sie den QR-Code, um zu bezahlen.</p>
-			<script>
-			    // JavaScript zum Polling des Servers
-			    function checkPaymentStatus() {
-				fetch('/status')
-				    .then(response => response.text())
-				    .then(data => {
-					if (data === "waiting") {
-					    setTimeout(checkPaymentStatus, 2000);
-					} else {
-					    window.location.href = "/payment-stage-2?tx=" + data;
-					}
-				    });
-			    }
-			    checkPaymentStatus();
-			</script>
-
-
+                        <h1 class="pt-2 tm-mb-30 tm-color-primary">
+                            Media Coins Purchase
+                        </h1>
+                        <p>
+                            We support instand payment using Solana
+                            Pay. Our suggestion is to use the Phantom
+                            wallet, which guarantees low fees (around
+                            1 US cent per transaction) as well as an
+                            easy and convenient handling.
+                        </p>
+                        <p style="margin-bottom: 0; padding-top: 1em">
+                            To pay: <strong style="font-size: 120%">{{ sol_amount | round(5) }} SOL</strong>
+                            ({{ usd_amount }} USD)
+                        </p>
+                        <p style="font-size: 80%; margin-top: 0; padding-bottom: 0.2em">
+                            Market Price: 1 SOL = {{ sol_price }} USD
+                        </p>
+                        <img src="/qr_image/{{ sol_amount }}" alt="Solana Pay QR Code">
+                        <p style="padding-top: 2em; padding-bottom:3em">
+                            Scan the QR code with your phone</p>
+                        <script>
+                            function checkPaymentStatus() {
+                                fetch('/status')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        if (data === "waiting") {
+                                            setTimeout(checkPaymentStatus, 2000);
+                                        } else {
+                                            window.location.href = "/payment-stage-2?tx=" + data;
+                                        }
+                                    });
+                            }
+                            checkPaymentStatus();
+                        </script>
                     </div>
                 </div>
                 <aside class="col-lg-4 tm-aside-col">
