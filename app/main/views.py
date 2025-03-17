@@ -456,8 +456,8 @@ def payment_final():
         coins_additional = 500 if sol_amount > 0 else 0
         user = users_collection.find_one_and_update(
             { 'username' : session['user'] },
-            { '$inc' : { 'coins_current' : coins_additional },
-              '$inc' : { 'coins_lifetime' : coins_additional }},
+            { '$inc' : { 'coins_current' : coins_additional,
+                         'coins_lifetime' : coins_additional }},
             return_document=ReturnDocument.AFTER)
         session.pop("amount_paid", None)  # avoid cheating by refreshing the html page
         return render_template("payment-final.html", sol_amount=sol_amount,
