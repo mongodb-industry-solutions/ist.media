@@ -81,7 +81,7 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <div class="tm-color-primary text-right" style="font-size: 140%">
-                        Benjamin Lorenz
+                        {{ user.fullname }}
                     </div>
                 </div>
             </div>
@@ -91,16 +91,16 @@
                 </div>
             </div>
             <div class="row tm-row">
-                <div class="col-lg-8 tm-post-col">
+                <div class="col-lg-10 tm-post-col">
                     <div class="mb-4 ai-gen">
                         <h1 class="pt-2 tm-mb-30 tm-color-primary">
                             Media Coins Purchase
                         </h1>
                         <p>
                             Transaction has been initiated. &nbsp;Its signature is<br/>
-                            <span style="font-size: 55%">{{ signature }}</span>
+                            <span style="font-size: 70%">{{ signature }}</span>
                         </p>
-                        <p style="padding-bottom: 5em">
+                        <p style="padding-bottom: 5em; padding-top: 2em; font-size: 120%">
                             <strong>Waiting for network confirmation...</strong>
                         </p>
                         <script>
@@ -111,7 +111,7 @@
                                         if (data === "waiting") {
                                             setTimeout(checkPaymentStatus, 2000);
                                         } else {
-                                            window.location.href = "/payment-final?amount=" + data;
+                                            window.location.href = "/payment-final";
                                         }
                                     });
                             }
@@ -119,22 +119,6 @@
                         </script>
                     </div>
                 </div>
-                <aside class="col-lg-4 tm-aside-col">
-                    <div class="tm-post-sidebar tm-insights">
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 1
-                            </a>
-                        </p>
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 2
-                            </a>
-                        </p>
-                    </div>
-                </aside>
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">

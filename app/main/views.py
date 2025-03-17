@@ -9,7 +9,7 @@ from mistune import html
 from .. import mongo, logger
 from . import main
 from bson.objectid import ObjectId
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from openai import OpenAI
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -425,32 +425,55 @@ def create_qr_code(payment_uri):
 def payment():
     log(request)
     check_for_quality_read()
-    usd_amount = 5.0 # top up of 5 USD hardcoded for now
-    sol_price, sol_amount = calculate_sol_amount(usd_amount)
-    return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
-                           usd_amount=usd_amount, user=get_user())
+    if "user" in session:
+        usd_amount = 5.0 # top up of 5 USD hardcoded for now
+        sol_price, sol_amount = calculate_sol_amount(usd_amount)
+        return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
+                               usd_amount=usd_amount, user=get_user())
+    else:
+        return redirect('/login')
 
 
 @main.route('/payment-stage-2')
 def payment_stage_2():
     log(request)
     check_for_quality_read()
-    signature = request.args.get('tx')
-    return render_template("payment-stage-2.html", signature=signature, user=get_user())
+    if "user" in session:
+        signature = request.args.get('tx')
+        return render_template("payment-stage-2.html", signature=signature, user=get_user())
+    else:
+        return redirect('/login')
 
 
 @main.route('/payment-final')
 def payment_final():
     log(request)
     check_for_quality_read()
-    amount = request.args.get('amount')
-    return render_template("payment-final.html", amount=amount, user=get_user())
+    if "user" in session:
+        sol_amount = session["amount_paid"] if "amount_paid" in session else 0
+        # 5 USD = 500 Coins - given for any SOL amount paid --
+        # this would need to be further hardened for production use
+        coins_additional = 500 if sol_amount > 0 else 0
+        user = users_collection.find_one_and_update(
+            { 'username' : session['user'] },
+            { '$inc' : { 'coins_current' : coins_additional },
+              '$inc' : { 'coins_lifetime' : coins_additional }},
+            return_document=ReturnDocument.AFTER)
+        session.pop("amount_paid", None)  # avoid cheating by refreshing the html page
+        return render_template("payment-final.html", sol_amount=sol_amount,
+                               coins_additional=coins_additional, user=user)
+    else:
+        return redirect('/login')
+
+
+def get_memo():
+    return session['user'] if 'user' in session else "anonymous"
 
 
 @main.route('/qr_image/<float:amount>')
 def qr_image(amount):
     SOLANA_RECIPIENT_ADDRESS = "918Y2TZvy386gXLWxGM9sBVutviT77xJriCDQsZeheEF"
-    memo = "bjjl"
+    memo = get_memo()
     label = "IST.Media"
     payment_uri = generate_solana_pay_uri(SOLANA_RECIPIENT_ADDRESS, amount, memo, label)
     qr_image = create_qr_code(payment_uri)
@@ -459,7 +482,7 @@ def qr_image(amount):
 
 @main.route('/status')
 def payment_status():
-    tx_tmp = solana_collection_tmp.find_one({ "memo" : "bjjl" })
+    tx_tmp = solana_collection_tmp.find_one({ "memo" : get_memo() })
     if tx_tmp:
         session['tx_in_progress'] = tx_tmp["signature"]
         return tx_tmp["signature"]
@@ -469,13 +492,16 @@ def payment_status():
 
 @main.route('/status-stage-2')
 def payment_status_stage_2():
-    signature = session['tx_in_progress']
-    tx = solana_collection_tx.find_one({ "signature" : signature, "memo" : "bjjl" })
-    if tx:
-        session.pop('tx_in_progress')
-        return str(tx["amount"])
-    else:
-        return "waiting"
+    if 'tx_in_progress' in session:
+        tx = solana_collection_tx.find_one({ "signature" : session['tx_in_progress'],
+                                             "memo" : get_memo() })
+        if tx:
+            users_collection.update_one({ 'username' : get_memo() }, { '$push' : { 'txs' : tx } })
+            session.pop('tx_in_progress')
+            session["amount_paid"] = tx["amount"]
+            return "tx_confirmed"
+    # no confirmation yet, or no transaction in progress
+    return "waiting"
 
 
 def adjusted_score(original_score, age_in_seconds, half_life=86400*90):
@@ -667,10 +693,17 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        collection().update_one({ "_id" : doc["_id"] },
-                              { "$inc" : { "visit_count" : 1 }})
+        collection().update_one({ "_id" : doc["_id"] }, { "$inc" : { "visit_count" : 1 }})
+        if 'user' in session:
+            result = users_collection.update_one({ 'username' : session['user'],
+                                                   'ids': { '$not' : { '$eq' : doc['uuid'] }}},
+                                                 { '$inc' : { 'coins_current' : -1 },
+                                                   '$push' : { 'ids' : doc['uuid'] }})
+            purchased = 'now' if result.modified_count > 0 else 'earlier'
+        else:
+            purchased = 'not_applicable'
         return render_template('post.html', doc=doc, fdoc=fdoc, user=get_user(),
-                               recommendations=recommendations, keywords=keywords,
+                               recommendations=recommendations, keywords=keywords, purchased=purchased,
                                visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,
                                read_count=doc['read_count'] if 'read_count' in doc else 0)
 

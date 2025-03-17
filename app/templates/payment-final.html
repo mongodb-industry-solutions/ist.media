@@ -81,7 +81,7 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <div class="tm-color-primary text-right" style="font-size: 140%">
-                        Benjamin Lorenz
+                        {{ user.fullname }}
                     </div>
                 </div>
             </div>
@@ -91,36 +91,30 @@
                 </div>
             </div>
             <div class="row tm-row">
-                <div class="col-lg-8 tm-post-col">
+                <div class="col-lg-10 tm-post-col">
                     <div class="mb-4 ai-gen">
                         <h1 class="pt-2 tm-mb-30 tm-color-primary">
                             Media Coins Purchase
                         </h1>
                         <p>
-                            Transaction successful. You paid <strong>{{ amount }} SOL</strong>.
+                            Transaction successful.
+                        </p>
+                        <p>
+                            You paid
+                            <strong style="font-size: 120%">{{ sol_amount | round(7) }} SOL</strong>,
+                            and received
+                            <strong style="font-size: 120%">{{ coins_additional }} Coins</strong>.
                         </p>
                         <p style="padding-top:1.75em; padding-bottom: 5em">
+                            You now have {{ user.coins_current }} Coins in total.
+                            Thank you for doing business with us! You can navigate to your
                             <span class="arrow">&#10145;&nbsp;</span>
-                            <a href="/profile">Profile Page</a>
+                            <a href="/profile">Profile Page</a>, or go to the
+                            <span class="arrow">&#10145;&nbsp;</span>
+                            <a href="/">Home Page</a>.
                         </p>
                     </div>
                 </div>
-                <aside class="col-lg-4 tm-aside-col">
-                    <div class="tm-post-sidebar tm-insights">
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 1
-                            </a>
-                        </p>
-                        <p style="padding: 0.6em 0 0 0; margin: 0">
-                            <a class="tm-color-primary" style="font-size: 90%"
-                               href="/insights?keyword={{ entity }}">
-                                My Stat 2
-                            </a>
-                        </p>
-                    </div>
-                </aside>
             </div>
             <footer class="row tm-row tm-pt-45">
                 <div class="col-md-6 col-12 tm-color-gray">
