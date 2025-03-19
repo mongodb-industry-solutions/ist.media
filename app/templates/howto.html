@@ -35,6 +35,13 @@
                          src="img/leaf.png"/>
                 </div>
                 <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
