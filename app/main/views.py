@@ -371,7 +371,7 @@ def do_login():
 
     if user and bcrypt.checkpw(password, user['password']):
         session['user'] = username
-        return redirect('/profile')
+        return redirect('/')
     else:
         session['badlogin'] = True
         return redirect('/login')
