@@ -255,6 +255,11 @@ def get_user():
     return users_collection.find_one({ 'username' : session['user'] }) if 'user' in session else {}
 
 
+@main.before_request
+def make_session_permanent():
+    session.permanent = True
+
+
 @main.route('/select_news_source', methods=['POST'])
 def select_news_source():
     selected_option = request.form['news_option']
