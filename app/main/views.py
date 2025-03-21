@@ -918,7 +918,7 @@ def insights():
     if keyword and keyword != "":
         content = html(calculate_insights(keyword))
         title = capitalize(keyword)
-        return render_template('insights.html',
+        return render_template('insights.html', user=get_user(),
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif _id and _id != "":
         try:
