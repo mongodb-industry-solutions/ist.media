@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import render_template, redirect, request, session, url_for, send_file
+from flask import g, render_template, redirect, request, session, url_for, send_file
 from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
@@ -258,6 +258,12 @@ def get_user():
 @main.before_request
 def make_session_permanent():
     session.permanent = True
+    g.user = get_user()
+
+
+@main.context_processor
+def inject_user():
+    return { 'user' : g.user }
 
 
 @main.route('/select_news_source', methods=['POST'])
@@ -308,7 +314,7 @@ def recalculate_keywords(uuid):
 def howto():
     log(request)
     check_for_quality_read()
-    return render_template('howto.html', user=get_user())
+    return render_template('howto.html')
 
 
 @main.route('/welcome')
@@ -323,7 +329,7 @@ def profile():
     log(request)
     check_for_quality_read()
     if "user" in session:
-        return render_template('profile.html', user=get_user())
+        return render_template('profile.html')
     else:
         return redirect('/login')
 
@@ -434,7 +440,7 @@ def payment():
         usd_amount = 5.0 # top up of 5 USD hardcoded for now
         sol_price, sol_amount = calculate_sol_amount(usd_amount)
         return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
-                               usd_amount=usd_amount, user=get_user())
+                               usd_amount=usd_amount)
     else:
         return redirect('/login')
 
@@ -445,7 +451,7 @@ def payment_stage_2():
     check_for_quality_read()
     if "user" in session:
         signature = request.args.get('tx')
-        return render_template("payment-stage-2.html", signature=signature, user=get_user())
+        return render_template("payment-stage-2.html", signature=signature)
     else:
         return redirect('/login')
 
@@ -563,7 +569,7 @@ def index():
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
-    return render_template('index.html', docs=docs, infoline=infoline, user=get_user())
+    return render_template('index.html', docs=docs, infoline=infoline)
 
 
 @main.route('/delete')
@@ -616,7 +622,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations, user=get_user())
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
     if style and style == "translated":
         if not 'uuid' in session:
             return redirect('/')
@@ -668,7 +674,7 @@ def post():
             recommendations = calculate_recommendations(doc['embedding'], session['history'], MAX_RCOM)
         else:
             recommendations = []
-        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations, user=get_user())
+        return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
             doc = collection().find_one({ "uuid" : uuid })
@@ -707,7 +713,7 @@ def post():
             purchased = 'now' if result.modified_count > 0 else 'earlier'
         else:
             purchased = 'not_applicable'
-        return render_template('post.html', doc=doc, fdoc=fdoc, user=get_user(),
+        return render_template('post.html', doc=doc, fdoc=fdoc,
                                recommendations=recommendations, keywords=keywords, purchased=purchased,
                                visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,
                                read_count=doc['read_count'] if 'read_count' in doc else 0)
@@ -809,7 +815,7 @@ def about():
         country_stats = []
         path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
-    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache, user=get_user(),
+    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
                            news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
 
@@ -900,7 +906,7 @@ def daily():
         entities = []
         podcast = None
     return render_template('daily.html', day=formatted_date, summary=summary,
-                           entities=entities, podcast=podcast, user=get_user())
+                           entities=entities, podcast=podcast)
 
 
 @main.route('/insights')
@@ -918,7 +924,7 @@ def insights():
     if keyword and keyword != "":
         content = html(calculate_insights(keyword))
         title = capitalize(keyword)
-        return render_template('insights.html', user=get_user(),
+        return render_template('insights.html',
                                title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif _id and _id != "":
         try:
@@ -930,7 +936,7 @@ def insights():
         content = html(cached_entry['answer'])
         title = capitalize(cached_entry['question'])
         return render_template('insights.html',
-                               title=title, content=content, gen_ai_cache=gen_ai_cache, user=get_user())
+                               title=title, content=content, gen_ai_cache=gen_ai_cache)
     elif query and query != "":
         query = query.strip()
         cached_entry = None
@@ -945,7 +951,7 @@ def insights():
             content = html(calculate_using_rag(query))
             title = capitalize(query)
         return render_template('insights.html',
-                               title=title, content=content, gen_ai_cache=gen_ai_cache, user=get_user())
+                               title=title, content=content, gen_ai_cache=gen_ai_cache)
     else:
         most_read_articles = collection().find().sort({ 'read_count' : -1 }).limit(10)
         return render_template('insights.html',
@@ -969,7 +975,7 @@ def insights():
 
                                """,
                                gen_ai_cache=gen_ai_cache,
-                               most_read_articles=most_read_articles, user=get_user())
+                               most_read_articles=most_read_articles)
 
 
 @main.route('/new')
