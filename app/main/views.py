@@ -274,9 +274,19 @@ class MongoJSONEncoder(JSONEncoder):
         return obj
 
     def encode(self, obj):
+        seen = set()
         def process_item(item):
+            item_id = id(item)
+            if item_id in seen:
+                return "[circular reference]"
+            if isinstance(item, (dict, list)):
+                seen.add(item_id)
             if isinstance(item, ObjectId):
                 return str(item)
+            elif isinstance(item, datetime):
+                return item.isoformat()
+            elif isinstance(item, bytes):
+                return item.decode('utf-8', errors='replace')
             elif isinstance(item, dict):
                 return {k: process_item(v) for k, v in item.items()}
             elif isinstance(item, list) and len(item) > 10:
@@ -284,8 +294,8 @@ class MongoJSONEncoder(JSONEncoder):
                 return item[:5] + [ "... (shortened, total: {})".format(total_length) ] + item[-5:]
             elif isinstance(item, list):
                 return [process_item(x) for x in item]
-            elif isinstance(item, str) and len(item) > 100:
-                return item[:100] + " [...]"
+            elif isinstance(item, str) and len(item) > 115:
+                return item[:115] + " [...]"
             return item
 
         processed_obj = process_item(obj)
@@ -295,8 +305,12 @@ class MongoJSONEncoder(JSONEncoder):
 @main.route('/json/<_id>')
 def show_json(_id):
     doc = collection().find_one({ "_id" : ObjectId(_id) })
+    title = "MongoDB Article Document"
+    if not doc:
+        doc = users_collection.find_one({ "_id" : ObjectId(_id) })
+        title = "MongoDB User Document"
     json_data = json.dumps(doc, indent=2, ensure_ascii=False, cls=MongoJSONEncoder)
-    return render_template('json.html', json_data=json_data)
+    return render_template('json.html', json_data=json_data, title=title)
 
 
 @main.route('/select_news_source', methods=['POST'])

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MongoDB Document</title>
+    <title>{{ title }}</title>
     <style>
         .popup {
             position: fixed;
@@ -16,7 +16,7 @@
             max-width: 80%;
             max-height: 80%;
             overflow: auto;
-            font-size: 90%;
+            font-size: 80%;
         }
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
@@ -25,7 +25,7 @@
 </head>
 <body>
     <div class="popup">
-        <h2>MongoDB Document</h2>
+        <h2>{{ title }}</h2>
         <pre><code class="language-json">{{ json_data }}</code></pre>
         <button onclick="window.close()" style="margin-top: 1em"> Close Window </button>
     </div>
