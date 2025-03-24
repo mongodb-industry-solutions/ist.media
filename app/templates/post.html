@@ -110,7 +110,8 @@
                     <div class="tm-post-full">
                         <div class="mb-4">
                             <h2 class="pt-2 tm-color-primary tm-post-title">
-                                {{ doc.title }}
+                                <a href="/json/{{ doc._id }}" target="_blank"
+                                   class="tm-color-primary">{{ doc.title }}</a>
                             </h2>
                             {% if not request.args.get('style') %}
                             <p style="margin: 0; padding: 0">

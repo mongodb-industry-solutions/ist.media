@@ -23,6 +23,7 @@ from langchain_mongodb.retrievers.hybrid_search import MongoDBAtlasHybridSearchR
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, urlencode
 from requests.auth import HTTPBasicAuth
+from json import JSONEncoder
 import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
 import io, qrcode, bcrypt
 
@@ -264,6 +265,38 @@ def make_session_permanent():
 @main.context_processor
 def inject_user():
     return { 'user' : g.user }
+
+
+class MongoJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        return obj
+
+    def encode(self, obj):
+        def process_item(item):
+            if isinstance(item, ObjectId):
+                return str(item)
+            elif isinstance(item, dict):
+                return {k: process_item(v) for k, v in item.items()}
+            elif isinstance(item, list) and len(item) > 10:
+                total_length = len(item)
+                return item[:5] + [ "... (shortened, total: {})".format(total_length) ] + item[-5:]
+            elif isinstance(item, list):
+                return [process_item(x) for x in item]
+            elif isinstance(item, str) and len(item) > 100:
+                return item[:100] + " [...]"
+            return item
+
+        processed_obj = process_item(obj)
+        return super().encode(processed_obj)
+
+
+@main.route('/json/<_id>')
+def show_json(_id):
+    doc = collection().find_one({ "_id" : ObjectId(_id) })
+    json_data = json.dumps(doc, indent=2, ensure_ascii=False, cls=MongoJSONEncoder)
+    return render_template('json.html', json_data=json_data)
 
 
 @main.route('/select_news_source', methods=['POST'])
