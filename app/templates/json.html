@@ -19,14 +19,14 @@
             font-size: 80%;
         }
     </style>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-one-dark.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 </head>
 <body>
     <div class="popup">
         <h2>{{ title }}</h2>
-        <pre><code class="language-json">{{ json_data }}</code></pre>
+        <pre><code class="language-json">{{ json_data | safe }}</code></pre>
         <button onclick="window.close()" style="margin-top: 1em"> Close Window </button>
     </div>
 </body>
