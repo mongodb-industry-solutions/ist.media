@@ -122,6 +122,14 @@
                         <div class="ai-gen">
                             <ul>
                                 <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Payments</span>
+                                    &mdash; Purchase Media Coins with SOL
+                                    (real, production integration of Solana blockchain, Mar 2025)</li>
+                                <li style="margin-bottom: 0">NEW:
+                                    <span style="font-weight: bold; color: #555">Login</span>
+                                    &mdash; Possibility to create an account, with explicit personalization
+                                    to follow soon (Mar 2025)</li>
+                                <li style="margin-bottom: 0">NEW:
                                     <span style="font-weight: bold; color: #555">Text to Podcast</span>
                                     &mdash; Daily Summary page with Podcast audio controls (Feb 2025)</li>
                                 <li style="margin-bottom: 0">NEW:
@@ -222,6 +230,17 @@
                             <br/>{{ loc.city }}, {{ loc.country }}
                             {% endif %}
                         </p>
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-60">
+                            Access Statistics per Path
+                        </h2>
+                        {% if path_stats|length > 0 %}
+                        <p>&nbsp;</p>
+                        <canvas id="pathStatsChart" style="max-height: 400px;"></canvas>
+                        {% else %}
+                        <p class="tm-pt-10">
+                            <i>List is empty</i>
+                        </p>
+                        {% endif %}
                         <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
                             Access Statistics per Country
                         </h2>
@@ -274,33 +293,6 @@
                             <i>List is empty</i>
                         </p>
                         {% endif %}
-                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
-                            Access Statistics per Path
-                        </h2>
-                        {% if path_stats|length > 0 %}
-                        <p class="tm-pt-10">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Path</th>
-                                        <th>Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for entry in path_stats %}
-                                    <tr>
-                                        <td>{{ entry._id | truncate(45) }}</td>
-                                        <td>{{ entry.access_count }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </p>
-                        {% else %}
-                        <p class="tm-pt-10">
-                            <i>List is empty</i>
-                        </p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -318,5 +310,76 @@
     </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the path_stats data from Jinja template
+            const pathStats = [
+                {% for entry in path_stats %}
+                {
+                    month_year: "{{ entry.month_year }}",
+                    path: "{{ entry.path }}",
+                    access_count: {{ entry.access_count }}
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            // Extract unique months and sort them (should already be sorted from pipeline)
+            const months = [...new Set(pathStats.map(item => item.month_year))];
+
+            // Define the top 3 paths we expect (based on your data)
+            const paths = ["/", "/post", "/daily", "/insights", "/profile", "/login", "/payment",
+                           "/backstage", "/howto" ];
+            const colors = {
+                "/": "#00684A",
+                "/post": "#DD6F01",
+                "/daily": "#3980B1",
+                "/insights": "#F7B731",
+                "/profile": "#9B5996",
+                "/backstage": "#E74C3C",
+                "/howto": "#009B7D",
+                "/login": "#808080",
+                "/payment": "#222222"
+            };
+
+            // Prepare datasets for Chart.js
+            const datasets = paths.map(path => {
+                return {
+                    label: path,
+                    data: months.map(month => {
+                        const entry = pathStats.find(item => item.month_year === month && item.path === path);
+                        return entry ? entry.access_count : 0;
+                    }),
+                    backgroundColor: colors[path],
+                    borderWidth: 1
+                };
+            });
+
+            // Create the chart
+            const ctx = document.getElementById('pathStatsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: { display: true, text: 'Month-Year' }
+                        },
+                        y: {
+                            stacked: true,
+                            title: { display: true, text: 'Access Count' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
