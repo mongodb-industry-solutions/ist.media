@@ -105,8 +105,12 @@
                         <h2 class="pt-2 tm-mb-30 tm-color-primary tm-post-title">
                             {{ day }}<br/>
                             <span style="color: grey; font-size: 60%">
+                                {% if podcast %}
                                 Summary &amp; Entity Extraction by <strong>OpenAI</strong>,
                                 Podcast by <strong>Google</strong>
+                                {% else %}
+                                Summary &amp; Entity Extraction by <strong>OpenAI</strong>
+                                {% endif %}
                             </span>
                         </h2>
                         {% if podcast %}
