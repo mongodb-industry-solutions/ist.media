@@ -1,0 +1,9 @@
+For NetBSD 10.1 production server with pkgsrc-2025Q1,
+you must link the following pkgsrc packages from
+the global installation into your virtual environment,
+otherwise `pip install -r requirements.txt´ will fail,
+due to incompatibilities of a few packages:
+
+/usr/pkg/lib/python3.11/site-packages/zstandard
+/usr/pkg/lib/python3.11/site-packages/zstandard-0.23.0.dist-info
+/usr/pkg/lib/python3.11/site-packages/uWSGI-2.0.28.dist-info
