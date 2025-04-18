@@ -1,5 +1,6 @@
 bcrypt
 beautifulsoup4
+feedparser
 Flask-PyMongo
 geocoder
 langchain-community
@@ -8,6 +9,7 @@ langchain-openai
 markdown
 mistune
 pillow
+pip-tools
 pycountry
 pydub
 python-dateutil
