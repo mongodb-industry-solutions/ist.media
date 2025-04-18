@@ -10,6 +10,7 @@ mistune
 pillow
 pycountry
 pydub
+python-dateutil
 qrcode
 uwsgi
 websocket-client
