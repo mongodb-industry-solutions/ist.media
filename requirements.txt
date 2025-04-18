@@ -6,13 +6,13 @@
 #
 annotated-types==0.7.0
     # via pydantic
-anyio==4.8.0
+anyio==4.9.0
     # via
     #   httpx
     #   openai
 bcrypt==4.3.0
     # via -r requirements.in
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via -r requirements.in
 blinker==1.9.0
     # via flask
@@ -41,9 +41,11 @@ future==1.0.0
     # via geocoder
 geocoder==1.38.1
     # via -r requirements.in
+greenlet==3.2.0
+    # via sqlalchemy
 h11==0.14.0
     # via httpcore
-httpcore==1.0.7
+httpcore==1.0.8
     # via httpx
 httpx==0.28.1
     # via
@@ -64,57 +66,61 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.3.20
+langchain==0.3.23
     # via langchain-mongodb
-langchain-core==0.3.45
+langchain-core==0.3.54
     # via
     #   langchain
     #   langchain-mongodb
     #   langchain-openai
     #   langchain-text-splitters
-langchain-mongodb==0.5.0
+langchain-mongodb==0.6.1
     # via -r requirements.in
-langchain-openai==0.3.8
+langchain-openai==0.3.14
     # via -r requirements.in
-langchain-text-splitters==0.3.6
+langchain-text-splitters==0.3.8
     # via
     #   langchain
     #   langchain-mongodb
-langsmith==0.3.14
+langsmith==0.3.32
     # via
     #   langchain
     #   langchain-core
+lark==1.2.2
+    # via langchain-mongodb
+markdown==3.8
+    # via -r requirements.in
 markupsafe==3.0.2
     # via
     #   jinja2
     #   werkzeug
-mistune==3.1.2
+mistune==3.1.3
     # via -r requirements.in
-numpy==2.2.3
+numpy==2.2.4
     # via langchain-mongodb
-openai==1.66.3
+openai==1.75.0
     # via langchain-openai
-orjson==3.10.15
+orjson==3.10.16
     # via langsmith
 packaging==24.2
     # via
     #   langchain-core
     #   langsmith
-pillow==11.1.0
+pillow==11.2.1
     # via -r requirements.in
 pycountry==24.6.1
     # via -r requirements.in
-pydantic==2.10.6
+pydantic==2.11.3
     # via
     #   langchain
     #   langchain-core
     #   langsmith
     #   openai
-pydantic-core==2.27.2
+pydantic-core==2.33.1
     # via pydantic
 pydub==0.25.1
     # via -r requirements.in
-pymongo==4.11.2
+pymongo==4.12.0
     # via
     #   flask-pymongo
     #   langchain-mongodb
@@ -122,7 +128,7 @@ pyyaml==6.0.2
     # via
     #   langchain
     #   langchain-core
-qrcode==8.0
+qrcode==8.1
     # via -r requirements.in
 ratelim==0.1.6
     # via geocoder
@@ -145,15 +151,15 @@ sniffio==1.3.1
     #   openai
 soupsieve==2.6
     # via beautifulsoup4
-sqlalchemy==2.0.39
+sqlalchemy==2.0.40
     # via langchain
-tenacity==9.0.0
+tenacity==9.1.2
     # via langchain-core
 tiktoken==0.9.0
     # via langchain-openai
 tqdm==4.67.1
     # via openai
-typing-extensions==4.12.2
+typing-extensions==4.13.2
     # via
     #   anyio
     #   beautifulsoup4
@@ -162,7 +168,10 @@ typing-extensions==4.12.2
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
-urllib3==2.3.0
+    #   typing-inspection
+typing-inspection==0.4.0
+    # via pydantic
+urllib3==2.4.0
     # via requests
 uwsgi==2.0.28
     # via -r requirements.in
