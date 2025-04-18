@@ -6,9 +6,9 @@
 
 export PATH=/usr/local/bin:/usr/pkg/bin:$PATH
 
-# start from the project's root directory (e.g. by running ./bin/uwsgi.start)
 cd /usr/local/share/ist.media
-uwsgi -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 \
+uwsgi --virtualenv /usr/local/share/rt \
+      -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 \
       --daemonize /tmp/uwsgi_media.log --disable-logging --auto-procname \
       --thunder-lock --umask 0022 --vacuum --touch-reload reload --lazy-apps \
       --procname-prefix-spaced ist.media --uid bjjl --gid users \

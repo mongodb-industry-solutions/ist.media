@@ -1,3 +1,4 @@
 #!/bin/sh
 
-python3 services/solana-tx-monitor.py
+. /usr/local/share/rt/bin/activate
+python services/solana-tx-monitor.py
