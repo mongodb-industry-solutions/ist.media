@@ -4,12 +4,20 @@
 #
 #    pip-compile
 #
+aiohappyeyeballs==2.6.1
+    # via aiohttp
+aiohttp==3.11.16
+    # via langchain-community
+aiosignal==1.3.2
+    # via aiohttp
 annotated-types==0.7.0
     # via pydantic
 anyio==4.9.0
     # via
     #   httpx
     #   openai
+attrs==25.3.0
+    # via aiohttp
 bcrypt==4.3.0
     # via -r requirements.in
 beautifulsoup4==4.13.4
@@ -27,6 +35,8 @@ click==8.1.8
     # via
     #   flask
     #   geocoder
+dataclasses-json==0.6.7
+    # via langchain-community
 decorator==5.2.1
     # via ratelim
 distro==1.9.0
@@ -37,6 +47,10 @@ flask==3.1.0
     # via flask-pymongo
 flask-pymongo==3.0.1
     # via -r requirements.in
+frozenlist==1.6.0
+    # via
+    #   aiohttp
+    #   aiosignal
 future==1.0.0
     # via geocoder
 geocoder==1.38.1
@@ -51,11 +65,14 @@ httpx==0.28.1
     # via
     #   langsmith
     #   openai
+httpx-sse==0.4.0
+    # via langchain-community
 idna==3.10
     # via
     #   anyio
     #   httpx
     #   requests
+    #   yarl
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
@@ -67,10 +84,15 @@ jsonpatch==1.33
 jsonpointer==3.0.0
     # via jsonpatch
 langchain==0.3.23
-    # via langchain-mongodb
+    # via
+    #   langchain-community
+    #   langchain-mongodb
+langchain-community==0.3.21
+    # via -r requirements.in
 langchain-core==0.3.54
     # via
     #   langchain
+    #   langchain-community
     #   langchain-mongodb
     #   langchain-openai
     #   langchain-text-splitters
@@ -85,6 +107,7 @@ langchain-text-splitters==0.3.8
 langsmith==0.3.32
     # via
     #   langchain
+    #   langchain-community
     #   langchain-core
 lark==1.2.2
     # via langchain-mongodb
@@ -94,10 +117,20 @@ markupsafe==3.0.2
     # via
     #   jinja2
     #   werkzeug
+marshmallow==3.26.1
+    # via dataclasses-json
 mistune==3.1.3
     # via -r requirements.in
+multidict==6.4.3
+    # via
+    #   aiohttp
+    #   yarl
+mypy-extensions==1.0.0
+    # via typing-inspect
 numpy==2.2.4
-    # via langchain-mongodb
+    # via
+    #   langchain-community
+    #   langchain-mongodb
 openai==1.75.0
     # via langchain-openai
 orjson==3.10.16
@@ -106,8 +139,13 @@ packaging==24.2
     # via
     #   langchain-core
     #   langsmith
+    #   marshmallow
 pillow==11.2.1
     # via -r requirements.in
+propcache==0.3.1
+    # via
+    #   aiohttp
+    #   yarl
 pycountry==24.6.1
     # via -r requirements.in
 pydantic==2.11.3
@@ -116,17 +154,23 @@ pydantic==2.11.3
     #   langchain-core
     #   langsmith
     #   openai
+    #   pydantic-settings
 pydantic-core==2.33.1
     # via pydantic
+pydantic-settings==2.9.0
+    # via langchain-community
 pydub==0.25.1
     # via -r requirements.in
 pymongo==4.12.0
     # via
     #   flask-pymongo
     #   langchain-mongodb
+python-dotenv==1.1.0
+    # via pydantic-settings
 pyyaml==6.0.2
     # via
     #   langchain
+    #   langchain-community
     #   langchain-core
 qrcode==8.1
     # via -r requirements.in
@@ -138,6 +182,7 @@ requests==2.32.3
     # via
     #   geocoder
     #   langchain
+    #   langchain-community
     #   langsmith
     #   requests-toolbelt
     #   tiktoken
@@ -152,9 +197,13 @@ sniffio==1.3.1
 soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==2.0.40
-    # via langchain
+    # via
+    #   langchain
+    #   langchain-community
 tenacity==9.1.2
-    # via langchain-core
+    # via
+    #   langchain-community
+    #   langchain-core
 tiktoken==0.9.0
     # via langchain-openai
 tqdm==4.67.1
@@ -168,9 +217,14 @@ typing-extensions==4.13.2
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
+    #   typing-inspect
     #   typing-inspection
+typing-inspect==0.9.0
+    # via dataclasses-json
 typing-inspection==0.4.0
-    # via pydantic
+    # via
+    #   pydantic
+    #   pydantic-settings
 urllib3==2.4.0
     # via requests
 uwsgi==2.0.28
@@ -179,5 +233,7 @@ websocket-client==1.8.0
     # via -r requirements.in
 werkzeug==3.1.3
     # via flask
+yarl==1.20.0
+    # via aiohttp
 zstandard==0.23.0
     # via langsmith

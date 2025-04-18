@@ -2,8 +2,9 @@ bcrypt
 beautifulsoup4
 Flask-PyMongo
 geocoder
-langchain_mongodb
-langchain_openai
+langchain-community
+langchain-mongodb
+langchain-openai
 markdown
 mistune
 pillow
