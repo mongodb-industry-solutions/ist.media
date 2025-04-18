@@ -24,15 +24,15 @@ AUTOCONTENT_API_KEY=<removed>
 # update ist.media
 09	14	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content.sh >/dev/null 2>&1
 #
-09	07	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_travel.sh >/dev/null 2>&1
-09	08,15	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_autos.sh >/dev/null 2>&1
-09	09,16	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_content_europe.sh >/dev/null 2>&1
-09	10,17	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_content_tech.sh >/dev/null 2>&1
-09	11,18	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_content_business.sh >/dev/null 2>&1
-09	12,19	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_intnews.sh >/dev/null 2>&1
-09	20	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_usnews.sh >/dev/null 2>&1
-09	13,21	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_finance.sh >/dev/null 2>&1
-09	23	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content_earnings.sh >/dev/null 2>&1
+09	07	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh travel >/dev/null 2>&1
+09	08,15	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh autos >/dev/null 2>&1
+09	09,16	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh europe >/dev/null 2>&1
+09	10,17	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh tech >/dev/null 2>&1
+09	11,18	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh business >/dev/null 2>&1
+09	12,19	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh intnews >/dev/null 2>&1
+09	20	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh usnews >/dev/null 2>&1
+09	13,21	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh finance >/dev/null 2>&1
+09	23	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh earnings >/dev/null 2>&1
 #
 21	14,23	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_daily.sh
 29	14,23	*	*	1-5	/usr/local/share/ist.media/cronjobs/create_podcast.sh >/dev/null 2>&1
