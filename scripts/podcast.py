@@ -4,10 +4,9 @@
 # Copyright (c) 2025 MongoDB Inc.
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 
-import os, time, requests
+import os, datetime, time, requests
 from bs4 import BeautifulSoup
 from pydub import AudioSegment
-from datetime import datetime
 
 audio_dir = '/usr/local/share/content/audio'
 podcast_tmp_file = '/var/tmp/podcast_tmp.wav'
@@ -16,7 +15,7 @@ token = os.getenv('AUTOCONTENT_API_KEY')
 create_url = 'https://api.autocontentapi.com/Content/Create'
 status_base_url = 'https://api.autocontentapi.com/content/status/'
 poll_interval = 10
-today = datetime.utcnow()
+today = datetime.datetime.now(datetime.UTC)
 
 response = requests.get("https://ist.media/feed")
 response.raise_for_status()
