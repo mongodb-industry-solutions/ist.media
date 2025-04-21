@@ -3,9 +3,8 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from datetime import datetime, timedelta
 from openai import OpenAI
-import os, re, json, pymongo
+import os, re, json, datetime, pymongo
 
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -20,7 +19,7 @@ ai = OpenAI()
 
 
 def get_mongodb_date_filter(natural_language_date):
-    today = datetime.utcnow()
+    today = datetime.datetime.now(datetime.UTC)
 
     prompt = f"""
     Convert the following time expression into a MongoDB-compatible filter format.
@@ -98,7 +97,7 @@ response = ai.chat.completions.create(
 )
 
 
-now = datetime.utcnow()
+now = datetime.datetime.now(datetime.UTC)
 formatted_date = now.strftime("%d %B %Y")
 
 entities_string = response.choices[0].message.content.strip()
