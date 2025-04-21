@@ -3,8 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from datetime import datetime
-import os, pymongo, smtplib, markdown
+import os, datetime, pymongo, smtplib, markdown
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -14,7 +13,7 @@ MBASE = "1_media_demo"
 news_collection = pymongo.MongoClient(MCONN)[MBASE]["news"]
 daily_collection = pymongo.MongoClient(MCONN)[MBASE]["daily"]
 
-formatted_date = datetime.utcnow().strftime("%d %B %Y")
+formatted_date = datetime.datetime.now(datetime.UTC).strftime("%d %B %Y")
 
 try:
     doc = daily_collection.find_one({"day": formatted_date})
