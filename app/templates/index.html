@@ -20,6 +20,20 @@
     <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    <style>
+        .tm-search-input:focus,
+        select.form-control:focus {
+            outline: none !important; /* Remove outline */
+        }
+        /* Firefox-specific fix to ensure no outline */
+        @-moz-document url-prefix() {
+            .tm-search-input:focus,
+            select.form-control:focus {
+                outline: none !important;
+                box-shadow: none; /* Remove any default shadow */
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -84,10 +98,26 @@
     </header>
     <div class="container-fluid">
         <main class="tm-main">
-            <!-- Search form -->
+
             <div class="row tm-row">
-                <div class="col-12">
-                    <form method="GET" class="form-inline tm-mb-25 tm-search-form">
+                <div class="col-12 d-flex">
+
+                    <form method="GET" class="form-inline tm-mb-25"
+                          style="margin-right: 10px">
+                        <select name="section" class="form-control tm-section-input">
+                            <optgroup label="General">
+                                <option value="all">All News</option>
+                                <option value="personalized">Personalized</option>
+                            </optgroup>
+                            <optgroup label="Sections">
+                                <option value="politics">Politics</option>
+                                <option value="business">Business</option>
+                                <option value="technology">Science & Tech</option>
+                            </optgroup>
+                        </select>
+                    </form>
+
+                    <form method="GET" class="form-inline tm-mb-25 tm-search-form" style="flex-grow: 1">
                         <input class="form-control tm-search-input"
                                name="query" type="text" placeholder="Hybrid Search..."
                                aria-label="Search">
@@ -95,6 +125,10 @@
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
                         </button>
                     </form>
+
+                </div>
+
+                <div class="col-12">
                     <div style="background: #f1f1f1">
                         <span style="padding-left: 0.2em" class="tm-color-primary">
                             {{ infoline }}
@@ -108,6 +142,7 @@
                     </div>
                     <div style="padding-bottom: 5px"></div>
                 </div>
+
             </div>
             <div class="row tm-row">
                 {% for doc in docs | sort(attribute = 'score', reverse = True) %}
