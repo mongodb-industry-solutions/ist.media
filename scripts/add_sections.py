@@ -68,11 +68,11 @@ def detect_sections(text):
         exit(1)
 
 try:
-    for doc in collection.find():
-    #for doc in collection.find({ "sections" : { "$exists" : False }}):
+    #for doc in collection.find():
+    for doc in collection.find({ "sections" : { "$exists" : False }}):
         try:
             sections = detect_sections(doc['text'])
-            print(doc['title'] + ": " + sections)
+            print(sections + " " + doc['title'])
             collection.update_one({ "_id" : doc["_id"] },
                                   { "$set" : { "sections" : eval(sections) }})
         except Exception as e:
