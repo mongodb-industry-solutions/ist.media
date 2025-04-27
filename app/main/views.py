@@ -582,7 +582,10 @@ def index():
     log(request)
     check_for_quality_read()
     query = request.args.get('query')
-    if query and query != "":
+    section = request.args.get('section')
+    if not section or section == "":
+        section = "_all"
+    if query and query != "": # the start page with a hybrid search query
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
         #docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
@@ -595,7 +598,10 @@ def index():
             seconds_away = abs(time_difference)
             doc['score'], doc['time_decay'] = adjusted_score(doc['score'], seconds_away)
         infoline = '"' + query.strip() + '"'
-    else: # the start page, called without query parameter
+    elif section != "_all" and section != "_personalized": # start page with section filter
+        docs = collection().find({ "sections" : section }).sort({ "published" : -1 }).limit(MAX_DOCS)
+        infoline = "Filtered by section"
+    else: # the start page, called without query and without section parameter
         if 'history' in session and len(session['history']) > 0:
             history_docs = list(map(lambda uuid:
                     collection().find_one({ "uuid" : uuid },
@@ -610,13 +616,34 @@ def index():
             # for unknown reasons, these docs lack the 'text' field - refetching...
             docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
             infoline = "Personalized content"
+            section = "_personalized"
         else:
             docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
             infoline = "Sorted by time - no history yet"
+            section = "_all"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
-    return render_template('index.html', docs=docs, infoline=infoline)
+
+    # the following dynamic calculation of all sections currently existing
+    # should probably be moved to a place where this is only calculated once
+    # per server start, and not with every index page call. Currently this is
+    # not a bit performance hit yet, but the more content is collected over
+    # time, the worse this will get.
+    pipeline = [
+        { "$project" : { "sections" : 1 }},
+        { "$unwind" : "$sections" },
+        { "$group" : { "_id" : None , "all_sections" : { "$addToSet" : "$sections" }}}
+    ]
+    result = list(collection().aggregate(pipeline))
+
+    if result:
+        sections = sorted(result[0]['all_sections'])
+    else:
+        sections = []
+
+    return render_template('index.html', docs=docs, infoline=infoline,
+                           sections=sections, selected_section=section)
 
 
 @main.route('/delete')

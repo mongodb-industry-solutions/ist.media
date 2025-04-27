@@ -23,14 +23,13 @@
     <style>
         .tm-search-input:focus,
         select.form-control:focus {
-            outline: none !important; /* Remove outline */
+            outline: none !important;
         }
-        /* Firefox-specific fix to ensure no outline */
         @-moz-document url-prefix() {
             .tm-search-input:focus,
             select.form-control:focus {
                 outline: none !important;
-                box-shadow: none; /* Remove any default shadow */
+                box-shadow: none;
             }
         }
     </style>
@@ -98,25 +97,29 @@
     </header>
     <div class="container-fluid">
         <main class="tm-main">
-
             <div class="row tm-row">
                 <div class="col-12 d-flex">
-
                     <form method="GET" class="form-inline tm-mb-25"
                           style="margin-right: 10px">
-                        <select name="section" class="form-control tm-section-input">
+                        <select name="section" id="sectionSelect"
+                                class="form-control tm-section-input">
                             <optgroup label="General">
-                                <option value="all">All News</option>
-                                <option value="personalized">Personalized</option>
+                                <option value="_all" {{ 'selected' if "_all" == selected_section }}>
+                                    All News
+                                </option>
+                                <option value="_personalized" {{ 'selected' if "_personalized" == selected_section }}>
+                                    Personalized
+                                </option>
                             </optgroup>
                             <optgroup label="Sections">
-                                <option value="politics">Politics</option>
-                                <option value="business">Business</option>
-                                <option value="technology">Science & Tech</option>
+                                {% for section in sections %}
+                                <option value="{{ section }}" {{ 'selected' if section == selected_section }}>
+                                    {{ section }}
+                                </option>
+                                {% endfor %}
                             </optgroup>
                         </select>
                     </form>
-
                     <form method="GET" class="form-inline tm-mb-25 tm-search-form" style="flex-grow: 1">
                         <input class="form-control tm-search-input"
                                name="query" type="text" placeholder="Hybrid Search..."
@@ -125,9 +128,7 @@
                             <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
                         </button>
                     </form>
-
                 </div>
-
                 <div class="col-12">
                     <div style="background: #f1f1f1">
                         <span style="padding-left: 0.2em" class="tm-color-primary">
@@ -184,5 +185,23 @@
     </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
+    <script>
+        const select = document.getElementById('sectionSelect');
+        let alreadyNavigating = false;
+
+        function handleSelectionChange() {
+            if (alreadyNavigating) return; // prevent double fire
+            alreadyNavigating = true;
+
+            const newValue = select.value;
+            if (!newValue) return;
+
+            const newUrl = newValue === '_all' ? '/' : `/?section=${encodeURIComponent(newValue)}`;
+            window.location.href = newUrl;
+        }
+
+        select.addEventListener('input', handleSelectionChange);
+        select.addEventListener('change', handleSelectionChange);
+    </script>
 </body>
 </html>
