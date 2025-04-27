@@ -585,7 +585,9 @@ def index():
     section = request.args.get('section')
     if not section or section == "":
         section = "_all"
-    if query and query != "": # the start page with a hybrid search query
+    elif section == "_all" or section == "_personalized":
+        session.pop('section', None)
+    if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
         #docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
@@ -598,10 +600,14 @@ def index():
             seconds_away = abs(time_difference)
             doc['score'], doc['time_decay'] = adjusted_score(doc['score'], seconds_away)
         infoline = '"' + query.strip() + '"'
-    elif section != "_all" and section != "_personalized": # start page with section filter
+    elif 'section' in session or section != "_all" and section != "_personalized":
+        if section != "_all" and section != "_personalized":
+            session['section'] = section
+        else:
+            section = session['section']
         docs = collection().find({ "sections" : section }).sort({ "published" : -1 }).limit(MAX_DOCS)
         infoline = "Filtered by section"
-    else: # the start page, called without query and without section parameter
+    else:
         if 'history' in session and len(session['history']) > 0:
             history_docs = list(map(lambda uuid:
                     collection().find_one({ "uuid" : uuid },

@@ -328,6 +328,17 @@ ul, ol {
     justify-content: flex-end;
 }
 
+.form-inline .form-control.tm-section-input {
+    border: 1;
+    border-color: #ddd;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    color: #333;
+    background-color: #f1f1f1;
+    height: 50px;
+    margin-right: 5px;
+}
+
 .form-inline .form-control.tm-search-input {
     display: block;
     height: 50px;
@@ -337,17 +348,6 @@ ul, ol {
     border-radius: 0;
     border-color: #00684A;
     font-size: 1.2rem;
-}
-
-.form-inline .form-control.tm-section-input {
-    border: 1;
-    border-color: #ddd;
-    border-radius: 4px;
-    font-size: 1.2rem;
-    color: #333;
-    background-color: #f1f1f1;
-    height: 50px;
-    margin-right: 5px;
 }
 
 .form-inline .form-control.tm-rag-input {

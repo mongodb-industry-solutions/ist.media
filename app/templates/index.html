@@ -196,7 +196,7 @@
             const newValue = select.value;
             if (!newValue) return;
 
-            const newUrl = newValue === '_all' ? '/' : `/?section=${encodeURIComponent(newValue)}`;
+            const newUrl = `/?section=${encodeURIComponent(newValue)}`;
             window.location.href = newUrl;
         }
 
