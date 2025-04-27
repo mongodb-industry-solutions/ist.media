@@ -14,3 +14,4 @@ cd /usr/local/share/ist.media/scripts
 python process_incoming.py
 python vectorize.py
 python add_sentiment.py
+python add_sections.py
