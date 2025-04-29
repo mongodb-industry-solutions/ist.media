@@ -176,61 +176,52 @@ def calculate_insights(text: str) -> str:
 
 def calculate_using_rag(question: str) -> str:
     logger.info(question)
-    template = """Answer the question based only on the following context:
-    {context}
 
-    Question: {question}
-    """
+    template = """Answer the question using both of the following knowledge bases.
+    Make it one continguous, comprehensive answer with three paragraphs.
+    Don't use bullet points and enumerations.
+
+    **Internal Knowledge:**
+    {local_context}
+
+    **Web Research:**
+    {web_context}
+
+    Question: {question}"""
+
     try:
+        local_retriever = vector_search().as_retriever(search_kwargs = { "k" : MAX_RAG })
+        local_docs = local_retriever.invoke(question)
+        local_context = "\n".join(doc.page_content for doc in local_docs)
+
+        client = OpenAI()
+        web_response = client.responses.create(
+            model = "gpt-4o",
+            tools = [ { "type" : "web_search_preview" } ],
+            input = question
+        )
+        web_context = web_response.output_text
+
         prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search().as_retriever(search_kwargs = { "k" : MAX_RAG })
         model = ChatOpenAI(model_name="gpt-4o")
         chain = (
-            { "context": retriever, "question": RunnablePassthrough() }
+            {
+                "local_context" : lambda x: local_context,
+                "web_context" : lambda x: web_context,
+                "question" : RunnablePassthrough()
+            }
             | prompt
             | model
             | StrOutputParser()
         )
         answer = chain.invoke(question)
-        gen_ai_cache_collection.insert_one({ "question" : question, "answer" : answer })
+        gen_ai_cache_collection.insert_one( { "question" : question, "answer" : answer } )
+
     except Exception as e:
         print(e) # will be printed in the log file that is residing in /tmp
         answer = ""
+
     return answer
-
-
-def calculate_using_rag_and_return_context(question):
-    template = """Answer the question based only on the following context:
-    {context}
-
-    Question: {question}
-    """
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
-    try:
-        prompt = ChatPromptTemplate.from_template(template)
-        retriever = vector_search().as_retriever(search_kwargs={ "k" : 3 })
-        model = ChatOpenAI(model_name="gpt-3.5-turbo")
-        chain = (
-            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
-            | prompt
-            | model
-            | StrOutputParser()
-        )
-        chain_with_source = RunnableParallel(
-            { "context": retriever, "question": RunnablePassthrough() }
-        ).assign(answer=chain)
-        result = chain_with_source.invoke(question)
-        answer = result['answer']
-        cx = result['context']
-        context = []
-        for c in cx:
-            context.append(collection().find_one({ "uuid" : c.metadata['uuid'] }))
-        gen_ai_cache_collection.insert_one({ "question" : question, "answer" : answer })
-    except Exception as e:
-        print(e) # will be printed in the log file that is residing in /tmp
-        answer = ""
-    return answer, context
 
 
 def capitalize(text: str) -> str:
