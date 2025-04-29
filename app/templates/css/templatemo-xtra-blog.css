@@ -339,6 +339,11 @@ ul, ol {
     margin-right: 5px;
 }
 
+@media (max-width: 500px) {
+  #sectionSelect { display: none; }
+  .ps { display: none; }
+}
+
 .form-inline .form-control.tm-search-input {
     display: block;
     height: 50px;
