@@ -339,6 +339,13 @@ ul, ol {
     margin-right: 5px;
 }
 
+@supports not (-moz-appearance: none) {
+    /* CSS here applies to all browsers except Firefox */
+    .form-inline .form-control.tm-section-input {
+        text-indent: 8px;
+    }
+}
+
 @media (max-width: 500px) {
   #sectionSelect { display: none; }
   .ps { display: none; }
