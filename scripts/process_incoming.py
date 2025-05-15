@@ -32,7 +32,7 @@ def gen(text):
             temperature = 0.7
         )
         return response.choices[0].message.content.strip()
-    
+
     except Exception as e:
         print(f"An error occurred: {e}")
         exit(1)
