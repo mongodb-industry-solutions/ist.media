@@ -15,7 +15,7 @@ from langchain.chains.llm import LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-import os, re, datetime, json, geocoder
+import os, re, datetime, json, geocoder, uuid
 
 
 MONGO_URI = os.environ['MONGODB_IST_MEDIA']
@@ -25,6 +25,8 @@ dbName = "1_media_demo"
 
 ip_info_cache_collectionName = "ip_info_cache"
 ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
+news_incoming_collectionName = "news_incoming"
+news_incoming_collection = client[dbName][news_incoming_collectionName]
 
 
 def debug(msg: str):
@@ -143,3 +145,30 @@ def keywords():
 def delete(uuid):
     ip = request.environ.get("X-Real-IP", request.remote_addr)
     # to be implemented
+
+
+@api.route('/create', methods=['POST'])
+def create():
+    log(request)
+    # parameter handling
+    try:
+        data = get_data(request.data)
+        title = get_string_attribute(data, 'title', 256)
+        text = get_string_attribute(data, 'text', 32768)
+    except ApiError as error:
+        return error.response
+    # real action starts here
+    try:
+        article = {
+            'uuid' : str(uuid.uuid4()),  # Generate a random UUID
+            'title' : title,
+            'text' : text,
+            'published' : datetime.datetime.now(datetime.UTC)
+        }
+        result = news_incoming_collection.insert_one(article)
+        if result.inserted_id:
+            return jsonify({ 'status' : 'ok', 'id' : result.inserted_id })
+        else:
+            return jsonify({ 'status' : 'failed', 'message' : 'Failed to insert article' })
+    except Exception as e:
+        return jsonify({ 'status' : 'failed', 'message' : str(e) })
