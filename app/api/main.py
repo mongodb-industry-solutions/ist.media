@@ -164,7 +164,7 @@ def create():
             'source' : 'api',
             'title' : title,
             'text' : text,
-            'published' : datetime.datetime.now(datetime.UTC)
+            'published' : datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
         }
         result = news_incoming_collection.insert_one(article)
         if result.inserted_id:
