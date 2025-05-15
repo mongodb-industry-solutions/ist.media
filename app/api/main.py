@@ -161,6 +161,7 @@ def create():
     try:
         article = {
             'uuid' : str(uuid.uuid4()),  # Generate a random UUID
+            'source' : 'api',
             'title' : title,
             'text' : text,
             'published' : datetime.datetime.now(datetime.UTC)
