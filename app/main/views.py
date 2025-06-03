@@ -26,6 +26,7 @@ from requests.auth import HTTPBasicAuth
 from json import JSONEncoder
 import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
 import io, qrcode, bcrypt
+import numpy as np
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -321,6 +322,8 @@ def select_news_source():
 def delete_articles_history():
     log(request)
     session['history'] = []
+    if 'user' in session:
+        users_collection.update_one({ 'username' : session['user'] }, { "$unset" : { "articles_visited" : 1 } })
     return redirect('/backstage')
 
 
@@ -328,6 +331,8 @@ def delete_articles_history():
 def delete_articles_history_from_homepage():
     log(request)
     session['history'] = []
+    if 'user' in session:
+        users_collection.update_one({ 'username' : session['user'] }, { "$unset" : { "articles_visited" : 1 } })
     return redirect('/')
 
 
@@ -565,6 +570,33 @@ def logout():
     return redirect('/')
 
 
+def get_embeddings(articles_visited):
+    uuids = [ item["uuid"] for item in articles_visited ]
+    cursor = collection().find({ "uuid" : { "$in" : uuids }}, { "embedding" : 1 })
+    return [ doc["embedding"] for doc in cursor if "embedding" in doc ]
+
+
+def add_to_fifo_if_not_exists(username, array_field, doc, max_length=10): # TODO: define `max_length´ constant
+    existing = users_collection.find_one({
+        "username" : username,
+        f"{array_field}.uuid" : doc['uuid']
+    })
+    if existing:
+        return False
+    users_collection.update_one(
+        { "username" : username },
+        {
+            "$push" : {
+                array_field: {
+                    "$each" : [ { "uuid" : doc['uuid'], "title": doc['title'], "added_at" : datetime.utcnow() } ],
+                    "$slice": -max_length
+                }
+            }
+        }
+    )
+    return True
+
+
 @main.route('/')
 def index():
     if not 'was_here_before' in session:
@@ -573,11 +605,8 @@ def index():
     log(request)
     check_for_quality_read()
     query = request.args.get('query')
-    section = request.args.get('section')
-    if not section or section == "":
-        section = "_all"
-    elif section == "_all" or section == "_personalized":
-        session.pop('section', None)
+    section = request.args.get('section') or session.get('section') or "_all"
+    session['section'] = section
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
@@ -591,33 +620,60 @@ def index():
             seconds_away = abs(time_difference)
             doc['score'], doc['time_decay'] = adjusted_score(doc['score'], seconds_away)
         infoline = '"' + query.strip() + '"'
-    elif 'section' in session or section != "_all" and section != "_personalized":
-        if section != "_all" and section != "_personalized":
-            session['section'] = section
-        else:
-            section = session['section']
+    elif section != "_all" and section != "_personalized":
         docs = collection().find({ "sections" : section }).sort({ "published" : -1 }).limit(MAX_DOCS)
         infoline = "Filtered by section"
     else:
-        if 'history' in session and len(session['history']) > 0:
-            history_docs = list(map(lambda uuid:
-                    collection().find_one({ "uuid" : uuid },
-                                        { "uuid" : 1, "title" : 1, "_id" : 0 }),
-                    session['history']))
-            concatenated_titles = ""
-            i = 0
-            for doc in history_docs[-5:]: # only consider the recent history
-                concatenated_titles += ("" if i == 0 else " ") + doc['title']
-                i += 1
-            docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
-            # for unknown reasons, these docs lack the 'text' field - refetching...
-            docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
-            infoline = "Personalized content"
-            section = "_personalized"
-        else:
+        if section == "_all":
             docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
-            infoline = "Sorted by time - no history yet"
-            section = "_all"
+            infoline = "Sorted by time"
+        else:
+            if not 'user' in session:
+                if 'history' in session and len(session['history']) > 0:
+                    history_docs = list(map(lambda uuid:
+                            collection().find_one({ "uuid" : uuid },
+                                                  { "uuid" : 1, "title" : 1, "_id" : 0 }),
+                            session['history']))
+                    concatenated_titles = ""
+                    i = 0
+                    for doc in history_docs[-5:]: # only consider the recent history
+                        concatenated_titles += ("" if i == 0 else " ") + doc['title']
+                        i += 1
+                    docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
+                    # for unknown reasons, these docs lack the 'text' field - refetching...
+                    docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
+                    infoline = "For anonymous user"
+                else:
+                    docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
+                    infoline = "Sorted by time"
+                    section = "_all"
+            else:
+                user = users_collection.find_one({ "username" : session['user']})
+                if 'articles_visited' in user:
+                    read_vectors = get_embeddings(user["articles_visited"])
+                    user_vector = np.mean(read_vectors, axis=0).tolist()
+                    pipeline = [
+                        {
+                            "$vectorSearch" : {
+                                "index" : "vector_index",
+                                "queryVector" : user_vector,
+                                "path" : "embedding",
+                                "numCandidates" : 100,
+                                "limit" : MAX_DOCS
+                            }
+                        },
+                        {
+                            "$match": {
+                                "uuid" : { "$nin" : [ item["uuid"] for item in user["articles_visited"] ] }
+                            }
+                        }
+                    ]
+                    docs = list(collection().aggregate(pipeline))
+                    infoline = "For " + user['username']
+                else:
+                    docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
+                    infoline = "Sorted by time"
+                    section = "_all"
     # prepare for a nice view
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
@@ -777,11 +833,20 @@ def post():
             recommendations = []
         collection().update_one({ "_id" : doc["_id"] }, { "$inc" : { "visit_count" : 1 }})
         if 'user' in session:
-            result = users_collection.update_one({ 'username' : session['user'],
-                                                   'ids': { '$not' : { '$eq' : doc['uuid'] }}},
-                                                 { '$inc' : { 'coins_current' : -1 },
-                                                   '$push' : { 'ids' : doc['uuid'] }})
-            purchased = 'now' if result.modified_count > 0 else 'earlier'
+            #result = users_collection.update_one({ 'username' : session['user'],
+            #                                       'articles_visited': { '$not' : { '$eq' : doc['uuid'] }}},
+            #                                     { '$inc' : { 'coins_current' : -1 },
+            #                                       '$push' : { 'articles_visited' : doc['uuid'] }})
+            #purchased = 'now' if result.modified_count > 0 else 'earlier'
+            result_inserted = add_to_fifo_if_not_exists(session['user'], 'articles_visited', doc)
+            if result_inserted:
+                users_collection.update_one(
+                    { 'username' : session['user'] },
+                    { '$inc': { 'coins_current' : -1 }}
+                )
+                purchased = 'now'
+            else:
+                purchased = 'earlier'
         else:
             purchased = 'not_applicable'
         return render_template('post.html', doc=doc, fdoc=fdoc,
