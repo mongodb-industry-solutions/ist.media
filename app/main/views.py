@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import g, render_template, redirect, request, session, url_for, send_file
+from flask import g, render_template, redirect, request, session, url_for, send_file, jsonify
 from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
@@ -27,6 +27,7 @@ from json import JSONEncoder
 import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
 import io, qrcode, bcrypt
 import numpy as np
+import voyageai
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -48,11 +49,38 @@ solana_collection_tx = client[DB_NAME]["solana_tx"]
 solana_collection_tmp = client[DB_NAME]["solana_tmp"]
 
 ai = OpenAI()
+voyage_ai = voyageai.Client()
 
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 16     # number of articles on the home page
 MAX_RCOM = 3      # number of recommended articles
 MAX_RAG = 7       # number of articles for RAG context - 128k token limit
+
+
+###########################################
+###   BEGIN experimental video search   ###
+###########################################
+
+frame_folder = "/usr/local/share/content/video/frames"
+frames = []
+for fname in sorted(os.listdir(frame_folder)):
+    if fname.endswith(".json") and fname.startswith("frame_"):
+        path = os.path.join(frame_folder, fname)
+        with open(path, "r") as f:
+            data = json.load(f)
+            frames.append({
+                "offset": data["offset"],
+                "embedding": data["embedding"]
+            })
+
+def cosine_similarity(a, b):
+    a = np.array(a)
+    b = np.array(b)
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+###########################################
+###    END experimental video search    ###
+###########################################
 
 
 def debug(msg: str):
@@ -705,6 +733,49 @@ def delete():
     collection().delete_one({ "uuid" : uuid })
     session['history'] = []
     return redirect('/')
+
+
+@main.route('/video_search')
+def video_search():
+    query_text = request.args.get('query')
+    if not query_text or query_text == "":
+        return jsonify({
+            "offset": 0,
+            "infoline": "Enter your query above"
+        })
+
+    query_embedding = np.array(voyage_ai.multimodal_embed(
+        [[query_text]], model="voyage-multimodal-3").embeddings[0])
+
+    scores = []
+    sorted_frames = sorted(frames, key=lambda x: x["offset"])
+    for frame in sorted_frames:
+        score = cosine_similarity(query_embedding, frame["embedding"])
+        scores.append(score)
+
+    best_idx = np.argmax(scores)
+
+    scene_start = None
+    prev_score = scores[best_idx]
+    for i in range(best_idx, -1, -1):
+        score = scores[i]
+        if prev_score - score > 0.01:
+            scene_start = sorted_frames[i]["offset"]
+            break
+        prev_score = score
+
+    if scene_start is None:
+        scene_start = sorted_frames[0]["offset"]
+
+    return jsonify({
+        "offset": scene_start,
+        "infoline": query_text
+    })
+
+
+@main.route('/video')
+def video():
+    return render_template('video.html', offset=0, infoline="Enter your search query above")
 
 
 @main.route('/post')
