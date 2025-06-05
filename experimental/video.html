@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Tagesschau Video</title>
+</head>
+<body>
+    <h1>Tagesschau-Player</h1>
+    <video id="video" width="800" controls>
+<!--        <source src="{{ url_for('static', filename='tagesschau.mp4') }}" type="video/mp4">-->
+        <source src="tagesschau.mp4" type="video/mp4">
+        Dein Browser unterstützt das Video-Tag nicht.
+    </video>
+
+    <script>
+        //const offset = {{ offset }};
+        const offset = 20;
+        const video = document.getElementById("video");
+
+        // Startzeit setzen, sobald das Video geladen ist
+        video.addEventListener('loadedmetadata', () => {
+            video.currentTime = offset;
+        });
+    </script>
+</body>
+</html>
