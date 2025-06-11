@@ -21,6 +21,50 @@
     <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
     {% include "css/snippet_post.html" %}
+    <style>
+        .video-container {
+            position: relative;
+            width: 640px;
+            margin: auto;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none; /* Let clicks go through unless hovering */
+        }
+
+        .video-container:hover .controls {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .controls button {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background-color: rgba(50, 50, 50, 0.75);
+        }
+  </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -107,9 +151,15 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
-                    <video id="video" style="width: 100%; margin-bottom: 40px" controls>
-                        <source src="/content/video/tagesschau.mp4" type="video/mp4">
-                    </video>
+                    <div class="video-container" style="width: 100%">
+                        <video id="video" style="width: 100%; margin-bottom: 40px" controls preload="auto">
+                            <source src="/content/video/tagesschau.mp4" type="video/mp4">
+                        </video>
+                        <div class="controls">
+                            <button onclick="skip(-5)">⏪&nbsp;&nbsp;&nbsp;5s</button>
+                            <button onclick="skip(5)">5s&nbsp;&nbsp;&nbsp;⏩</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <footer class="row tm-row">
@@ -185,6 +235,23 @@
                     console.error("Fetch error:", err);
                     infoLine.textContent = "Error retrieving video info.";
                 });
+        });
+    </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('video');
+
+            window.skip = function(seconds) {
+                if (!video || isNaN(video.duration)) return;
+
+                let newTime = Math.min(Math.max(0, video.currentTime + seconds), video.duration);
+
+                if (typeof video.fastSeek === 'function') {
+                    video.fastSeek(newTime);
+                } else {
+                    video.currentTime = newTime;
+                }
+            };
         });
     </script>
 </body>
