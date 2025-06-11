@@ -132,6 +132,8 @@
         const searchForm = document.getElementById("searchForm");
 
         let offset = {{ offset }};
+        let currentMovie = video.getAttribute("src");
+
         video.addEventListener('loadedmetadata', () => {
             if (!isNaN(offset)) {
                 video.currentTime = offset;
@@ -145,14 +147,35 @@
                 infoLine.textContent = "Enter your query above";
                 return;
             }
+
             fetch(`/video_search?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.offset !== undefined) {
+                    if (data.movie) {
+                        const newSrc = `/content/video/${encodeURIComponent(data.movie)}.mp4`;
+                        if (video.getAttribute("src") !== newSrc) {
+                            // Pause, change source, load, and set new offset after metadata is loaded
+                            video.pause();
+                            video.setAttribute("src", newSrc);
+                            video.load();
+                            offset = data.offset || 0;
+                            video.addEventListener('loadedmetadata', function handler() {
+                                video.currentTime = offset;
+                                video.play();
+                                video.removeEventListener('loadedmetadata', handler);
+                            });
+                            currentMovie = newSrc;
+                        } else if (data.offset !== undefined) {
+                            offset = data.offset;
+                            video.currentTime = offset;
+                            video.play();
+                        }
+                    } else if (data.offset !== undefined) {
                         offset = data.offset;
                         video.currentTime = offset;
                         video.play();
                     }
+
                     if (data.infoline !== undefined) {
                         infoLine.textContent = data.infoline;
                     }

@@ -61,17 +61,22 @@ MAX_RAG = 7       # number of articles for RAG context - 128k token limit
 ###   BEGIN experimental video search   ###
 ###########################################
 
-frame_folder = "/usr/local/share/content/video/frames"
+parent_folder = "/usr/local/share/content/video/frames"
 frames = []
-for fname in sorted(os.listdir(frame_folder)):
-    if fname.endswith(".json") and fname.startswith("frame_"):
-        path = os.path.join(frame_folder, fname)
-        with open(path, "r") as f:
-            data = json.load(f)
-            frames.append({
-                "offset": data["offset"],
-                "embedding": data["embedding"]
-            })
+
+print("Building movie search array...", end="", flush=True)
+for root, _, files in os.walk(parent_folder):
+    for fname in sorted(files):
+        if fname.endswith(".json") and fname.startswith("frame_"):
+            path = os.path.join(root, fname)
+            with open(path, "r") as f:
+                data = json.load(f)
+                frames.append({
+                    "movie": data["movie"],
+                    "offset": data["offset"],
+                    "embedding": data["embedding"]
+                })
+print(" done")
 
 def cosine_similarity(a, b):
     a = np.array(a)
@@ -748,28 +753,31 @@ def video_search():
         [[query_text]], model="voyage-multimodal-3").embeddings[0])
 
     scores = []
-    sorted_frames = sorted(frames, key=lambda x: x["offset"])
-    for frame in sorted_frames:
+    for frame in frames:
         score = cosine_similarity(query_embedding, frame["embedding"])
         scores.append(score)
 
     best_idx = np.argmax(scores)
 
+    movie = None
     scene_start = None
     prev_score = scores[best_idx]
     for i in range(best_idx, -1, -1):
         score = scores[i]
         if prev_score - score > 0.01:
-            scene_start = sorted_frames[i]["offset"]
+            movie = frames[i]["movie"]
+            scene_start = frames[i]["offset"]
             break
         prev_score = score
 
     if scene_start is None:
-        scene_start = sorted_frames[0]["offset"]
+        movie = frames[0]["movie"] # TODO: might point to the wrong "default" movie
+        scene_start = frames[0]["offset"]
 
     return jsonify({
-        "offset": scene_start,
-        "infoline": query_text
+        "movie" : movie,
+        "offset" : scene_start,
+        "infoline" : query_text
     })
 
 
