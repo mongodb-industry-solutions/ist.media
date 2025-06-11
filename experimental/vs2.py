@@ -2,9 +2,9 @@ from moviepy import VideoFileClip
 import os
 
 # Path to the input video
-video_path = 'tagesschau.mp4'
+video_path = 'wwdc2025.mp4'
 # Directory to save frames
-output_dir = 'frames'
+output_dir = 'wwdc2025.dir'
 # Create output directory if it doesn't exist
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)

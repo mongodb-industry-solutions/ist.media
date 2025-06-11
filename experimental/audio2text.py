@@ -4,12 +4,12 @@ import openai
 
 client = openai.OpenAI()
 
-input_file = "tagesschau.mp3"
-output_dir = "frames"
+input_file = "wwdc2025.mp3"
+output_dir = "wwdc2025.dir"
 os.makedirs(output_dir, exist_ok=True)
 
 audio = AudioSegment.from_mp3(input_file)
-chunk_duration = 10 * 1000
+chunk_duration = 20 * 1000
 
 for start_ms in range(0, len(audio), chunk_duration):
     chunk = audio[start_ms:start_ms + chunk_duration]
@@ -22,7 +22,7 @@ for start_ms in range(0, len(audio), chunk_duration):
             transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f,
-                language="de"
+                language="en"
             )
             text = transcript.text.strip()
     except Exception as e:
@@ -33,6 +33,6 @@ for start_ms in range(0, len(audio), chunk_duration):
         out_f.write(text)
 
     os.remove(chunk_filename)
-    print(f"Transkribiert: Sekunde {offset_sec:04d}")
+    print(f"Second {offset_sec:04d}")
 
-print("Fertig.")
+print("Done.")

@@ -4,7 +4,7 @@ from PIL import Image
 import voyageai
 
 client = voyageai.Client()
-image_folder = "./frames/"
+image_folder = "./wwdc2025.dir/"
 
 for filename in sorted(os.listdir(image_folder)):
     if filename.lower().endswith((".jpg", ".jpeg", ".png")) and filename.startswith("frame_"):
@@ -13,8 +13,7 @@ for filename in sorted(os.listdir(image_folder)):
         offset_str = base.split("_")[1]
         offset = int(offset_str)
 
-        # Errechne nächstgelegenen 10-Sekunden-Block (abgerundet)
-        text_offset = (offset // 10) * 10
+        text_offset = (offset // 20) * 20
         text_file = os.path.join(image_folder, f"frame_{text_offset:04d}.txt")
 
         if not os.path.isfile(text_file):
@@ -31,7 +30,7 @@ for filename in sorted(os.listdir(image_folder)):
             embedding = result.embeddings[0]
 
             frame_data = {
-                "movie": "tagesschau",
+                "movie": "wwdc2025",
                 "offset": offset,
                 "text_offset": text_offset,
                 "embedding": embedding
