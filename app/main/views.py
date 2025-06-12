@@ -740,6 +740,11 @@ def delete():
     return redirect('/')
 
 
+@main.route('/howto_videosearch')
+def howto_videosearch():
+    return render_template('howto_videosearch.html')
+
+
 @main.route('/video_search')
 def video_search():
     query_text = request.args.get('query')

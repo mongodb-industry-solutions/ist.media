@@ -89,6 +89,10 @@
             </div>
             <nav class="tm-nav" id="tm-nav">
                 <ul>
+                    <li class="tm-nav-item active"><a href="/video" class="tm-nav-link">
+                            <i class="fas fa-film"></i>
+                            Video&nbsp;Search&nbsp;(NEW)
+                    </a></li>
                     <li class="tm-nav-item"><a href="/" class="tm-nav-link">
                             <i class="fas fa-home"></i>
                             Home
@@ -162,6 +166,42 @@
                     </div>
                 </div>
             </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <span style="font-size: 115%; color: #333">
+                        You can try one of these search terms&mdash;finding in
+                        <b>German News</b>, and the <b>WWDC 2025 Keynote</b>
+                    </span>
+                </div>
+                <div class="col-12 tm-mt-10">
+                    <a href="#" class="tm-color-primary bold search-term-link">police</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">ambulance</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">liquid glass</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">2026</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">apple car play</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">car play ultra</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">phone on the mac</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">basketball</a>
+                    <br/>
+                    <a href="#" class="tm-color-primary bold search-term-link">clock on the wall</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">men with glasses</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">send email</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">steuererleichterungen</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">wettervorhersage</a>
+                </div>
+                <div class="col-12 tm-mt-20">
+                    Or enter your individual input into the search field at the top of the page
+                    and hit &lt;return&gt;.
+                </div>
+                <div class="col-12 tm-mt-30 tm-mb-60">
+                    <span style="font-size: 120%; color: #333">
+                        A view behind the scenes
+                        <a class="tm-color-primary" href="/howto_videosearch">
+                            is provided here
+                        </a>.
+                    </span>
+                </div>
+            </div>
             <footer class="row tm-row">
                 <div class="col-md-6 col-12 tm-color-gray">
                     Design: <a href="https://templatemo.com/tm-553-xtra-blog"
@@ -180,72 +220,68 @@
         const video = document.getElementById("video");
         const infoLine = document.getElementById("infoLine");
         const searchForm = document.getElementById("searchForm");
-
-        let offset = {{ offset }};
-        let currentMovie = video.getAttribute("src");
-
-        video.addEventListener('loadedmetadata', () => {
-            if (!isNaN(offset)) {
-                video.currentTime = offset;
-            }
-        });
-
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const query = this.query.value.trim();
+        function performSearch(query) {
             if (!query) {
                 infoLine.textContent = "Enter your query above";
                 return;
             }
-
             fetch(`/video_search?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.movie) {
                         const newSrc = `/content/video/${encodeURIComponent(data.movie)}.mp4`;
                         if (video.getAttribute("src") !== newSrc) {
-                            // Pause, change source, load, and set new offset after metadata is loaded
                             video.pause();
                             video.setAttribute("src", newSrc);
                             video.load();
-                            offset = data.offset || 0;
+                            let offset = data.offset || 0;
                             video.addEventListener('loadedmetadata', function handler() {
                                 video.currentTime = offset;
                                 video.play();
                                 video.removeEventListener('loadedmetadata', handler);
                             });
-                            currentMovie = newSrc;
                         } else if (data.offset !== undefined) {
-                            offset = data.offset;
-                            video.currentTime = offset;
+                            video.currentTime = data.offset;
                             video.play();
                         }
                     } else if (data.offset !== undefined) {
-                        offset = data.offset;
-                        video.currentTime = offset;
+                        video.currentTime = data.offset;
                         video.play();
                     }
 
                     if (data.infoline !== undefined) {
                         infoLine.textContent = data.infoline;
                     }
-                    this.query.value = "";
                 })
                 .catch(err => {
                     console.error("Fetch error:", err);
                     infoLine.textContent = "Error retrieving video info.";
                 });
+        }
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = this.query.value.trim();
+            performSearch(query);
+            this.query.value = ""; // clear input after search
+        });
+    </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.search-term-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const query = this.textContent.trim();
+                    performSearch(query);
+                });
+            });
         });
     </script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const video = document.getElementById('video');
-
             window.skip = function(seconds) {
                 if (!video || isNaN(video.duration)) return;
-
                 let newTime = Math.min(Math.max(0, video.currentTime + seconds), video.duration);
-
                 if (typeof video.fastSeek === 'function') {
                     video.fastSeek(newTime);
                 } else {

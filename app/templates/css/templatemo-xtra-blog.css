@@ -26,6 +26,10 @@ hr {
     margin-bottom: 10px;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .radio-container {
 }
 
