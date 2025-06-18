@@ -5,11 +5,11 @@ Flask-PyMongo
 geocoder
 langchain-community
 langchain-mongodb
+langchain-voyageai
 langchain-openai
 markdown
 mistune
 pillow
-pip-tools
 pycountry
 pydub
 python-dateutil
