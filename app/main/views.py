@@ -1271,39 +1271,4 @@ def insights():
 
 @main.route('/new')
 def new_article():
-    if 'title' in session:
-        title = session['title']
-    else:
-        title = ''
-    if 'text' in session:
-        text = session['text']
-    else:
-        text = ''
-    return render_template('new.html', title=title, text=text)
-
-
-@main.route('/submit_post', methods=['POST'])
-def submit_post():
-    session['title'] = request.form.get('title')
-    session['text'] = request.form.get('text')
-    if 'image' not in request.files:
-        return redirect(url_for('.new_article', error="missing_image"))
-    image_file = request.files['image']
-    if image_file.filename == '':
-        return redirect(url_for('.new_article', error="missing_image"))
-    uuid = str(python_uuid.uuid4().hex)
-    published = datetime.utcnow().isoformat()
-    author = 'Benjamin Lorenz'
-    image_file.save(os.path.join('/home/bjjl/content/images', uuid + '.jpg'))
-    collection().insert_one({ 'uuid' : uuid, 'published' : published, 'author' : author,
-                            'title' : session['title'], 'text' : session['text'] })
-    session.pop('title')
-    session.pop('text')
-    return redirect('/post?uuid=' + uuid)
-
-
-@main.route('/contact')
-def contact():
-    log(request)
-    check_for_quality_read()
-    return render_template('contact.html')
+    return render_template('new.html')

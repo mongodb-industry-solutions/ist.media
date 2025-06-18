@@ -3,7 +3,7 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import jsonify, request
+from flask import jsonify, request, redirect
 from flask import current_app as app
 from .. import mongo, logger
 from . import api
@@ -155,8 +155,11 @@ def create():
         data = get_data(request.data)
         title = get_string_attribute(data, 'title', 256)
         text = get_string_attribute(data, 'text', 32768)
-    except ApiError as error:
-        return error.response
+        json_params = True
+    except ApiError:
+        title = request.form['title']
+        text = request.form['text']
+        json_params = False
     # real action starts here
     try:
         article = {
@@ -168,7 +171,10 @@ def create():
         }
         result = news_incoming_collection.insert_one(article)
         if result.inserted_id:
-            return jsonify({ 'status' : 'ok', 'id' : result.inserted_id })
+            if json_params:
+                return jsonify({ 'status' : 'ok', 'id' : result.inserted_id })
+            else:
+                return redirect('/new')
         else:
             return jsonify({ 'status' : 'failed', 'message' : 'Failed to insert article' })
     except Exception as e:
