@@ -1272,3 +1272,8 @@ def insights():
 @main.route('/new')
 def new_article():
     return render_template('new.html')
+
+
+@main.route('/newurl')
+def new_url():
+    return render_template('newurl.html')

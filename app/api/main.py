@@ -10,6 +10,7 @@ from . import api
 from .errors import ApiError, bad_request, internal_server_error
 from bson import ObjectId
 from pymongo import MongoClient
+from openai import OpenAI
 from langchain.docstore.document import Document
 from langchain.chains.llm import LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
@@ -28,6 +29,7 @@ ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
 news_incoming_collectionName = "news_incoming"
 news_incoming_collection = client[dbName][news_incoming_collectionName]
 
+ai = OpenAI()
 
 def debug(msg: str):
     if app.config['DEBUG']:
@@ -175,6 +177,88 @@ def create():
                 return jsonify({ 'status' : 'ok', 'id' : result.inserted_id })
             else:
                 return redirect('/new')
+        else:
+            return jsonify({ 'status' : 'failed', 'message' : 'Failed to insert article' })
+    except Exception as e:
+        return jsonify({ 'status' : 'failed', 'message' : str(e) })
+
+
+def fact_check_and_write_about(url):
+    prompt = f"""
+
+    Conduct a fact check on the news below and write your own article about it.
+    No bullet points, at least 2500 characters in length, and write in English.
+
+    {url}
+    """
+    try:
+        response = ai.responses.create(
+            model = "gpt-4o",
+            tools = [ { "type" : "web_search_preview" } ],
+            input = prompt
+        )
+        return response.output_text
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        exit(1)
+
+
+def create_title(text):
+    prompt = f"""
+
+    Generate a title that reflects the essence of the article below, and
+    that could be used as the headline of a newspaper's article. Do not
+    surround the headline with single or double quotes.
+
+    {text}
+    """
+    try:
+        response = ai.responses.create(
+            model = "gpt-4o",
+            input = prompt
+        )
+        return response.output_text
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        exit(1)
+
+
+@api.route('/create_from_url', methods=['POST'])
+def create_from_url():
+    log(request)
+    # parameter handling
+    try:
+        data = get_data(request.data)
+        url = get_string_attribute(data, 'sourceurl', 512)
+        json_params = True
+    except ApiError:
+        url = request.form['sourceurl']
+        json_params = False
+    # real action starts here
+
+    text = fact_check_and_write_about(url)
+    title = create_title(text)
+
+    #print(title)
+    #print(text)
+    #return redirect('/newurl')
+
+    try:
+        article = {
+            'uuid' : str(uuid.uuid4()),  # Generate a random UUID
+            'source' : 'api',
+            'title' : title,
+            'text' : text,
+            'published' : datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
+        }
+        result = news_incoming_collection.insert_one(article)
+        if result.inserted_id:
+            if json_params:
+                return jsonify({ 'status' : 'ok', 'id' : result.inserted_id })
+            else:
+                return redirect('/newurl')
         else:
             return jsonify({ 'status' : 'failed', 'message' : 'Failed to insert article' })
     except Exception as e:
