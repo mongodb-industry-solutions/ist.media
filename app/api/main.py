@@ -208,8 +208,12 @@ def create_title(text):
     prompt = f"""
 
     Generate a title that reflects the essence of the article below, and
-    that could be used as the headline of a newspaper's article. Do not
-    surround the headline with single or double quotes.
+    that could be used as the headline of a newspaper's article.
+
+    Provide a headline that does not mislead regarding timing - what happened
+    in the past, what is current news, etc.
+
+    Do not surround the headline with single or double quotes.
 
     {text}
     """
