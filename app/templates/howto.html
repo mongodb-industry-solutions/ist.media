@@ -137,6 +137,25 @@
                                 picture</a> for more technical audiences.
                             </li>
                             <li>
+                                <strong>Multimodal Video Search</strong>: On the left main
+                                navigation, click Video Search (accessible from the Home page).
+                                Search for something displayed in the video (using image similarity
+                                search capabilities &mdash; one image frame vector-embedded per 2 seconds of
+                                video) or spoken in the voice
+                                track (using its transcript, e.g. text similarity search).
+                                One of two videos will be returned and running with an
+                                offset to immediately see the sequence in question.
+                                <div style="padding: 0; margin: 0.5em"></div>
+                                To make your life easier, there's a list of preconfigured search
+                                terms at the bottom of the page for you to click.
+                                This capability of the demo is powered by
+                                <a href="https://docs.voyageai.com/docs/multimodal-embeddings"
+                                   class="tm-color-primary">
+                                    multimodal embeddings
+                                </a>
+                                of Voyage AI.
+                            </li>
+                            <li>
                                 <strong>Content Suggestions / Related Posts</strong>: Click on a
                                 news article on the Home page. Show the right column of the page,
                                 where three Related Posts are displayed, together with their
@@ -160,17 +179,24 @@
                                 search functionality like the one that MongoDB provides.
                             </li>
                             <li>
-                                <strong>Meta Data Calculation (Keywords / Sentiment /
+                                <strong>Meta Data Calculation (Sections / Keywords / Sentiment /
                                 Popularity)</strong>: Click on an article. At the top of the right
-                                column there is a list of 5-6 keywords displayed. Explain that they
+                                column there is a list of 5-6 keywords displayed.
+                                Explain that they
                                 have been calculated with the help of an LLM, and then added to the
                                 JSON Document, leveraging the <a class="tm-color-primary"
                                 href="#documentmodel">flexibility of the MongoDB Document
                                 Model</a>. You can click on a keyword to fetch background
                                 information about the item (again leveraging the power of GenAI).
-                                In a similar way, sentiment of the article (positive, negative,
-                                neutral) is calculated, and displayed in smiley format. Finally,
-                                popularity of the article is tracked by counting the page
+                                <div style="padding: 0; margin: 0.5em"></div>
+                                In a similar way, sentiment of the article (positive,
+                                negative, neutral) is calculated, and displayed in smiley format.
+                                Furthermore, up to three sections are auto-generated
+                                for each article, and stored in MongoDB as a JSON list. Another
+                                opportunity for you to emphasize the power of the document model,
+                                allowing for list structures.
+                                <div style="padding: 0; margin: 0.5em"></div>
+                                Finally, popularity of the article is tracked by counting the page
                                 impressions, as well as the qualified reads (user scrolls to the end
                                 of the article, and stays on the page for longer than 10
                                 seconds). This data will be used for dynamic pricing in a later
@@ -179,7 +205,7 @@
                             <li>
                                 <strong>Content Manipulations (Summary / Translation)</strong>:
                                 Click on an article. At the top of the article's text, you find
-                                links to Create Summary and to Translate to various languages,
+                                links to create a summary and to translate to various languages,
                                 available from the dropdown list. Explain that these manipulations
                                 are done on-the-fly with the help of an LLM.
                             </li>
@@ -207,7 +233,20 @@
                                 Question" form at the top of the page to formulate a question about
                                 any news-related topic. Using a <a class="tm-color-primary"
                                 href="#ragarchitecture">RAG Architecture</a> an informed answer to
-                                the question is formulated.
+                                the question is formulated, which takes into account three sources:
+                                <ul>
+                                    <li style="margin-bottom: 0; padding: 0">
+                                        Knowledge baked into the LLM (available up to its cut-off date)
+                                    </li>
+                                    <li style="margin-bottom: 0; margin-top: 0.3em; padding: 0">
+                                        Information from relevant news articles within ist.media (retrieved
+                                        by MongoDB Vector Search)
+                                    </li>
+                                    <li style="margin-bottom: 0; margin-top: 0.3em; padding: 0">
+                                        Information from public web sources, looked up in real-time
+                                        (in the spirit of Agentic AI)
+                                    </li>
+                                </ul>
                             </li>
                     </ul></p>
                     <p>&nbsp;</p>
