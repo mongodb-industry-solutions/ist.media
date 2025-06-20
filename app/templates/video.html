@@ -22,50 +22,21 @@
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
     {% include "css/snippet_post.html" %}
     <style>
-        .video-container {
+        .video-wrapper {
             position: relative;
             width: 100%;
-            margin: auto;
-            aspect-ratio: 16 / 9;
+            padding-top: 56.25%; /* 16:9 = 9 / 16 * 100 */
+            overflow: hidden;
         }
-
-        .video-container video {
+        .video-inner {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+        }
+        .video-inner video {
             width: 100%;
             height: 100%;
-            display: block;
             object-fit: cover;
-        }
-
-        .controls {
-            position: absolute;
-            bottom: 50px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .video-container:hover .controls {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .controls button {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .controls button:hover {
-            background-color: rgba(50, 50, 50, 0.75);
+            display: block;
         }
     </style>
 </head>
@@ -158,25 +129,21 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
-                    <div class="video-container" style="width: 100%">
-                        <video id="video" style="width: 100%; margin-bottom: 40px" controls preload="auto">
-                            <source src="video/cover.mp4" type="video/mp4">
-                        </video>
-                        <div class="controls">
-                            <button onclick="skip(-5)">⏪&nbsp;&nbsp;&nbsp;5s</button>
-                            <button onclick="skip(5)">5s&nbsp;&nbsp;&nbsp;⏩</button>
+                    <div class="video-wrapper">
+                        <div class="video-inner">
+                            <video id="video" controls>
+                                <source src="video/cover.mp4" type="video/mp4">
+                            </video>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row tm-row">
-                <div class="col-12">
-                    <span style="font-size: 115%; color: #333">
-                        You can try one of these search terms&mdash;finding in
-                        <b>German News</b>, and the <b>WWDC 2025 Keynote</b>
-                    </span>
+                <div class="col-12 tm-mt-20">
+                    You can also use one of the following search terms&mdash;finding in
+                    <b>German News</b>, and the <b>WWDC 2025 Keynote</b>
                 </div>
-                <div class="col-12 tm-mt-10">
+                <div class="col-12 tm-mt-10" style="font-size: 90%">
                     <a href="#" class="tm-color-primary bold search-term-link">police</a> |
                     <a href="#" class="tm-color-primary bold search-term-link">ambulance</a> |
                     <a href="#" class="tm-color-primary bold search-term-link">liquid glass</a> |
@@ -195,17 +162,10 @@
                     <a href="#" class="tm-color-primary bold search-term-link">bierwerbung</a> |
                     <a href="#" class="tm-color-primary bold search-term-link">wettervorhersage</a>
                 </div>
-                <div class="col-12 tm-mt-20">
-                    Or enter your individual input into the search field at the top of the page
-                    and hit &lt;return&gt;.
-                </div>
                 <div class="col-12 tm-mt-30 tm-mb-60">
-                    <span style="font-size: 120%; color: #333">
-                        A view behind the scenes
-                        <a class="tm-color-primary" href="/howto_videosearch">
-                            is provided here
-                        </a>.
-                    </span>
+                    A view behind the scenes
+                    <a class="tm-color-primary" href="/howto_videosearch">
+                        is provided here</a>.
                 </div>
             </div>
             <footer class="row tm-row">
@@ -238,6 +198,7 @@
                         const newSrc = `/content/video/${encodeURIComponent(data.movie)}.mp4`;
                         if (video.getAttribute("src") !== newSrc) {
                             video.pause();
+                            video.controls = false;
                             video.setAttribute("src", newSrc);
                             video.load();
                             let offset = data.offset || 0;
@@ -264,14 +225,18 @@
                     infoLine.textContent = "Error retrieving video info.";
                 });
         }
+        video.addEventListener("mouseenter", () => {
+            video.controls = true;
+        });
+        video.addEventListener("mouseleave", () => {
+            video.controls = false;
+        });
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const query = this.query.value.trim();
             performSearch(query);
             this.query.value = ""; // clear input after search
         });
-    </script>
-    <script>
         window.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.search-term-link').forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -280,20 +245,6 @@
                     performSearch(query);
                 });
             });
-        });
-    </script>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const video = document.getElementById('video');
-            window.skip = function(seconds) {
-                if (!video || isNaN(video.duration)) return;
-                let newTime = Math.min(Math.max(0, video.currentTime + seconds), video.duration);
-                if (typeof video.fastSeek === 'function') {
-                    video.fastSeek(newTime);
-                } else {
-                    video.currentTime = newTime;
-                }
-            };
         });
     </script>
 </body>
