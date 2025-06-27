@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from pydub import AudioSegment
 
 audio_dir = '/usr/local/share/content/audio'
-podcast_tmp_file = '/var/tmp/podcast_tmp.wav'
+podcast_tmp_file = '/var/tmp/podcast_tmp.mp3'
 
 token = os.getenv('AUTOCONTENT_API_KEY')
 create_url = 'https://api.autocontentapi.com/Content/Create'
@@ -78,7 +78,7 @@ def poll_status(request_id):
             with open(podcast_tmp_file, 'wb') as handler:
                 handler.write(podcast_data)
 
-            audio = AudioSegment.from_wav(podcast_tmp_file)
+            audio = AudioSegment.from_file(podcast_tmp_file, format="mp3")
             audio = audio.set_frame_rate(44100)
             filename = f"{audio_dir}/podcast-{today:%d.%m.%Y}.mp3"
             audio.export(filename, format="mp3", bitrate="192k")
