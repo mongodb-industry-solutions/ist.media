@@ -344,18 +344,17 @@
             const months = [...new Set(pathStats.map(item => item.month_year))];
 
             // Define the top 3 paths we expect (based on your data)
-            const paths = ["/", "/post", "/daily", "/insights", "/profile", "/login", "/payment",
-                           "/backstage", "/howto" ];
+            const paths = ["/", "/post", "/daily", "/insights", "/howto", "/howto_videosearch",
+                           "/backstage", "/video_search" ];
             const colors = {
-                "/": "#00684A",
-                "/post": "#DD6F01",
-                "/daily": "#3980B1",
+                "/": "#20886A",
+                "/post": "#ED7F11",
+                "/daily": "#4990C1",
                 "/insights": "#F7B731",
-                "/profile": "#9B5996",
-                "/backstage": "#E74C3C",
-                "/howto": "#009B7D",
-                "/login": "#808080",
-                "/payment": "#222222"
+                "/howto": "#9B5996",
+                "/howto_videosearch": "#DB99D6",
+                "/backstage": "#F75C4C",
+                "/video_search": "#B0D870"
             };
 
             // Prepare datasets for Chart.js

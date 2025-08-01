@@ -329,6 +329,7 @@ class MongoJSONEncoder(JSONEncoder):
 
 @main.route('/json/<_id>')
 def show_json(_id):
+    log(request)
     doc = collection().find_one({ "_id" : ObjectId(_id) })
     title = "MongoDB Article Document"
     if not doc:
@@ -340,6 +341,7 @@ def show_json(_id):
 
 @main.route('/select_news_source', methods=['POST'])
 def select_news_source():
+    log(request)
     selected_option = request.form['news_option']
     session['news_source'] = 'business_news' if selected_option == 'traditional' else DEFAULT_NEWS_COLLECTION
     # need to reset some stuff when switching source
@@ -422,6 +424,7 @@ def register():
 
 @main.route('/do_register', methods=['POST'])
 def do_register():
+    log(request)
     username = request.form.get('username')
     password = request.form.get('password').encode('utf-8')
 
@@ -451,6 +454,7 @@ def login():
 
 @main.route('/do_login', methods=['POST'])
 def do_login():
+    log(request)
     username = request.form.get('username')
     password = request.form.get('password').encode('utf-8')
 
@@ -559,6 +563,7 @@ def get_memo():
 
 @main.route('/qr_image/<float:amount>')
 def qr_image(amount):
+    log(request)
     SOLANA_RECIPIENT_ADDRESS = "918Y2TZvy386gXLWxGM9sBVutviT77xJriCDQsZeheEF"
     memo = get_memo()
     label = "IST.Media"
@@ -569,6 +574,7 @@ def qr_image(amount):
 
 @main.route('/status')
 def payment_status():
+    #log(request)
     tx_tmp = solana_collection_tmp.find_one({ "memo" : get_memo() })
     if tx_tmp:
         session['tx_in_progress'] = tx_tmp["signature"]
@@ -579,6 +585,7 @@ def payment_status():
 
 @main.route('/status-stage-2')
 def payment_status_stage_2():
+    log(request)
     if 'tx_in_progress' in session:
         tx = solana_collection_tx.find_one({ "signature" : session['tx_in_progress'],
                                              "memo" : get_memo() })
@@ -599,6 +606,7 @@ def adjusted_score(original_score, age_in_seconds, half_life=86400*90):
 
 @main.route('/logout')
 def logout():
+    log(request)
     session.pop('user', None)
     return redirect('/')
 
@@ -734,6 +742,7 @@ def index():
 
 @main.route('/delete')
 def delete():
+    log(request)
     uuid = request.args.get('uuid')
     collection().delete_one({ "uuid" : uuid })
     session['history'] = []
@@ -742,11 +751,13 @@ def delete():
 
 @main.route('/howto_videosearch')
 def howto_videosearch():
+    log(request)
     return render_template('howto_videosearch.html')
 
 
 @main.route('/video_search')
 def video_search():
+    log(request)
     query_text = request.args.get('query')
     if not query_text or query_text == "":
         return jsonify({
@@ -788,6 +799,8 @@ def video_search():
 
 @main.route('/video')
 def video():
+    log(request)
+    check_for_quality_read()
     return render_template('video.html', offset=0, infoline="Enter your search query above")
 
 
@@ -1164,6 +1177,7 @@ def get_news_for_today():
 
 @main.route('/feed')
 def feed():
+    log(request)
     docs = get_news_for_today()
     return render_template('feed.html', docs=docs)
 
@@ -1271,9 +1285,11 @@ def insights():
 
 @main.route('/new')
 def new_article():
+    log(request)
     return render_template('new.html')
 
 
 @main.route('/newurl')
 def new_url():
+    log(request)
     return render_template('newurl.html')
