@@ -28,7 +28,7 @@ def get_articles(client, url):
 
 def click_articles(client, links):
     """Click all article links with pause between each"""
-    for i, a in enumerate(links, 1):
+    for i, a in enumerate(links[:4], 1):
         href = a.get("href")
         if not href:
             continue
