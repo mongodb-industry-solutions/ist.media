@@ -1,11 +1,17 @@
+#
+# Create transcript files from mp3 voice track
+#
+# Copyright (c) 2025 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+
 import os
 from pydub import AudioSegment
 import openai
 
 client = openai.OpenAI()
 
-input_file = "wwdc2025.mp3"
-output_dir = "wwdc2025.dir"
+input_file = "voicetrack.mp3" # replace with your actual filename
+output_dir = "voicetrack.dir" # same here
 os.makedirs(output_dir, exist_ok=True)
 
 audio = AudioSegment.from_mp3(input_file)
@@ -26,7 +32,7 @@ for start_ms in range(0, len(audio), chunk_duration):
             )
             text = transcript.text.strip()
     except Exception as e:
-        text = f"[Fehler: {e}]"
+        text = f"[Error: {e}]"
 
     output_txt = os.path.join(output_dir, f"frame_{offset_sec:04d}.txt")
     with open(output_txt, "w") as out_f:

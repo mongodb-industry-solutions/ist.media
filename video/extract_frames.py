@@ -1,26 +1,24 @@
+#
+# Extract frames from mp4 video
+#
+# Copyright (c) 2025 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+
 from moviepy import VideoFileClip
 import os
 
-# Path to the input video
-video_path = 'wwdc2025.mp4'
-# Directory to save frames
-output_dir = 'wwdc2025.dir'
-# Create output directory if it doesn't exist
+video_path = 'video.mp4' # replace with your actual filename
+output_dir = 'video.dir' # same here
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# Load the video
 clip = VideoFileClip(video_path)
-
-# Get video duration and fps
 duration = clip.duration
 fps = clip.fps
 
-# Extract frames at 2-second intervals
 for t in range(0, int(duration), 2):
     frame = clip.get_frame(t)
     output_path = os.path.join(output_dir, f'frame_{t:04d}.jpg')
     clip.save_frame(output_path, t=t)
 
-# Close the clip
 clip.close()

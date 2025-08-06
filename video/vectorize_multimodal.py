@@ -1,10 +1,16 @@
+#
+# Create multimodal vector files
+#
+# Copyright (c) 2025 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+
 import os
 import json
 from PIL import Image
 import voyageai
 
 client = voyageai.Client()
-image_folder = "./wwdc2025.dir/"
+image_folder = "./video.dir/" # replace with your actual directory name
 
 for filename in sorted(os.listdir(image_folder)):
     if filename.lower().endswith((".jpg", ".jpeg", ".png")) and filename.startswith("frame_"):
@@ -17,7 +23,7 @@ for filename in sorted(os.listdir(image_folder)):
         text_file = os.path.join(image_folder, f"frame_{text_offset:04d}.txt")
 
         if not os.path.isfile(text_file):
-            print(f"Kein Text gefunden für Sekunde {offset} → {text_file} fehlt")
+            print(f"No text for second {offset} → {text_file} is missing")
             continue
 
         try:
@@ -30,7 +36,7 @@ for filename in sorted(os.listdir(image_folder)):
             embedding = result.embeddings[0]
 
             frame_data = {
-                "movie": "wwdc2025",
+                "movie": "video", # replace with your actual movie/video name
                 "offset": offset,
                 "text_offset": text_offset,
                 "embedding": embedding
@@ -40,9 +46,9 @@ for filename in sorted(os.listdir(image_folder)):
             with open(output_file, "w") as f:
                 json.dump(frame_data, f)
 
-            print(f"Vektorisiert: {filename} mit Text {text_file}")
+            print(f"Vectorized: {filename} with text {text_file}")
 
         except Exception as e:
-            print(f"Fehler bei {filename}: {e}")
+            print(f"Error at {filename}: {e}")
 
-print("Alle JSON-Dateien wurden erstellt.")
+print("All JSON files have been created.")
