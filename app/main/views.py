@@ -52,7 +52,7 @@ solana_collection_tmp = client[DB_NAME]["solana_tmp"]
 # the database that is used for preview (from content lab)
 MONGO_URI_PREVIEW = os.environ['MONGODB_IST_MEDIA_PREVIEW']
 client_preview = MongoClient(MONGO_URI_PREVIEW)
-preview_collection = client_preview["ist_media_internship"]["drafts"]
+preview_collection = client_preview["ist_media_internship"]["preview"]
 
 
 ai = OpenAI()
