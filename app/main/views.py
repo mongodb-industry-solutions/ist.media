@@ -48,6 +48,13 @@ users_collection = client[DB_NAME]["users"]
 solana_collection_tx = client[DB_NAME]["solana_tx"]
 solana_collection_tmp = client[DB_NAME]["solana_tmp"]
 
+
+# the database that is used for preview (from content lab)
+MONGO_URI_PREVIEW = os.environ['MONGODB_IST_MEDIA_PREVIEW']
+client_preview = MongoClient(MONGO_URI_PREVIEW)
+preview_collection = client_preview["ist_media_internship"]["drafts"]
+
+
 ai = OpenAI()
 voyage_ai = voyageai.Client()
 
@@ -812,6 +819,7 @@ def post():
     query = request.args.get('query')
     uuid = request.args.get('uuid')
     lang = request.args.get('lang')
+    preview = request.args.get('preview')
     if query and query != "":
         return index()
     if style and style == "summary":
@@ -899,6 +907,13 @@ def post():
         else:
             recommendations = []
         return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
+    if preview and preview != "":
+        published = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        doc = preview_collection.find_one({ "_id" : ObjectId(preview)})
+        #fdoc = html(doc['text'].replace("\n", "\n\n"))
+        return render_template('post.html', doc=doc, fdoc=doc['content'], preview=True,
+                               published=published,
+                               recommendations=[], keywords=doc['keywords'])
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
             doc = collection().find_one({ "uuid" : uuid })

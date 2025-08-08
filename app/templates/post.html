@@ -101,8 +101,13 @@
             <div class="row tm-row">
                 <div class="col-12">
                     <hr class="tm-hr-primary tm-mb-55">
+                    {% if preview is defined %}
+                    <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
+                         src="img/contentlab-preview.png" alt="">
+                    {% else %}
                     <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
                          src="/content/images/{{ doc.uuid }}.webp" alt="">
+                    {% endif %}
                 </div>
             </div>
             <div class="row tm-row">
@@ -116,6 +121,9 @@
                             </h2>
                             {% if not request.args.get('style') %}
                             <p style="margin: 0; padding: 0">
+                                {% if preview is defined %}
+                                {{ published | format_datetime('full') }}<br/>
+                                {% else %}
                                 {{ doc.published | format_datetime('full') }}<br/>
                                 Visits: <strong>{{ visit_count }}</strong>,
                                 &nbsp;Reads: <strong>{{ read_count }}</strong>,
@@ -134,6 +142,7 @@
                                 {% elif purchased == 'earlier' %}
                                 &nbsp;&nbsp;<span class="ps" style="font-size: 75%">already purchased</span>
                                 {% endif %}
+                                {% endif %}
                             </p>
                             {% else %}
                             <p style="margin: 0; padding: 0">
@@ -141,7 +150,7 @@
                                    class="tm-color-primary">&#10145; Back to original</a>
                             </p>
                             {% endif %}
-                            {% if not request.args.get('style') %}
+                            {% if not request.args.get('style') and not preview is defined %}
                             <div style="display: flex;
                                         align-items: center">
                                 <a style="text-align: right" href="/post?style=summary"
@@ -188,10 +197,12 @@
                         <hr class="mb-3 tm-hr-primary">
                         <h2 class="mb-4 tm-post-title tm-color-primary">
                             Keywords
+                            {% if not preview is defined %}
                             <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
                                href="/recalculate_keywords/{{ doc.uuid }}">
                                 [recalculate]
                             </a>
+                            {% endif %}
                         </h2>
                         <div style="line-height: 1.6em; padding-left: 0.9em">
                             {% for keyword in keywords %}
