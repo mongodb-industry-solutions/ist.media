@@ -249,7 +249,7 @@ ul, ol {
     font-weight: bold;
 }
 
-.ai-gen h3, .ai-gen h4 {
+.ai-gen h1, .ai-gen h2, .ai-gen h3, .ai-gen h4 {
     color: #00684A;
     font-weight: normal;
     padding-top: 0.9em;

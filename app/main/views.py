@@ -910,9 +910,8 @@ def post():
     if preview and preview != "":
         published = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         doc = preview_collection.find_one({ "_id" : ObjectId(preview)})
-        #fdoc = html(doc['text'].replace("\n", "\n\n"))
-        return render_template('post.html', doc=doc, fdoc=doc['content'], preview=True,
-                               published=published,
+        fdoc = '<div class="ai-gen">' + html(doc['content'].replace("\n", "\n\n")) + '</div>'
+        return render_template('post.html', doc=doc, fdoc=fdoc, preview=True, published=published,
                                recommendations=[], keywords=doc['keywords'])
     else:
         if uuid: # highest prio: use uuid page parameter, if provided
