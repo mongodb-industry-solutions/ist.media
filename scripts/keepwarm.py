@@ -27,8 +27,8 @@ def get_articles(client, url):
     return soup.select(ARTICLE_SELECTOR)
 
 def click_articles(client, links):
-    """Click all article links with pause between each"""
-    for i, a in enumerate(links[:4], 1):
+    """Click some article links with pause between each"""
+    for i, a in enumerate(links[:2], 1):
         href = a.get("href")
         if not href:
             continue
