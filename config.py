@@ -24,6 +24,7 @@ class Config:
 
 class DevelopmentConfig(Config):
 
+    MAIN_BASE_URL = 'http://localhost:9090'
     API_BASE_URL = 'http://localhost:9090/api'
 
     # turn Flask into debug mode
@@ -32,6 +33,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
 
+    MAIN_BASE_URL = 'https://ist.media'
     API_BASE_URL = 'https://ist.media/api'
 
     # cookie security

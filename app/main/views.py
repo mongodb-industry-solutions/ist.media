@@ -403,12 +403,7 @@ def article_engagement_stats():
         start_date = datetime.utcnow() - timedelta(days=30)
         match_stage["ts"] = {"$gte": start_date}
 
-    sort_param = request.args.get("sort", "read").lower()
-    if sort_param == "scroll":
-        sort_stage = {"$sort": {"avg_scroll_depth": -1, "read_to_end_rate": -1}}
-    else:
-        sort_stage = {"$sort": {"read_to_end_rate": -1, "avg_scroll_depth": -1}}
-
+    sort_param = request.args.get("sort", "read_visit").lower()
     try:
         limit = request.args.get("limit", 15, type=int)
         if limit <= 0:
@@ -416,126 +411,233 @@ def article_engagement_stats():
     except ValueError:
         limit = 15
 
+    if sort_param == "scroll":
+        sort_stage = {"$sort": {"avg_scroll_depth": -1, "read_to_end_rate_visit": -1}}
+    elif sort_param == "read_user":
+        sort_stage = {"$sort": {"read_to_end_rate_user": -1, "avg_scroll_depth": -1}}
+    elif sort_param == "read_first":
+        sort_stage = {"$sort": {"read_to_end_rate_first_visit": -1, "avg_scroll_depth": -1}}
+    else:
+        sort_stage = {"$sort": {"read_to_end_rate_visit": -1, "avg_scroll_depth": -1}}
+
     pipeline = [
         {"$match": match_stage},
-        {
-            "$group": {
-                "_id": {
-                    "article_uuid": "$article_uuid",
-                    "is_leave": {"$eq": ["$event", "leave"]}
-                },
-                "avg_scroll_depth": {"$avg": "$scroll_depth"},
-                "total_events": {"$sum": 1},
-                "read_to_end_count": {
-                    "$sum": {
-                        "$cond": [
-                            {"$and": [
-                                {"$eq": ["$event", "leave"]},
-                                "$read_to_end"
-                            ]},
-                            1,
-                            0
-                        ]
-                    }
-                },
-                "total_leaves": {
-                    "$sum": {
-                        "$cond": [
-                            {"$eq": ["$event", "leave"]},
-                            1,
-                            0
-                        ]
-                    }
-                }
-            }
-        },
-        {
-            "$group": {
-                "_id": "$_id.article_uuid",
-                "avg_scroll_depth": {"$avg": "$avg_scroll_depth"},
-                "total_events": {"$sum": "$total_events"},
-                "read_to_end_count": {"$sum": "$read_to_end_count"},
-                "total_leaves": {"$sum": "$total_leaves"}
-            }
-        },
-        {
-            "$addFields": {
-                "article_uuid_str": {"$toString": "$_id"},
-                "read_to_end_rate": {
-                    "$round": [
-                        {
-                            "$multiply": [
-                                {
-                                    "$cond": [
-                                        {"$gt": ["$total_leaves", 0]},
-                                        {"$divide": ["$read_to_end_count", "$total_leaves"]},
-                                        0
-                                    ]
-                                },
-                                100
-                            ]
-                        },
-                        2
-                    ]
-                },
-                "read_to_end_rate_int": {
-                    "$toInt": {
-                        "$round": [
+
+        {"$facet": {
+            # visit-based metrics
+            "visits": [
+                {"$match": {"event": "leave"}},
+                {"$group": {
+                    "_id": "$article_uuid",
+                    "total_leaves": {"$sum": 1},
+                    "read_to_end_count": {"$sum": {"$cond": ["$read_to_end", 1, 0]}},
+                    "avg_leave_scroll": {"$avg": "$scroll_depth"}
+                }}
+            ],
+            # user-based best-ever
+            "users": [
+                {"$addFields": {"user_key": {"$ifNull": ["$user_id", "$anon_id"]}}},
+                {"$group": {
+                    "_id": {"article_uuid": "$article_uuid", "user_key": "$user_key"},
+                    "best_read_to_end": {"$max": {"$cond": ["$read_to_end", 1, 0]}},
+                    "any_leave": {"$max": {"$cond": [{"$eq": ["$event", "leave"]}, 1, 0]}}
+                }},
+                {"$group": {
+                    "_id": "$_id.article_uuid",
+                    "read_to_end_users": {"$sum": {"$cond": ["$best_read_to_end", 1, 0]}},
+                    "total_users_with_leave": {"$sum": {"$cond": ["$any_leave", 1, 0]}}
+                }}
+            ],
+            # first-visit-only metric
+            "first_visits": [
+                {"$addFields": {"user_key": {"$ifNull": ["$user_id", "$anon_id"]}}},
+                {"$match": {"event": "leave"}},
+                {"$sort": {"ts": 1}},
+                {"$group": {
+                    "_id": {"article_uuid": "$article_uuid", "user_key": "$user_key"},
+                    "first_ts": {"$first": "$ts"},
+                    "first_read_to_end": {"$first": "$read_to_end"}
+                }},
+                {"$group": {
+                    "_id": "$_id.article_uuid",
+                    "read_to_end_first_visit_count": {"$sum": {"$cond": ["$first_read_to_end", 1, 0]}},
+                    "total_first_visits": {"$sum": 1}
+                }}
+            ]
+        }},
+
+        # merge facet outputs
+        {"$project": {
+            "merged": {
+                "$map": {
+                    "input": "$visits",
+                    "as": "v",
+                    "in": {
+                        "$mergeObjects": [
+                            "$$v",
                             {
-                                "$multiply": [
+                                "$ifNull": [
                                     {
-                                        "$cond": [
-                                            {"$gt": ["$total_leaves", 0]},
-                                            {"$divide": ["$read_to_end_count", "$total_leaves"]},
-                                            0
-                                        ]
+                                        "$first": {
+                                            "$filter": {
+                                                "input": "$users",
+                                                "as": "u",
+                                                "cond": {"$eq": ["$$u._id", "$$v._id"]}
+                                            }
+                                        }
                                     },
-                                    100
+                                    {"_id": "$$v._id", "read_to_end_users": 0, "total_users_with_leave": 0}
                                 ]
                             },
-                            0
-                        ]
-                    }
-                },
-                "avg_scroll_depth": {
-                    "$round": [
-                        {"$multiply": ["$avg_scroll_depth", 100]},
-                        2
-                    ]
-                },
-                "avg_scroll_depth_int": {
-                    "$toInt": {
-                        "$round": [
-                            {"$multiply": ["$avg_scroll_depth", 100]},
-                            0
+                            {
+                                "$ifNull": [
+                                    {
+                                        "$first": {
+                                            "$filter": {
+                                                "input": "$first_visits",
+                                                "as": "f",
+                                                "cond": {"$eq": ["$$f._id", "$$v._id"]}
+                                            }
+                                        }
+                                    },
+                                    {"_id": "$$v._id", "read_to_end_first_visit_count": 0, "total_first_visits": 0}
+                                ]
+                            }
                         ]
                     }
                 }
             }
-        },
-        {
-            "$lookup": {
-                "from": "news",
-                "localField": "article_uuid_str",
-                "foreignField": "uuid",
-                "as": "article_info"
+        }},
+        {"$unwind": "$merged"},
+        {"$replaceRoot": {"newRoot": "$merged"}},
+
+        # computed fields
+        {"$addFields": {
+            "article_uuid_str": {"$toString": "$_id"},
+
+            "avg_scroll_depth": {"$round": [{"$multiply": ["$avg_leave_scroll", 100]}, 2]},
+            "avg_scroll_depth_int": {"$toInt": {"$round": [{"$multiply": ["$avg_leave_scroll", 100]}, 0]}},
+
+            "read_to_end_rate_visit": {
+                "$round": [
+                    {"$multiply": [
+                        {"$cond": [
+                            {"$gt": ["$total_leaves", 0]},
+                            {"$divide": ["$read_to_end_count", "$total_leaves"]},
+                            0
+                        ]},
+                        100
+                    ]},
+                    2
+                ]
+            },
+            "read_to_end_rate_visit_int": {
+                "$toInt": {
+                    "$round": [
+                        {"$multiply": [
+                            {"$cond": [
+                                {"$gt": ["$total_leaves", 0]},
+                                {"$divide": ["$read_to_end_count", "$total_leaves"]},
+                                0
+                            ]},
+                            100
+                        ]},
+                        0
+                    ]
+                }
+            },
+
+            "read_to_end_rate_user": {
+                "$round": [
+                    {"$multiply": [
+                        {"$cond": [
+                            {"$gt": ["$total_users_with_leave", 0]},
+                            {"$divide": ["$read_to_end_users", "$total_users_with_leave"]},
+                            0
+                        ]},
+                        100
+                    ]},
+                    2
+                ]
+            },
+            "read_to_end_rate_user_int": {
+                "$toInt": {
+                    "$round": [
+                        {"$multiply": [
+                            {"$cond": [
+                                {"$gt": ["$total_users_with_leave", 0]},
+                                {"$divide": ["$read_to_end_users", "$total_users_with_leave"]},
+                                0
+                            ]},
+                            100
+                        ]},
+                        0
+                    ]
+                }
+            },
+
+            "read_to_end_rate_first_visit": {
+                "$round": [
+                    {"$multiply": [
+                        {"$cond": [
+                            {"$gt": ["$total_first_visits", 0]},
+                            {"$divide": ["$read_to_end_first_visit_count", "$total_first_visits"]},
+                            0
+                        ]},
+                        100
+                    ]},
+                    2
+                ]
+            },
+            "read_to_end_rate_first_visit_int": {
+                "$toInt": {
+                    "$round": [
+                        {"$multiply": [
+                            {"$cond": [
+                                {"$gt": ["$total_first_visits", 0]},
+                                {"$divide": ["$read_to_end_first_visit_count", "$total_first_visits"]},
+                                0
+                            ]},
+                            100
+                        ]},
+                        0
+                    ]
+                }
             }
-        },
+        }},
+
+        {"$lookup": {
+            "from": "news",
+            "localField": "article_uuid_str",
+            "foreignField": "uuid",
+            "as": "article_info"
+        }},
         {"$unwind": {"path": "$article_info", "preserveNullAndEmptyArrays": True}},
-        {
-            "$project": {
-                "_id": 0,
-                "uuid": "$article_uuid_str",
-                "title": "$article_info.title",
-                "total_leaves": 1,
-                "read_to_end_count": 1,
-                "read_to_end_rate": 1,
-                "read_to_end_rate_int": 1,
-                "avg_scroll_depth": 1,
-                "avg_scroll_depth_int": 1,
-                "total_events": 1
-            }
-        },
+
+        {"$project": {
+            "_id": 0,
+            "uuid": "$article_uuid_str",
+            "title": "$article_info.title",
+
+            "total_leaves": 1,
+            "read_to_end_count": 1,
+            "read_to_end_rate_visit": 1,
+            "read_to_end_rate_visit_int": 1,
+
+            "read_to_end_users": 1,
+            "total_users_with_leave": 1,
+            "read_to_end_rate_user": 1,
+            "read_to_end_rate_user_int": 1,
+
+            "read_to_end_first_visit_count": 1,
+            "total_first_visits": 1,
+            "read_to_end_rate_first_visit": 1,
+            "read_to_end_rate_first_visit_int": 1,
+
+            "avg_scroll_depth": 1,
+            "avg_scroll_depth_int": 1
+        }},
+
         sort_stage,
         {"$limit": limit}
     ]
@@ -1331,7 +1433,22 @@ def about():
         country_stats = []
         path_stats = []
         print(e) # will be printed in the log file that is residing in /tmp
+
+    try:
+        service_url = app.config['MAIN_BASE_URL'] + '/stats/article_engagement'
+        response = requests.get(
+            service_url,
+            auth=HTTPBasicAuth(IST_MEDIA_AUTH[0], IST_MEDIA_AUTH[1]),
+            params={"days": 90, "limit": 5}
+        )
+        response.raise_for_status()
+        article_engagement_stats_json = response.json()
+    except Exception as e:
+        print(f"Error fetching article engagement stats: {e}")
+        article_engagement_stats_json = []
+
     return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
+                           article_engagement_stats_json=article_engagement_stats_json,
                            news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
                            loc=loc, country_stats=country_stats, path_stats=path_stats)
 
