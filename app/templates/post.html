@@ -249,5 +249,13 @@
     </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
+    <script>
+        if (!localStorage.getItem('anon_id')) {
+            localStorage.setItem('anon_id', crypto.randomUUID());
+        }
+        window.userID = "{{ user.username if user else '' }}" || localStorage.getItem('anon_id');
+        window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+    </script>
+    <script src="js/tracking.js"></script>
 </body>
 </html>

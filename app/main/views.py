@@ -8,6 +8,7 @@ from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
 from . import main
+from bson import Binary
 from bson.objectid import ObjectId
 from pymongo import MongoClient, ReturnDocument
 from openai import OpenAI
@@ -47,6 +48,7 @@ daily_collection = client[DB_NAME]["daily"]
 users_collection = client[DB_NAME]["users"]
 solana_collection_tx = client[DB_NAME]["solana_tx"]
 solana_collection_tmp = client[DB_NAME]["solana_tmp"]
+engagement_events_collection = client[DB_NAME]["engagement_events"]
 
 
 # the database that is used for preview (from content lab)
@@ -344,6 +346,202 @@ def show_json(_id):
         title = "MongoDB User Document"
     json_data = json.dumps(doc, indent=2, ensure_ascii=False, cls=MongoJSONEncoder)
     return render_template('json.html', json_data=json_data, title=title)
+
+
+@main.route("/track", methods=["POST"])
+def track_event():
+    data = request.get_json(force=True) or {}
+    event = {}
+
+    if "user_id" not in data or not data["user_id"]:
+        return jsonify({"error": "Missing user_id"}), 400
+    event["user_id"] = data["user_id"]
+
+    if "article_uuid" in data and data["article_uuid"]:
+        try:
+            article_uuid = python_uuid.UUID(data["article_uuid"])
+            event["article_uuid"] = Binary.from_uuid(article_uuid)
+        except (ValueError, AttributeError):
+            pass
+
+    allowed_fields = [
+        "event",
+        "scroll_depth",
+        "offer_type",
+        "amount"
+    ]
+    for f in allowed_fields:
+        if f in data and data[f] not in (None, "", []):
+            if f == "scroll_depth":
+                try:
+                    depth = max(0.0, min(float(data[f]), 1.0))
+                    event[f] = round(depth, 2)
+                except (ValueError, TypeError):
+                    continue
+            else:
+                event[f] = data[f]
+
+    if event.get("event") == "leave" and "scroll_depth" in event:
+        event["read_to_end"] = event["scroll_depth"] >= 0.98
+
+    event["ts"] = datetime.utcnow()
+
+    engagement_events_collection.insert_one(event)
+    return jsonify({"status": "ok"})
+
+
+@main.route("/stats/article_engagement", methods=["GET"])
+def article_engagement_stats():
+    match_stage = {"event": {"$in": ["scroll_progress", "leave"]}}
+
+    try:
+        days = request.args.get("days", 30, type=int)
+        if days and days > 0:
+            start_date = datetime.utcnow() - timedelta(days=days)
+            match_stage["ts"] = {"$gte": start_date}
+    except ValueError:
+        start_date = datetime.utcnow() - timedelta(days=30)
+        match_stage["ts"] = {"$gte": start_date}
+
+    sort_param = request.args.get("sort", "read").lower()
+    if sort_param == "scroll":
+        sort_stage = {"$sort": {"avg_scroll_depth": -1, "read_to_end_rate": -1}}
+    else:
+        sort_stage = {"$sort": {"read_to_end_rate": -1, "avg_scroll_depth": -1}}
+
+    try:
+        limit = request.args.get("limit", 15, type=int)
+        if limit <= 0:
+            limit = 15
+    except ValueError:
+        limit = 15
+
+    pipeline = [
+        {"$match": match_stage},
+        {
+            "$group": {
+                "_id": {
+                    "article_uuid": "$article_uuid",
+                    "is_leave": {"$eq": ["$event", "leave"]}
+                },
+                "avg_scroll_depth": {"$avg": "$scroll_depth"},
+                "total_events": {"$sum": 1},
+                "read_to_end_count": {
+                    "$sum": {
+                        "$cond": [
+                            {"$and": [
+                                {"$eq": ["$event", "leave"]},
+                                "$read_to_end"
+                            ]},
+                            1,
+                            0
+                        ]
+                    }
+                },
+                "total_leaves": {
+                    "$sum": {
+                        "$cond": [
+                            {"$eq": ["$event", "leave"]},
+                            1,
+                            0
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$_id.article_uuid",
+                "avg_scroll_depth": {"$avg": "$avg_scroll_depth"},
+                "total_events": {"$sum": "$total_events"},
+                "read_to_end_count": {"$sum": "$read_to_end_count"},
+                "total_leaves": {"$sum": "$total_leaves"}
+            }
+        },
+        {
+            "$addFields": {
+                "article_uuid_str": {"$toString": "$_id"},
+                "read_to_end_rate": {
+                    "$round": [
+                        {
+                            "$multiply": [
+                                {
+                                    "$cond": [
+                                        {"$gt": ["$total_leaves", 0]},
+                                        {"$divide": ["$read_to_end_count", "$total_leaves"]},
+                                        0
+                                    ]
+                                },
+                                100
+                            ]
+                        },
+                        2
+                    ]
+                },
+                "read_to_end_rate_int": {
+                    "$toInt": {
+                        "$round": [
+                            {
+                                "$multiply": [
+                                    {
+                                        "$cond": [
+                                            {"$gt": ["$total_leaves", 0]},
+                                            {"$divide": ["$read_to_end_count", "$total_leaves"]},
+                                            0
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    }
+                },
+                "avg_scroll_depth": {
+                    "$round": [
+                        {"$multiply": ["$avg_scroll_depth", 100]},
+                        2
+                    ]
+                },
+                "avg_scroll_depth_int": {
+                    "$toInt": {
+                        "$round": [
+                            {"$multiply": ["$avg_scroll_depth", 100]},
+                            0
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "news",
+                "localField": "article_uuid_str",
+                "foreignField": "uuid",
+                "as": "article_info"
+            }
+        },
+        {"$unwind": {"path": "$article_info", "preserveNullAndEmptyArrays": True}},
+        {
+            "$project": {
+                "_id": 0,
+                "uuid": "$article_uuid_str",
+                "title": "$article_info.title",
+                "total_leaves": 1,
+                "read_to_end_count": 1,
+                "read_to_end_rate": 1,
+                "read_to_end_rate_int": 1,
+                "avg_scroll_depth": 1,
+                "avg_scroll_depth_int": 1,
+                "total_events": 1
+            }
+        },
+        sort_stage,
+        {"$limit": limit}
+    ]
+
+    results = list(engagement_events_collection.aggregate(pipeline))
+    return jsonify(results)
 
 
 @main.route('/select_news_source', methods=['POST'])
