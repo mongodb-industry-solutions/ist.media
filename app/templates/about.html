@@ -246,11 +246,11 @@
                             <br/>{{ loc.city }}, {{ loc.country }}
                             {% endif %}
                         </p>
-                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-40">
+                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-60">
                             Top 5 Articles by Read-to-End Rate
                         </h2>
                         <p class="tm-pt-10">
-                            <canvas id="rteStatsChart" style="max-height: 400px;"></canvas>
+                            <canvas id="rteStatsChart" style="height: 200px;"></canvas>
                         </p>
                         <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-60">
                             Access Statistics per Path
@@ -390,7 +390,7 @@
                     scales: {
                         x: {
                             stacked: true,
-                            title: { display: true, text: 'Month-Year' }
+                            title: { display: false, text: 'Month-Year' }
                         },
                         y: {
                             stacked: true,
@@ -418,7 +418,7 @@
                         (b.avg_scroll_depth - a.avg_scroll_depth))
                   .slice(0, 10);
 
-            const maxLabelLength = 10;
+            const maxLabelLength = 15;
             const fullTitles = top.map(d => d.title);
             const shortTitles = fullTitles.map(t =>
                 t.length > maxLabelLength ? t.slice(0, maxLabelLength - 1) + '…' : t
@@ -456,7 +456,7 @@
                     scales: {
                         x: {
                             ticks: { maxRotation: 0, autoSkip: false },
-                            title: { display: true, text: 'Article' }
+                            title: { display: false, text: 'Article' }
                         },
                         y: {
                             beginAtZero: true,
