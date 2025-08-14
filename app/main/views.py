@@ -390,6 +390,64 @@ def track_event():
     return jsonify({"status": "ok"})
 
 
+@main.route("/user_engagement/<user_id>")
+def user_engagement(user_id):
+    weeks_limit = 12
+    mean_calc_weeks = 4
+
+    pipeline = [
+        {"$match": {"user_id": user_id, "event": {"$in": ["leave", "scroll"]}}},
+        {"$addFields": {
+            "week": {"$isoWeek": "$ts"},
+            "year": {"$isoWeekYear": "$ts"}
+        }},
+        {"$group": {
+            "_id": {"year": "$year", "week": "$week"},
+            "read_to_end_count": {"$sum": {"$cond": ["$read_to_end", 1, 0]}},
+            "avg_scroll_depth": {"$avg": "$scroll_depth"},
+            "distinct_articles": {"$addToSet": "$article_uuid"}
+        }},
+        {"$project": {
+            "year": "$_id.year",
+            "week": "$_id.week",
+            "read_to_end_count": 1,
+            "avg_scroll_depth": 1,
+            "distinct_articles": {"$size": "$distinct_articles"},
+            "_id": 0
+        }},
+        {"$addFields": {
+            "engagement_index": {
+                "$round": [
+                    {
+                        "$add": [
+                            {"$multiply": ["$read_to_end_count", 5]},
+                            {"$multiply": ["$avg_scroll_depth", 0.3]},
+                            {"$multiply": ["$distinct_articles", 2]}
+                        ]
+                    },
+                    0
+                ]
+            }
+        }},
+        {"$sort": {"year": -1, "week": -1}},
+        {"$limit": weeks_limit}
+    ]
+
+    results = list(engagement_events_collection.aggregate(pipeline))
+
+    if results:
+        last_weeks_for_mean = results[:mean_calc_weeks]
+        mean_val = round(sum(r["engagement_index"] for r in last_weeks_for_mean) / len(last_weeks_for_mean), 0)
+    else:
+        mean_val = 0
+
+    return jsonify({
+        "user_id" : user_id,
+        "mean_engagement_index" : int(mean_val),
+        "weekly_details" : results
+    })
+
+
 @main.route("/stats/article_engagement", methods=["GET"])
 def article_engagement_stats():
     match_stage = {"event": {"$in": ["scroll_progress", "leave"]}}
