@@ -294,11 +294,16 @@ def get_user():
 def make_session_permanent():
     session.permanent = True
     g.user = get_user()
+    try:
+        g.engagement = compute_user_engagement(g.user['username'])['mean_engagement_index']
+    except Exception:
+        g.engagement = 0
 
 
 @main.context_processor
 def inject_user():
-    return { 'user' : g.user }
+    return { 'user' : g.user,
+             'engagement' : g.engagement }
 
 
 class MongoJSONEncoder(JSONEncoder):
@@ -392,9 +397,11 @@ def track_event():
 
 @main.route("/user_engagement/<user_id>")
 def user_engagement(user_id):
-    weeks_limit = 12
-    mean_calc_weeks = 4
+    data = compute_user_engagement(user_id)
+    return jsonify({"user_id": user_id, **data})
 
+
+def compute_user_engagement(user_id, weeks_limit=12, mean_calc_weeks=4):
     pipeline = [
         {"$match": {"user_id": user_id, "event": {"$in": ["leave", "scroll"]}}},
         {"$addFields": {
@@ -411,21 +418,18 @@ def user_engagement(user_id):
             "year": "$_id.year",
             "week": "$_id.week",
             "read_to_end_count": 1,
-            "avg_scroll_depth": 1,
+            "avg_scroll_depth": { "$round": ["$avg_scroll_depth", 2] },
             "distinct_articles": {"$size": "$distinct_articles"},
             "_id": 0
         }},
         {"$addFields": {
             "engagement_index": {
                 "$round": [
-                    {
-                        "$add": [
-                            {"$multiply": ["$read_to_end_count", 5]},
-                            {"$multiply": ["$avg_scroll_depth", 0.3]},
-                            {"$multiply": ["$distinct_articles", 2]}
-                        ]
-                    },
-                    0
+                    {"$add": [
+                        {"$multiply": ["$read_to_end_count", 5]},
+                        {"$multiply": ["$avg_scroll_depth", 0.3]},
+                        {"$multiply": ["$distinct_articles", 2]}
+                    ]}, 0
                 ]
             }
         }},
@@ -434,18 +438,16 @@ def user_engagement(user_id):
     ]
 
     results = list(engagement_events_collection.aggregate(pipeline))
-
     if results:
         last_weeks_for_mean = results[:mean_calc_weeks]
         mean_val = round(sum(r["engagement_index"] for r in last_weeks_for_mean) / len(last_weeks_for_mean), 0)
     else:
         mean_val = 0
 
-    return jsonify({
-        "user_id" : user_id,
-        "mean_engagement_index" : int(mean_val),
-        "weekly_details" : results
-    })
+    return {
+        "mean_engagement_index": int(mean_val),
+        "weekly_details": results
+    }
 
 
 @main.route("/stats/article_engagement", methods=["GET"])
