@@ -295,7 +295,7 @@ def make_session_permanent():
     session.permanent = True
     g.user = get_user()
     try:
-        g.engagement = compute_user_engagement(g.user['username'])['mean_engagement_index']
+        g.engagement = compute_user_engagement(g.user['username'])
     except Exception:
         g.engagement = 0
 
@@ -303,7 +303,7 @@ def make_session_permanent():
 @main.context_processor
 def inject_user():
     return { 'user' : g.user,
-             'engagement' : g.engagement }
+             'engagement' : g.engagement['mean_engagement_index'] }
 
 
 class MongoJSONEncoder(JSONEncoder):
@@ -344,11 +344,15 @@ class MongoJSONEncoder(JSONEncoder):
 @main.route('/json/<_id>')
 def show_json(_id):
     log(request)
-    doc = collection().find_one({ "_id" : ObjectId(_id) })
-    title = "MongoDB Article Document"
-    if not doc:
-        doc = users_collection.find_one({ "_id" : ObjectId(_id) })
-        title = "MongoDB User Document"
+    if _id == "0": # this is a hack - should refactor at some point
+        doc = g.engagement
+        title = "User Engagement Details"
+    else:
+        doc = collection().find_one({ "_id" : ObjectId(_id) })
+        title = "MongoDB Article Document"
+        if not doc:
+            doc = users_collection.find_one({ "_id" : ObjectId(_id) })
+            title = "MongoDB User Document"
     json_data = json.dumps(doc, indent=2, ensure_ascii=False, cls=MongoJSONEncoder)
     return render_template('json.html', json_data=json_data, title=title)
 
