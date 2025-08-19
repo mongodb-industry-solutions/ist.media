@@ -297,13 +297,16 @@ def make_session_permanent():
     try:
         g.engagement = compute_user_engagement(g.user['username'])
     except Exception:
-        g.engagement = 0
+        g.engagement = None
 
 
 @main.context_processor
 def inject_user():
-    return { 'user' : g.user,
-             'engagement' : int( math.floor( g.engagement['ema']['ema28'] + 0.5 )) }
+    try:
+        engagement = int( math.floor( g.engagement['ema']['ema28'] + 0.5 ))
+    except Exception:
+        engagement = 0
+    return { 'user' : g.user, 'engagement' : engagement }
 
 
 class MongoJSONEncoder(JSONEncoder):
