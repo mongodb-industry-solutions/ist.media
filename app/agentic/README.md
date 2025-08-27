@@ -1,3 +1,36 @@
+# Agentic Blueprint (Flask)
+Mounts at **/app/agentic**
+
+## Integrate
+1) Env:
+```bash
+export MONGODB_URI="mongodb://user:pass@localhost:27017/?authSource=admin"
+export OPENAI_API_KEY="sk-..."   # required
+export LOG_LEVEL=INFO            # optional
+export PLANNER_INTERVAL_SEC=600  # optional
+```
+2) In your app factory (after `app = Flask(...)`):
+```python
+from app.agentic import register_agentic
+register_agentic(app)
+```
+3) Endpoints:
+- POST `/app/agentic/decide_register_wall` (alias `/app/agentic/decide`)
+- POST `/app/agentic/decide_homepage`
+- POST `/app/agentic/event`
+- GET  `/app/agentic/admin/arms/overview?experiment_class=homepage_ordering&days=14`
+- GET  `/app/agentic/admin/arms/series?experiment_id=<ObjectId>&days=28`
+- GET  `/app/agentic/admin/arms/weights?experiment_id=<ObjectId>`
+- GET  `/app/agentic/admin/agents/logs`
+
+Optional seeding:
+```python
+from app.agentic.seed_demo import run as seed
+seed()
+```
+
+
+
 # Demo Documentation: Agentic AI + MongoDB for Media Optimization
 
 ## Problem Statement
