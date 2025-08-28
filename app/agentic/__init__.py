@@ -25,15 +25,15 @@ import app.agentic.routes as routes  # to inject singletons
 logger = logging.getLogger("bandit")
 
 def register_agentic(app: Flask) -> None:
-    """Mount the agentic blueprint at /app/agentic and start coordinator."""
-    if not os.getenv("MONGODB_URI"):
-        raise SystemExit("MONGODB_URI is required.")
+    """Mount the agentic blueprint at /agentic and start coordinator."""
+    if not os.getenv("MONGODB_IST_MEDIA"):
+        raise SystemExit("MONGODB_IST_MEDIA is required.")
     if not os.getenv("OPENAI_API_KEY"):
         raise SystemExit("OPENAI_API_KEY is required — planner is LLM-only.")
 
     logging.basicConfig(level=getattr(logging, LOG_LEVEL, logging.INFO), format='%(message)s')
 
-    store = Store(os.getenv("MONGODB_URI"))
+    store = Store(os.getenv("MONGODB_IST_MEDIA"))
     store.init_indexes()
     planner = Planner(store)
     experiments_api = Experiments(store)
@@ -60,4 +60,4 @@ def register_agentic(app: Flask) -> None:
             time.sleep(PLANNER_INTERVAL_SEC)
     threading.Thread(target=coordinator_loop, daemon=True).start()
 
-    app.register_blueprint(api_bp, url_prefix="/app/agentic")
+    app.register_blueprint(api_bp, url_prefix="/agentic")

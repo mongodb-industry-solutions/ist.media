@@ -1,10 +1,10 @@
 # Agentic Blueprint (Flask)
-Mounts at **/app/agentic**
+Mounts at **/agentic**
 
 ## Integrate
 1) Env:
 ```bash
-export MONGODB_URI="mongodb://user:pass@localhost:27017/?authSource=admin"
+export MONGODB_IST_MEDIA=""      # required
 export OPENAI_API_KEY="sk-..."   # required
 export LOG_LEVEL=INFO            # optional
 export PLANNER_INTERVAL_SEC=600  # optional
@@ -15,13 +15,13 @@ from app.agentic import register_agentic
 register_agentic(app)
 ```
 3) Endpoints:
-- POST `/app/agentic/decide_register_wall` (alias `/app/agentic/decide`)
-- POST `/app/agentic/decide_homepage`
-- POST `/app/agentic/event`
-- GET  `/app/agentic/admin/arms/overview?experiment_class=homepage_ordering&days=14`
-- GET  `/app/agentic/admin/arms/series?experiment_id=<ObjectId>&days=28`
-- GET  `/app/agentic/admin/arms/weights?experiment_id=<ObjectId>`
-- GET  `/app/agentic/admin/agents/logs`
+- POST `/agentic/decide_register_wall`
+- POST `/agentic/decide_homepage`
+- POST `/agentic/event`
+- GET  `/agentic/admin/arms/overview?experiment_class=homepage_ordering&days=14`
+- GET  `/agentic/admin/arms/series?experiment_id=<ObjectId>&days=28`
+- GET  `/agentic/admin/arms/weights?experiment_id=<ObjectId>`
+- GET  `/agentic/admin/agents/logs`
 
 Optional seeding:
 ```python
