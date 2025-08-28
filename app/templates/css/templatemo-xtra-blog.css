@@ -651,6 +651,15 @@ a:hover figcaption { color: #004628; }
 .tm-contact-form label { font-size: 1.4rem; }
 .tm-contact-form .form-group { display: flex; }
 
+
+.badge-agent { background:#eef2f7; color:#2b2f33; }
+.badge-planner { background:#e8f5e9; color:#1b5e20; }
+.badge-rewards { background:#fff3cd; color:#664d03; }
+.badge-analytics { background:#e7f1ff; color:#0a58ca; }
+.badge-homepage { background:#eaf4f4; color:#0f5132; }
+.badge-register { background:#fde7ef; color:#842029; }
+
+
 @media (max-width: 1540px) {
     .tm-header { width: 320px; }
 

@@ -8,9 +8,11 @@ from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
 from .util import utcnow, day_str
 from .config import CONV_WINDOW_MINUTES, MOMENTUM_WINDOW_HOURS
+
 class Rewards:
     def __init__(self, store):
         self.store = store
+
     def conversion_success(self, user_id: str, t_assign: datetime) -> bool:
         t_end = t_assign + timedelta(minutes=CONV_WINDOW_MINUTES)
         ev = self.store.events.find_one({
@@ -19,6 +21,7 @@ class Rewards:
             "ts": {"$gte": t_assign, "$lte": t_end},
         })
         return bool(ev)
+
     def momentum_success(self, user_id: str, t_assign: datetime) -> Optional[bool]:
         d0 = day_str(t_assign)
         d2 = day_str(t_assign + timedelta(hours=MOMENTUM_WINDOW_HOURS))
@@ -32,6 +35,7 @@ class Rewards:
         except Exception:
             return None
         return (r2 - r0) > 0.0
+
     def apply_to_arm(self, arm_doc: Dict[str, Any], conv: Optional[bool], mom: Optional[bool]) -> None:
         st = arm_doc.get("stats", {})
         conv_alpha = float(st.get("conv_alpha", 1.0)) + (1 if conv else 0)
@@ -54,8 +58,12 @@ class Rewards:
                 "momentum_successes": momentum_successes,
             }
         }})
-    def resolve_pending(self) -> int:
+
+    def resolve_pending(self) -> dict:
         count = 0
+        conv_true = 0
+        mom_true = 0
+        mom_none = 0
         cur = self.store.assignments.find({"resolved": {"$ne": True}}).limit(500)
         for a in cur:
             conv = None; mom = None
@@ -72,11 +80,25 @@ class Rewards:
             arm = self.store.arms.find_one({"experiment_id": a["experiment_id"], "arm_id": a["arm_id"]})
             if arm:
                 self.apply_to_arm(arm, conv, mom)
+            if conv is True: conv_true += 1
+            if mom is True: mom_true += 1
+            if mom is None and a.get("experiment_class") == "homepage_ordering": mom_none += 1
             count += 1
+
+        rows_updated = 0
         if count:
-            self.recompute_rollups(since_days=30)
-        return count
-    def recompute_rollups(self, since_days: int = 14) -> None:
+            rows_updated = self.recompute_rollups(since_days=30)
+
+        return {
+            "total_resolved": count,
+            "conv_true": conv_true,
+            "mom_true": mom_true,
+            "mom_pending_or_missing": mom_none,
+            "rollup_rows": rows_updated,
+        }
+
+
+    def recompute_rollups(self, since_days: int = 14) -> int:
         start = utcnow() - timedelta(days=since_days)
         start_day = start.date().isoformat()
         self.store.campaign_ts.delete_many({"day": {"$gte": start_day}})
@@ -113,3 +135,4 @@ class Rewards:
                 }},
                 upsert=True,
             )
+        return len(rows)

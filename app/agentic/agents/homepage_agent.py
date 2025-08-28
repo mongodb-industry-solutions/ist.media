@@ -11,11 +11,14 @@ from ..strategies import score_time, score_popular, score_interest_boosted
 from ..util import utcnow
 from datetime import timedelta
 from ..config import ARTICLE_AGE_MAX_DAYS, DEFAULT_DECAY_DAYS, DEFAULT_WEIGHTS, MAX_HOMEPAGE_RESULTS
+
 class HomepageAgent(Agent):
     name = "homepage"
+
     def __init__(self, store, blackboard, experiments_api):
         super().__init__(store, blackboard)
         self.experiments_api = experiments_api
+
     def decide(self, user_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
         ex = self.experiments_api.pick_experiment("homepage_ordering")
         if not ex:
@@ -55,5 +58,18 @@ class HomepageAgent(Agent):
             "resolved": False,
         }
         self.store.assignments.insert_one(assign)
-        self.bb.log(self.name, "assigned", {"user_id": user_id, "experiment_id": ex.get("experiment_id"), "arm_id": arm_id, "articles_count": len(top)})
-        return {"experiment_id": ex.get("experiment_id"), "experiment_class": "homepage_ordering", "ordering_strategy": arm_id, "parameters": {"decay_days": decay_days, "exclude_read": True}, "articles": top}
+
+        preview_titles = [t["title"] for t in top[:3]]
+        self.bb.log(self.name, "assigned", {
+            "user_id": user_id,
+            "experiment_id": ex.get("experiment_id"),
+            "arm_id": arm_id,
+            "strategy": strat,
+            "decay_days": decay_days,
+            "user_top_sections": user_top_sections,
+            "articles_count": len(top),
+            "top_titles_preview": preview_titles,
+        })
+
+        return {"experiment_id": ex.get("experiment_id"), "experiment_class": "homepage_ordering",
+                "ordering_strategy": arm_id, "parameters": {"decay_days": decay_days, "exclude_read": True}, "articles": top}
