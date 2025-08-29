@@ -153,13 +153,18 @@
                 {% for doc in docs | sort(attribute = 'score', reverse = True) %}
                 <article class="col-12 col-md-6 tm-post">
                     <hr class="tm-hr-primary">
-                    <a href="/post?uuid={{ doc.uuid }}"
+                    <a href="/go?uuid={{ doc.uuid }}"
                        class="tm-post-link tm-pt-20 tm-color-primary">
                         <div class="tm-post-link-inner">
                             <img src="/content/images/{{ doc.uuid }}.webp"
                                  style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
-                        <h2 class="tm-pt-30 tm-color-primary tm-post-title">{{ doc.title }}</h2>
+                        <h2 class="tm-pt-30 tm-color-primary tm-post-title">
+                            {{ doc.title }}
+                            {% if doc.is_register_only %}
+                            <span class="badge text-bg-warning ms-2">RegONLY</span>
+                            {% endif %}
+                        </h2>
                     </a>
                     <p class="tm-pt-10">
                         {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}

@@ -123,13 +123,39 @@ def decide_register_wall():
     ensure_minimum_bootstrap()
     data = request.get_json(force=True)
     user_id = data.get("user_id"); article_id = data.get("article_id")
+    preview = bool(data.get("preview"))  # <— NEW
+
     if not user_id or not article_id:
         return jsonify({"error": "user_id and article_id required"}), 400
+
+    # Only popular articles are eligible (unchanged)
     popular_docs = planner_singleton.popular_articles()
     if article_id not in {d.get("uuid") for d in popular_docs}:
-        return jsonify({"display_register_wall": False})
-    ctx = {"days_since_last_visit": data.get("days_since_last_visit"), "momentum": data.get("momentum")}
-    result = registry.get("register_wall").decide(user_id=user_id, article_id=article_id, context=ctx)
+        return jsonify({"display_register_wall": False, "preview": preview})
+
+    ctx = {"days_since_last_visit": data.get("days_since_last_visit"),
+           "momentum": data.get("momentum")}
+
+    if preview:
+        # compute but DO NOT assign/log
+        ex = experiments_api.pick_experiment("register_wall")
+        if not ex:
+            return jsonify({"display_register_wall": False, "preview": True})
+        from .bandit import ThompsonScalarized
+        from .config import DEFAULT_WEIGHTS
+        weights = tuple(ex.get("parameters", {}).get("weights", list(DEFAULT_WEIGHTS)))
+        policy = ThompsonScalarized(store.arms, ex, weights)
+        arm_id, _ = policy.choose_arm(ctx)
+        return jsonify({"display_register_wall": True,
+                        "arm_id": arm_id,
+                        "experiment_id": ex.get("experiment_id"),
+                        "preview": True})
+
+    # normal path (creates assignment)
+    result = registry.get("register_wall").decide(user_id=user_id,
+                                                 article_id=article_id,
+                                                 context=ctx)
+    result["preview"] = False
     return jsonify(result)
 
 

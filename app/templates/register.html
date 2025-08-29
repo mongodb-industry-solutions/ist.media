@@ -95,11 +95,21 @@
                 <form action="/do_register" method="POST">
                     <div class="col-lg-8 tm-post-col">
                         <div class="mb-4 ai-gen">
+                            {% if article_id %}
+                            <p>
+                                In order to read article {{ article_id }},
+                                <strong>you need to register first</strong>.
+                                <br/><br/>
+                                This will allow you to enjoy explicit personalisation, targeted content
+                                suggestions, and much more. Registration only takes 1 minute!
+                            </p>
+                            {% else %}
                             <p>
                                 Welcome! You can register with the system to
                                 enjoy explicit personalisation, targeted content suggestions,
-                                and much more!
+                                and much more.
                             </p>
+                            {% endif %}
                             <div class="spacer-large">
                                 <span class="error {% if badlogin is defined %}visible{% endif %}">
                                     Registration failed &mdash; please try again

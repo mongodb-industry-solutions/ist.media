@@ -957,7 +957,8 @@ def register():
     if "user" in session:
         return redirect('/profile')
     else:
-        return render_template('register.html')
+        article_id = request.args.get('article_id')
+        return render_template('register.html', article_id=article_id)
 
 
 @main.route('/do_register', methods=['POST'])
@@ -1257,10 +1258,21 @@ def index():
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
 
+    # integration with bandit/agentic subsystem
+    agent_url = app.config['AGENTIC_BASE_URL'] + '/decide_register_wall'
+    for d in docs:
+        try:
+            r = requests.post(agent_url,
+                              json = { "user_id" : user_id, "article_id" : d["uuid"], "preview" : True },
+                              timeout = 0.8).json()
+            d["is_register_only"] = bool(r.get("display_register_wall"))
+        except Exception:
+            d["is_register_only"] = False
+
     # the following dynamic calculation of all sections currently existing
     # should probably be moved to a place where this is only calculated once
     # per server start, and not with every index page call. Currently this is
-    # not a bit performance hit yet, but the more content is collected over
+    # not a big performance hit yet, but the more content is collected over
     # time, the worse this will get.
     pipeline = [
         { "$project" : { "sections" : 1 }},
@@ -1276,6 +1288,33 @@ def index():
 
     return render_template('index.html', docs=docs, infoline=infoline,
                            sections=sections, selected_section=section)
+
+
+@main.route("/go")
+def go():
+    if user := session.get("user"):
+        user_id = user['username']
+    else:
+        user_id = None
+
+    article_id = request.args.get("uuid")
+    if not article_id:
+        return redirect("/")
+
+    # real decision (creates assignment if eligible)
+    agent_url = app.config['AGENTIC_BASE_URL'] + '/decide_register_wall'
+    try:
+        r = requests.post(agent_url,
+                          json = { "user_id" : user_id, "article_id" : article_id},
+                          timeout=1.5
+            ).json()
+    except Exception:
+        r = { "display_register_wall" : False}
+
+    if r.get("display_register_wall"):
+        return redirect(f"/register?article_id={article_id}")
+
+    return redirect(f"/post?uuid={article_id}")
 
 
 @main.route('/delete')

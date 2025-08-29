@@ -26,6 +26,7 @@ class DevelopmentConfig(Config):
 
     MAIN_BASE_URL = 'http://localhost:9090'
     API_BASE_URL = 'http://localhost:9090/api'
+    AGENTIC_BASE_URL = 'http://localhost:9090/agentic'
 
     # turn Flask into debug mode
     DEBUG = True
@@ -35,6 +36,7 @@ class ProductionConfig(Config):
 
     MAIN_BASE_URL = 'https://ist.media'
     API_BASE_URL = 'https://ist.media/api'
+    AGENTIC_BASE_URL = 'https://ist.media/agentic'
 
     # cookie security
     SESSION_COOKIE_SECURE    = True
