@@ -18,10 +18,13 @@ store = None
 
 
 def _register_wall_active() -> bool:
-    # at least one active experiment with ≥1 active arm
-    q = {"experiment_class": "register_wall", "status": "active"}
-    ex = store.experiments.find_one(q)  # uses Mongo
-    return bool(ex)
+    # at least one active experiment with ≥1 non-disabled arm
+    ex = store.experiments.find_one({"experiment_class": "register_wall", "status": "active"})
+    if not ex:
+        return False
+    return store.arms.count_documents(
+        {"experiment_id": ex["_id"], "status": {"$ne": "disabled"}}, limit=1
+    ) > 0
 
 
 def _summarize_log(r):
@@ -118,13 +121,35 @@ def user_status_json(user_id: str) -> dict:
 
 
 def ensure_minimum_bootstrap():
-    """Ensure each experiment class is active; driven by the LLM planner."""
     plan = planner_singleton.propose() or {}
     for ex_class in ("register_wall", "homepage_ordering"):
         try:
-            # bootstraps per class
-            if experiments_api.count_active(ex_class) == 0 and plan.get(ex_class):
-                experiments_api.create_from_plan(ex_class, plan[ex_class])
+            # Skip if already active
+            if experiments_api.count_active(ex_class) > 0:
+                continue
+
+            # Extract proposed experiments list (may be empty)
+            ex_list = ((plan.get(ex_class) or {}).get("experiments") or [])
+
+            # Fallback defaults if planner returns nothing
+            if not ex_list:
+                if ex_class == "register_wall":
+                    ex_list = [{
+                        "parameters": {"weights": [0.7, 0.3]},
+                        "arms": [
+                            {"arm_id": "control",  "label": "control",  "status": "active"},
+                            {"arm_id": "register", "label": "register", "status": "active"},
+                        ],
+                    }]
+                elif ex_class == "homepage_ordering":
+                    ex_list = [{
+                        "parameters": {"weights": [1.0]},
+                        "arms": [
+                            {"arm_id": "time_order", "label": "time_order", "status": "active"},
+                        ],
+                    }]
+
+            experiments_api.create_from_plan(ex_class, {"experiments": ex_list})
         except Exception as e:
             # do not block other classes
             print(f"[bootstrap] {ex_class} failed: {e}")
@@ -154,14 +179,6 @@ def decide_register_wall():
 
     if is_authenticated or not user_id:
         return jsonify({"display_register_wall": False, "preview": preview}), 200
-
-    # hide preview badge when experiment is inactive
-    if preview and not _register_wall_active():
-        return jsonify({
-            "display_register_wall": False,
-            "preview": True,
-            "reason": "experiment_inactive"
-        }), 200
 
     if preview:
         thr = planner_singleton.popular_threshold()
@@ -193,12 +210,6 @@ def decide_register_wall_batch():
     data = request.get_json(force=True) or {}
     article_ids = data.get("article_ids") or []
     preview = bool(data.get("preview", True))
-
-    if not _register_wall_active():
-        return jsonify({
-            aid: {"display_register_wall": False, "preview": True, "reason": "experiment_inactive"}
-            for aid in (article_ids or [])
-        }), 200
 
     # get cached threshold (fast path; recompute happens at most once per TTL)
     thr = planner_singleton.popular_threshold()

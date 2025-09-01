@@ -32,7 +32,9 @@ class RegisterWallAgent(Agent):
         """
         preview = bool(context.get("preview", False))
         is_authenticated = bool(context.get("is_authenticated", False))
-        exp_id = "register_wall"
+        # pick the latest active experiment *document* for this class
+        exp = self.experiments_api.pick_experiment("register_wall")
+        exp_id = exp["_id"] if exp else None
 
         # Gate consistent with routes: authenticated users never see the wall
         if is_authenticated or not user_id:
@@ -62,8 +64,7 @@ class RegisterWallAgent(Agent):
             }
 
         # ASSIGNMENT PATH (bandit):
-        # Ensure the experiment is active
-        exp = self.store.experiments.find_one({"experiment_id": exp_id})
+        # Ensure we have an active experiment
         if not exp or exp.get("status") != "active":
             return {
                 "arm_id": "control",
@@ -72,9 +73,9 @@ class RegisterWallAgent(Agent):
                 "reason": "experiment_inactive",
             }
 
-        # Ensure there is at least one active arm before choosing
+        # Ensure there is at least one usable arm before choosing
         has_active_arm = self.store.arms.count_documents(
-            {"experiment_id": exp_id, "active": True}, limit=1
+            {"experiment_id": exp_id, "status": {"$ne": "disabled"}}, limit=1
         ) > 0
         if not has_active_arm:
             return {
@@ -84,8 +85,8 @@ class RegisterWallAgent(Agent):
                 "reason": "no_active_arms",
             }
 
-        # Normal bandit choice (use your existing policy construction)
-        policy = self._policy_for(exp_id)  # if you previously had local creation, keep that line
+        # Normal bandit choice
+        policy = self._policy_for(exp)  # build policy with the experiment document
         arm_id, meta = policy.choose_arm(context)
 
         # Map arm -> rendering decision (adjust if you use different arm names)
@@ -100,10 +101,6 @@ class RegisterWallAgent(Agent):
 
     # If you previously created the policy inline, keep that and remove this helper.
     # This helper simply centralizes however you build your policy.
-    def _policy_for(self, experiment_id: str):
-        """Return the bandit policy for the given experiment_id using your existing wiring."""
-        # Example: if you previously did something else, replicate it here:
-        # return self.policy_factory(experiment_id=experiment_id, store=self.store)
-        # or return Policy(self.store, experiment_id)
-        raise NotImplementedError  # replace with your existing policy construction
-
+    def _policy_for(self, experiment):
+        """Return the bandit policy for the given experiment document."""
+        return ThompsonScalarized(self.store.arms, experiment=experiment, weights=DEFAULT_WEIGHTS)
