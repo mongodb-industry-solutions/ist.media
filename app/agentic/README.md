@@ -1,36 +1,3 @@
-# Agentic Blueprint (Flask)
-Mounts at **/agentic**
-
-## Integrate
-1) Env:
-```bash
-export MONGODB_IST_MEDIA=""      # required
-export OPENAI_API_KEY="sk-..."   # required
-export LOG_LEVEL=INFO            # optional
-export PLANNER_INTERVAL_SEC=600  # optional
-```
-2) In your app factory (after `app = Flask(...)`):
-```python
-from app.agentic import register_agentic
-register_agentic(app)
-```
-3) Endpoints:
-- POST `/agentic/decide_register_wall`
-- POST `/agentic/decide_homepage`
-- POST `/agentic/event`
-- GET  `/agentic/admin/arms/overview?experiment_class=homepage_ordering&days=14`
-- GET  `/agentic/admin/arms/series?experiment_id=<ObjectId>&days=28`
-- GET  `/agentic/admin/arms/weights?experiment_id=<ObjectId>`
-- GET  `/agentic/admin/agents/logs`
-
-Optional seeding:
-```python
-from app.agentic.seed_demo import run as seed
-seed()
-```
-
-
-
 # Demo Documentation: Agentic AI + MongoDB for Media Optimization
 
 ## Problem Statement
@@ -143,10 +110,6 @@ With agentic AI and MongoDB:
 
 ---
 
-👉 This story is crisp enough for a demo, but deep enough to impress a technical audience.
-
----
-
 # 🎤 Speaking Notes for Demo
 
 ### Slide 1 — Problem Statement
@@ -220,5 +183,3 @@ With agentic AI and MongoDB:
   We don’t set up the tests. The AI does. And that’s the breakthrough.”*
 
 ---
-
-👉 This script is lean enough to deliver naturally but has **all the right demo beats**: the pain point, why agentic, Mongo’s role, how the loop works, how success is visible, and the “wow” takeaway.
