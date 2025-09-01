@@ -4,7 +4,7 @@
 #
 
 from __future__ import annotations
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, current_app
 from .planner import Planner
 from .experiments import Experiments
 from .util import utcnow
@@ -118,15 +118,27 @@ def user_status_json(user_id: str) -> dict:
 
 
 def ensure_minimum_bootstrap():
-    """Ensure each required experiment class is active. Uses the LLM planner."""
+    """Ensure each experiment class is active; driven by the LLM planner."""
     plan = planner_singleton.propose() or {}
     for ex_class in ("register_wall", "homepage_ordering"):
         try:
+            # bootstraps per class
             if experiments_api.count_active(ex_class) == 0 and plan.get(ex_class):
                 experiments_api.create_from_plan(ex_class, plan[ex_class])
         except Exception as e:
-            # keep going; one class failing shouldn't block the other
+            # do not block other classes
             print(f"[bootstrap] {ex_class} failed: {e}")
+
+
+@bp.before_app_request
+def _bootstrap_once():
+    # Run only once per process
+    if getattr(current_app, "_rw_bootstrap_done", False):
+        return
+    try:
+        ensure_minimum_bootstrap()
+    finally:
+        current_app._rw_bootstrap_done = True
 
 
 @bp.post("/decide_register_wall")
