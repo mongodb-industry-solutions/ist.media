@@ -52,6 +52,12 @@ def register_agentic(app: Flask) -> None:
     routes.experiments_api = experiments_api
     routes.store = store
 
+    try:
+        # LLM-driven bootstrap at startup so preview/assignments run in a live experiment context
+        routes.ensure_minimum_bootstrap()
+    except Exception as e:
+        logging.getLogger(__name__).warning("Startup bootstrap failed: %s", e)
+
     def coordinator_loop():
         while True:
             registry.get("planner").tick()

@@ -1392,8 +1392,11 @@ def index():
 
 @main.route("/go")
 def go():
-    is_authenticated = 'user' in session
+    article_id = request.args.get("uuid")
+    if not article_id:
+        return redirect("/")
 
+    is_authenticated = 'user' in session
     if user := session.get("user"):
         user_id = user['username']
     else:
@@ -1401,10 +1404,6 @@ def go():
 
     if is_authenticated: # no assignments while logged in
         return redirect(f"/post?uuid={article_id}")
-
-    article_id = request.args.get("uuid")
-    if not article_id:
-        return redirect("/")
 
     # real decision (creates assignment if eligible)
     agent_url = app.config['AGENTIC_BASE_URL'] + '/decide_register_wall'
@@ -1416,7 +1415,15 @@ def go():
     except Exception:
         r = { "display_register_wall" : False}
 
-    if r.get("display_register_wall"):
+    # DEBUG only
+    print("decide_register_wall resp: %r", r)
+
+    show = r.get("display_register_wall")
+    if show is None:
+        arm = (r.get("arm_label") or r.get("arm_id") or "").lower()
+        show = arm not in ("", "control", "no_wall")
+
+    if show:
         return redirect(f"/register?article_id={article_id}")
 
     return redirect(f"/post?uuid={article_id}")

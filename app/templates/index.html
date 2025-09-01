@@ -160,10 +160,12 @@
                                  style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">
-                            {{ doc.title }}
                             {% if not is_authenticated and doc.is_register_only %}
-                            <span class="badge badge-planner me-2">REGISTER</span>
+                            <span class="badge badge-register"
+                                  style="vertical-align: 2px">R+</span>
+                            <span style="padding-right: 0.15em"></span>
                             {% endif %}
+                            {{ doc.title }}
                         </h2>
                     </a>
                     <p class="tm-pt-10">

@@ -17,6 +17,13 @@ experiments_api: Experiments = None
 store = None
 
 
+def _register_wall_active() -> bool:
+    # at least one active experiment with ≥1 active arm
+    q = {"experiment_class": "register_wall", "status": "active"}
+    ex = store.experiments.find_one(q)  # uses Mongo
+    return bool(ex)
+
+
 def _summarize_log(r):
     agent = r.get("agent", "")
     act = r.get("action", "")
@@ -111,58 +118,57 @@ def user_status_json(user_id: str) -> dict:
 
 
 def ensure_minimum_bootstrap():
-    if not store.experiments.find_one({"status": "active"}):
-        plan = planner_singleton.propose()
-        for ex_class in ("register_wall", "homepage_ordering"):
-            if plan.get(ex_class):
-                experiments_api.create_from_plan(ex_class, plan.get(ex_class))
+    """Ensure each required experiment class is active. Uses the LLM planner."""
+    plan = planner_singleton.propose() or {}
+    for ex_class in ("register_wall", "homepage_ordering"):
+        try:
+            if experiments_api.count_active(ex_class) == 0 and plan.get(ex_class):
+                experiments_api.create_from_plan(ex_class, plan[ex_class])
+        except Exception as e:
+            # keep going; one class failing shouldn't block the other
+            print(f"[bootstrap] {ex_class} failed: {e}")
 
 
 @bp.post("/decide_register_wall")
 def decide_register_wall():
-    ensure_minimum_bootstrap()
-    data = request.get_json(force=True)
+    data = request.get_json(force=True) or {}
+    user_id = data.get("user_id")
+    article_id = data.get("article_id")
+    is_authenticated = bool(data.get("is_authenticated", False))
+    preview = bool(data.get("preview", False))
 
-    is_authenticated = bool(data.get("is_authenticated"))
-    # if user is logged in, never show register wall (hard stop)
-    if is_authenticated:
-        return jsonify({"display_register_wall": False, "reason": "authenticated", "preview": bool(data.get("preview"))})
+    if not article_id:
+        return jsonify({"error": "missing article_id"}), 400
 
-    user_id = data.get("user_id"); article_id = data.get("article_id")
-    preview = bool(data.get("preview"))
+    if is_authenticated or not user_id:
+        return jsonify({"display_register_wall": False, "preview": preview}), 200
 
-    if not user_id or not article_id:
-        return jsonify({"error": "user_id and article_id required"}), 400
-
-    # Only popular articles are eligible (unchanged)
-    popular_docs = planner_singleton.popular_articles()
-    if article_id not in {d.get("uuid") for d in popular_docs}:
-        return jsonify({"display_register_wall": False, "preview": preview})
-
-    ctx = {"days_since_last_visit": data.get("days_since_last_visit"),
-           "momentum": data.get("momentum")}
+    # hide preview badge when experiment is inactive
+    if preview and not _register_wall_active():
+        return jsonify({
+            "display_register_wall": False,
+            "preview": True,
+            "reason": "experiment_inactive"
+        }), 200
 
     if preview:
-        # compute arm but DO NOT assign/log
-        ex = experiments_api.pick_experiment("register_wall")
-        if not ex:
-            return jsonify({"display_register_wall": False, "preview": True})
-        from .bandit import ThompsonScalarized
-        from .config import DEFAULT_WEIGHTS
-        weights = tuple(ex.get("parameters", {}).get("weights", list(DEFAULT_WEIGHTS)))
-        policy = ThompsonScalarized(store.arms, ex, weights)
-        arm_id, _ = policy.choose_arm(ctx)
-        return jsonify({"display_register_wall": True,
-                        "arm_id": arm_id,
-                        "experiment_id": ex.get("experiment_id"),
-                        "preview": True})
+        thr = planner_singleton.popular_threshold()
+        read = planner_singleton.get_read_counts([article_id]).get(article_id, 0)
+        return jsonify({
+            "display_register_wall": (read >= thr),
+            "preview": True,
+            "thr": thr,
+            "read_count": read
+        }), 200
 
-    # normal path (creates assignment)
-    result = registry.get("register_wall").decide(user_id=user_id,
-                                                 article_id=article_id,
-                                                 context=ctx)
-    result["preview"] = False
-    return jsonify(result)
+    # ASSIGNMENT path (no preview):
+    # Here we must ensure the experiment is active and has ≥1 active arm.
+    result = registry.get("register_wall").decide(
+        user_id=user_id,
+        article_id=article_id,
+        context={"is_authenticated": is_authenticated},
+    )
+    return jsonify(result), 200
 
 
 @bp.post("/decide_register_wall_batch")
@@ -175,6 +181,12 @@ def decide_register_wall_batch():
     data = request.get_json(force=True) or {}
     article_ids = data.get("article_ids") or []
     preview = bool(data.get("preview", True))
+
+    if not _register_wall_active():
+        return jsonify({
+            aid: {"display_register_wall": False, "preview": True, "reason": "experiment_inactive"}
+            for aid in (article_ids or [])
+        }), 200
 
     # get cached threshold (fast path; recompute happens at most once per TTL)
     thr = planner_singleton.popular_threshold()
