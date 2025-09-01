@@ -6,7 +6,8 @@
 from __future__ import annotations
 import os
 
-DB_NAME = "banditdb"  # fixed
+DB_NAME = "banditdb"
+NEWS_DB_NAME = "1_media_demo"
 CONV_WINDOW_MINUTES = 5
 MOMENTUM_WINDOW_HOURS = 48
 DEFAULT_WEIGHTS = (0.7, 0.3)

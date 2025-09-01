@@ -250,11 +250,17 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/templatemo-script.js"></script>
     <script>
-        if (!localStorage.getItem('anon_id')) {
-            localStorage.setItem('anon_id', crypto.randomUUID());
-        }
-        window.userID = "{{ user.username if user else '' }}" || localStorage.getItem('anon_id');
-        window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+        (function syncAnonIdCookie(){
+            if (!localStorage.getItem('anon_id')) {
+                localStorage.setItem('anon_id', crypto.randomUUID());
+            }
+            const anon = localStorage.getItem('anon_id');
+            // write a cookie accessible to Flask (path=/, 180 days)
+            document.cookie = "anon_id=" + encodeURIComponent(anon) + "; path=/; max-age=" + (60*60*24*180) + "; SameSite=Lax";
+            // expose globals
+            window.userID = "{{ user.username if user else '' }}" || anon;
+            window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+        })();
     </script>
     <script src="js/tracking.js"></script>
 </body>

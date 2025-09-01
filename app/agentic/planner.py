@@ -3,117 +3,186 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from __future__ import annotations
-import json, os, re
-from typing import Any, Dict, List, Optional
+# provides "popular articles" based on a cached popularity threshold,
+# and (optionally) asks an LLM to propose experiments.
+#
+# The popularity threshold is computed as:
+#     max(min_read, quantile(read_count, top_quantile))
+# It is stored in MongoDB (collection `metrics_cache`) and recomputed at most
+# once per TTL (24h by default) via Store.get_popular_threshold(...).
 
-# Try modern OpenAI client first; fallback to legacy
+
+from __future__ import annotations
+
+import os
+import json
+import re
+from typing import Any, Dict, List, Iterable
+
+# Try modern OpenAI client first; fallback to legacy. Only used in propose().
 try:
     from openai import OpenAI  # type: ignore
     _use_client = True
 except Exception:  # pragma: no cover
-    import openai  # type: ignore
     _use_client = False
+    try:
+        import openai  # type: ignore
+    except Exception:
+        openai = None  # type: ignore
 
-from .config import POPULAR_MIN_READ, POPULAR_TOP_QUANTILE
-from .util import utcnow
-
-# System prompt the LLM sees
-PLANNER_SYSTEM = (
-    "You are a product optimization planner for a media site. "
-    "Propose experiments & arms to improve register CTA clicks and momentum. "
-    "Output strictly JSON with top-level keys 'register_wall' and 'homepage_ordering'."
-)
-
+# ---------------------------------------------------------------------
+# Robust JSON parsing for LLM outputs
+# ---------------------------------------------------------------------
 def _safe_json_loads(text: str) -> Dict[str, Any]:
     """
     Try to parse the LLM output as JSON.
-    If it isn't clean JSON, attempt to extract the largest {...} block.
+    If it isn't clean JSON, attempt to extract the largest {...} block or an array.
     Return {} on failure.
     """
     text = (text or "").strip()
     if not text:
         return {}
 
-    # First try: direct JSON
+    # Direct JSON
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
+    except Exception:
         pass
 
-    # Second try: extract a JSON object substring
+    # Largest JSON object
     m = re.search(r"\{.*\}", text, re.S)
     if m:
-        candidate = m.group(0)
         try:
-            return json.loads(candidate)
+            return json.loads(m.group(0))
         except Exception:
             pass
 
-    # Third try: sometimes models wrap arrays
+    # Array fallback → normalize to expected dict
     m2 = re.search(r"\[.*\]", text, re.S)
     if m2:
         try:
             arr = json.loads(m2.group(0))
-            # If it's an array of experiments, normalize to our schema
-            return {
-                "register_wall": {"experiments": arr},
-                "homepage_ordering": {"experiments": []},
-            }
+            return {"register_wall": {"experiments": arr}, "homepage_ordering": {"experiments": []}}
         except Exception:
             pass
 
-    # Give up
-    print("[planner] Failed to parse LLM output:", text[:400])
     return {}
+
+# ---------------------------------------------------------------------
+# Local default prompts; may be overridden via environment variables:
+#   PLANNER_SYSTEM_PROMPT, PLANNER_USER_PROMPT
+# We intentionally do NOT import prompt strings from config to avoid hard import
+# dependencies. This fixes ImportError in environments without those symbols.
+# ---------------------------------------------------------------------
+DEFAULT_PLANNER_SYSTEM_PROMPT = (
+    "You are a planning assistant that proposes controlled experiments for a news site. "
+    "Respond in concise JSON with keys 'register_wall' and 'homepage_ordering', each "
+    "containing an 'experiments' array."
+)
+DEFAULT_PLANNER_USER_PROMPT = (
+    "Propose a small set of candidate experiments for the register wall and homepage ordering. "
+    "Keep it simple and safe; do not require migrations."
+)
+
+# ---------------------------------------------------------------------
+# Project imports
+# ---------------------------------------------------------------------
+from .config import POPULAR_MIN_READ, POPULAR_TOP_QUANTILE
+from .store import Store
 
 
 class Planner:
     """
-    LLM-driven planner.
-    - Gathers a popularity sample from MongoDB.
-    - Asks the LLM to propose experiments and arms.
-    - Returns a dict consumable by Experiments.create_from_plan().
+    Planner for proposing experiments and providing popularity-based selections.
+
+    - Provides "popular articles" using a cached popularity threshold in MongoDB.
+    - Can (optionally) ask an LLM to propose experiments. If no API key is set,
+      propose() returns an empty normalized plan without raising.
     """
 
-    def __init__(self, store, model: str = "gpt-4o-mini", temperature: float = 0.3):
-        # LLM REQUIRED (per your requirement)
-        if not os.getenv("OPENAI_API_KEY"):
-            raise SystemExit("OPENAI_API_KEY is required — planner is LLM-only by design.")
-
+    def __init__(self, store: Store, model: str = "gpt-4o-mini", temperature: float = 0.2) -> None:
         self.store = store
         self.model = model
         self.temperature = temperature
 
-        if _use_client:
-            self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        else:
-            import openai  # type: ignore
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            self.client = None
+        self._api_ready = bool(os.getenv("OPENAI_API_KEY"))
+        self._client = None
+        if self._api_ready:
+            try:
+                if _use_client:
+                    self._client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # type: ignore
+                else:
+                    if openai is not None:  # type: ignore
+                        openai.api_key = os.getenv("OPENAI_API_KEY")  # type: ignore
+            except Exception:
+                # Don't hard-fail; just mark not ready
+                self._api_ready = False
+                self._client = None
 
-    def popular_articles(
+    # -------------------------------------------------------------------------
+    # Threshold access (cached in MongoDB via Store)
+    # -------------------------------------------------------------------------
+    def popular_threshold(
         self,
+        *,
         min_read: int = POPULAR_MIN_READ,
         top_quantile: float = POPULAR_TOP_QUANTILE,
+        ttl_hours: int = 24,
+        cache_key: str = "popular_threshold_v1",
+    ) -> int:
+        """
+        Return the integer threshold defined as max(min_read, quantile(read_count, top_quantile)).
+        The value is cached in `metrics_cache` and recomputed only if it is older than `ttl_hours`.
+        """
+        return self.store.get_popular_threshold(
+            min_read=min_read,
+            top_quantile=top_quantile,
+            ttl_hours=ttl_hours,
+            cache_key=cache_key,
+        )
+
+    # -------------------------------------------------------------------------
+    # Public API: popular articles
+    # -------------------------------------------------------------------------
+    def popular_articles(
+        self,
+        *,
+        min_read: int = POPULAR_MIN_READ,
+        top_quantile: float = POPULAR_TOP_QUANTILE,
+        ttl_hours: int = 24,
+        limit: int = 200,
     ) -> List[Dict[str, Any]]:
         """
-        Return a trimmed list of 'popular' articles for the LLM to consider.
-        Uses a dynamic quantile AND a static floor.
-        """
-        docs = list(
-            self.store.news.find(
-                {},
-                {"uuid": 1, "title": 1, "sections": 1, "read_count": 1, "published": 1},
-            ).limit(5000)
-        )
-        reads = sorted(int(d.get("read_count", 0)) for d in docs) if docs else []
-        qthr = reads[max(0, int(len(reads) * top_quantile) - 1)] if reads else 0
-        thr = max(min_read, qthr)
-        popular = [d for d in docs if int(d.get("read_count", 0)) >= thr]
-        # Return up to 200, most-read first
-        return sorted(popular, key=lambda d: int(d.get("read_count", 0)), reverse=True)[:200]
+        Return up to `limit` popular articles, sorted by read_count (desc).
 
+        The threshold is read from the Mongo cache (recomputed at most once per
+        `ttl_hours`). Only the necessary subset is fetched; no full collection
+        scan is performed in the hot path.
+        """
+        thr = self.popular_threshold(min_read=min_read, top_quantile=top_quantile, ttl_hours=ttl_hours)
+
+        cursor = self.store.news.find(
+            {"read_count": {"$gte": int(thr)}},
+            {"uuid": 1, "title": 1, "sections": 1, "read_count": 1, "published": 1},
+        ).sort("read_count", -1).limit(int(limit))
+
+        return list(cursor)
+
+    # -------------------------------------------------------------------------
+    # Helper for batch preview endpoints
+    # -------------------------------------------------------------------------
+    def get_read_counts(self, uuids: Iterable[str]) -> Dict[str, int]:
+        """
+        Return a mapping {uuid: read_count} only for the provided UUIDs.
+
+        This is used by the batch preview endpoint to avoid N roundtrips
+        and to keep the homepage preview fast.
+        """
+        return self.store.read_counts_for(uuids)
+
+    # -------------------------------------------------------------------------
+    # Optional: use an LLM to propose experiments
+    # -------------------------------------------------------------------------
     def _normalize_plan(self, plan: Dict[str, Any]) -> Dict[str, Any]:
         """
         Ensure the returned structure always has the expected shape:
@@ -123,75 +192,52 @@ class Planner:
         }
         """
         norm = {"register_wall": {"experiments": []}, "homepage_ordering": {"experiments": []}}
-
         if isinstance(plan, dict):
             for k in ("register_wall", "homepage_ordering"):
                 v = plan.get(k)
                 if isinstance(v, dict) and isinstance(v.get("experiments"), list):
                     norm[k]["experiments"] = v["experiments"]
                 elif isinstance(v, list):
-                    # Allow direct list fallback
                     norm[k]["experiments"] = v
         return norm
 
     def propose(self) -> Dict[str, Any]:
         """
-        Ask the LLM for experiments. Robust to non-JSON output.
-        Returns normalized plan (never raises JSON decode).
+        Ask an LLM for experiments. Robust to non-JSON output.
+        If no API key is configured, returns an empty normalized plan.
         """
-        popular = self.popular_articles()
-        payload = {
-            "objective": {
-                "conversion": "register_cta_click within 5m of assignment",
-                "momentum": "ema7_over_ema28 increases within 48h",
-            },
-            "popular_articles_sample": [
-                {
-                    "uuid": d.get("uuid"),
-                    "sections": d.get("sections", []),
-                    "read_count": d.get("read_count", 0),
-                }
-                for d in popular[:50]
-            ],
-            "ask": (
-                "Propose new experiment instances for classes 'register_wall' and 'homepage_ordering'. "
-                "For 'register_wall', suggest arms keyed by article category with concise copy. "
-                "For 'homepage_ordering', suggest arms specifying strategy ('time','popular','interest_boosted') "
-                "and parameters (decay_days, exclude_read). Provide 1-3 audience_filters where useful. "
-                "Return STRICT JSON with keys 'register_wall' and 'homepage_ordering', each containing "
-                "{\"experiments\": [ ... ]}. Do NOT include any commentary."
-            ),
-        }
+        if not self._api_ready:
+            return {"register_wall": {"experiments": []}, "homepage_ordering": {"experiments": []}}
 
-        # ---- Call LLM ----
-        if _use_client:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": PLANNER_SYSTEM},
-                    {"role": "user", "content": json.dumps(payload)},
-                ],
-                temperature=self.temperature,
-            )
-            text = (resp.choices[0].message.content or "").strip()
-        else:
-            import openai  # type: ignore
-            resp = openai.ChatCompletion.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": PLANNER_SYSTEM},
-                    {"role": "user", "content": json.dumps(payload)},
-                ],
-                temperature=self.temperature,
-            )
-            text = (resp["choices"][0]["message"]["content"] or "").strip()
+        system_prompt = os.getenv("PLANNER_SYSTEM_PROMPT", DEFAULT_PLANNER_SYSTEM_PROMPT).strip()
+        user_prompt = os.getenv("PLANNER_USER_PROMPT", DEFAULT_PLANNER_USER_PROMPT).strip()
 
-        # ---- Parse robustly ----
+        try:
+            if _use_client and self._client is not None:
+                resp = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=self.temperature,
+                )
+                text = (resp.choices[0].message.content or "").strip()
+            elif openai is not None:  # type: ignore
+                resp = openai.ChatCompletion.create(  # type: ignore
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=self.temperature,
+                )
+                text = (resp["choices"][0]["message"]["content"] or "").strip()
+            else:
+                return {"register_wall": {"experiments": []}, "homepage_ordering": {"experiments": []}}
+        except Exception:
+            # Fail soft; never crash the app due to LLM issues
+            return {"register_wall": {"experiments": []}, "homepage_ordering": {"experiments": []}}
+
         plan = _safe_json_loads(text)
-        norm = self._normalize_plan(plan)
-
-        # Optional: quick sanity guard; if both are empty, log the raw snippet
-        if not norm["register_wall"]["experiments"] and not norm["homepage_ordering"]["experiments"]:
-            print("[planner] Empty plan after parsing; snippet:", text[:200])
-
-        return norm
+        return self._normalize_plan(plan)

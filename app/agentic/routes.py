@@ -122,8 +122,14 @@ def ensure_minimum_bootstrap():
 def decide_register_wall():
     ensure_minimum_bootstrap()
     data = request.get_json(force=True)
+
+    is_authenticated = bool(data.get("is_authenticated"))
+    # if user is logged in, never show register wall (hard stop)
+    if is_authenticated:
+        return jsonify({"display_register_wall": False, "reason": "authenticated", "preview": bool(data.get("preview"))})
+
     user_id = data.get("user_id"); article_id = data.get("article_id")
-    preview = bool(data.get("preview"))  # <— NEW
+    preview = bool(data.get("preview"))
 
     if not user_id or not article_id:
         return jsonify({"error": "user_id and article_id required"}), 400
@@ -137,7 +143,7 @@ def decide_register_wall():
            "momentum": data.get("momentum")}
 
     if preview:
-        # compute but DO NOT assign/log
+        # compute arm but DO NOT assign/log
         ex = experiments_api.pick_experiment("register_wall")
         if not ex:
             return jsonify({"display_register_wall": False, "preview": True})
@@ -157,6 +163,38 @@ def decide_register_wall():
                                                  context=ctx)
     result["preview"] = False
     return jsonify(result)
+
+
+@bp.post("/decide_register_wall_batch")
+def decide_register_wall_batch():
+    """
+    Decide register-wall for multiple articles in one request (preview mode).
+    Uses the cached popularity threshold (MongoDB cache; recomputed at most once per day)
+    and only fetches read_count for the provided UUIDs.
+    """
+    data = request.get_json(force=True) or {}
+    article_ids = data.get("article_ids") or []
+    preview = bool(data.get("preview", True))
+
+    # get cached threshold (fast path; recompute happens at most once per TTL)
+    thr = planner_singleton.popular_threshold()
+
+    # read counts only for the requested UUIDs (no full scan)
+    id_to_read = planner_singleton.get_read_counts(article_ids)
+
+    # build response map
+    resp = {}
+    for aid in article_ids:
+        read = int(id_to_read.get(aid, 0))
+        display = (read >= thr)
+        resp[aid] = {
+            "display_register_wall": display,
+            "preview": preview,
+            # optional debug fields (handy during demo):
+            "read_count": read,
+            "thr": thr,
+        }
+    return jsonify(resp)
 
 
 @bp.post("/decide_homepage")

@@ -161,8 +161,8 @@
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">
                             {{ doc.title }}
-                            {% if doc.is_register_only %}
-                            <span class="badge text-bg-warning ms-2">RegONLY</span>
+                            {% if not is_authenticated and doc.is_register_only %}
+                            <span class="badge badge-planner me-2">REGISTER</span>
                             {% endif %}
                         </h2>
                     </a>
@@ -211,6 +211,19 @@
 
         select.addEventListener('input', handleSelectionChange);
         select.addEventListener('change', handleSelectionChange);
+    </script>
+    <script>
+        (function syncAnonIdCookie(){
+            if (!localStorage.getItem('anon_id')) {
+                localStorage.setItem('anon_id', crypto.randomUUID());
+            }
+            const anon = localStorage.getItem('anon_id');
+            // write a cookie accessible to Flask (path=/, 180 days)
+            document.cookie = "anon_id=" + encodeURIComponent(anon) + "; path=/; max-age=" + (60*60*24*180) + "; SameSite=Lax";
+            // expose globals
+            window.userID = "{{ user.username if user else '' }}" || anon;
+            window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+        })();
     </script>
 </body>
 </html>

@@ -17,10 +17,22 @@ class RegisterWallAgent(Agent):
         super().__init__(store, blackboard)
         self.experiments_api = experiments_api
 
+    def _matches_targeting(self, context: dict, targeting: dict) -> bool:
+        # very simple matcher: only enforce anonymous if specified
+        if targeting.get("user_is_anonymous") is True and context.get("is_authenticated") is True:
+            return False
+        return True
+
     def decide(self, user_id: str, article_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
         ex = self.experiments_api.pick_experiment("register_wall")
         if not ex:
             return {"display_register_wall": False}
+
+        # If experiment declares anonymous audience, enforce it:
+        targeting = ex.get("targeting", {})
+        if not self._matches_targeting(context, targeting):
+            return {"display_register_wall": False, "reason": "targeting_mismatch"}
+
         weights = tuple(ex.get("parameters", {}).get("weights", list(DEFAULT_WEIGHTS)))
         policy = ThompsonScalarized(self.store.arms, ex, weights)
         arm_id, _ = policy.choose_arm(context)
