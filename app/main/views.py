@@ -292,28 +292,20 @@ def get_user():
 
 
 @main.before_request
-def make_session_permanent():
+def before_request():
     session.permanent = True
     g.user = get_user()
     try:
         g.engagement = compute_user_engagement(g.user['username'])
     except Exception:
         g.engagement = None
-
-     # if user is logged in, we ignore anonymous ID
-    if 'user' in session:
-        return
-    # anonymous: read cookie set by JS
-    cookie_anon = request.cookies.get("anon_id")
-    if cookie_anon:
-        # only set if not already set; don't churn
-        if session.get("anon_id") != cookie_anon:
-            session["anon_id"] = cookie_anon
-    # do NOT auto-generate a server anon_id; JS owns it.
+    if not 'user' in session:
+        if cookie_anonymous := request.cookies.get("anon_id"):
+            session["anonymous_user"] = cookie_anonymous
 
 
 @main.context_processor
-def inject_user():
+def inject_user_metrics():
     try:
         engagement = int( math.floor( g.engagement['ema']['ema28'] + 0.5 ))
     except Exception:
@@ -966,11 +958,12 @@ def profile():
 def register():
     log(request)
     check_for_quality_read()
-    if "user" in session:
+    if "user" in session:  # already registered
         return redirect('/profile')
     else:
-        article_id = request.args.get('article_id')
-        return render_template('register.html', article_id=article_id)
+        # allow for passing an optional article id --
+        # can be used to redirect after registration (register wall)
+        return render_template('register.html', article_id=request.args.get('article_id'))
 
 
 @main.route('/do_register', methods=['POST'])
@@ -1189,92 +1182,6 @@ def add_to_fifo_if_not_exists(username, array_field, doc, max_length=10): # TODO
     return True
 
 
-def _decide_register_wall_batch(article_ids: List[str], user_id: str, is_authenticated: bool) -> Dict[str, Any] | None:
-    """
-    Call the agent's batch endpoint once for all given article UUIDs.
-    Returns a dict {uuid: decision_dict} or None if the batch endpoint is unavailable.
-    """
-    base = (app.config.get("AGENTIC_BASE_URL") or "").rstrip("/")
-    if not base or not article_ids:
-        return None
-
-    try:
-        resp = requests.post(
-            base + "/decide_register_wall_batch",
-            json={
-                "article_ids": list(article_ids),
-                "user_id": user_id,
-                "preview": True,
-                "is_authenticated": bool(is_authenticated),
-            },
-            timeout=0.8,
-        )
-        if resp.status_code == 404:
-            # Endpoint not deployed -> fall back to single calls
-            return None
-        resp.raise_for_status()
-        return resp.json()
-    except Exception:
-        return None
-
-
-def _apply_register_wall_decisions(homepage_docs: List[Dict[str, Any]], user_id: str | None, is_authenticated: bool) -> List[Dict[str, Any]]:
-    """
-    Mutates homepage_docs in place by setting `is_register_only` per card.
-
-    Preserves the old semantics:
-      - Only evaluate if NOT authenticated and user_id is present.
-      - Otherwise set is_register_only=False for all docs.
-    Tries the batch API first; if unavailable, falls back to single calls.
-    """
-    # Gate: only anonymous users with a user_id are eligible for preview decisions
-    if is_authenticated or not user_id:
-        for d in homepage_docs:
-            d["is_register_only"] = False
-        return homepage_docs
-
-    ids = [d.get("uuid") for d in homepage_docs if d.get("uuid")]
-    decisions = _decide_register_wall_batch(ids, user_id=user_id, is_authenticated=is_authenticated)
-
-    if decisions is None:
-        # Fallback to the single-call endpoint (old behavior)
-        base = (app.config.get("AGENTIC_BASE_URL") or "").rstrip("/")
-        for d in homepage_docs:
-            uuid = d.get("uuid")
-            if not uuid:
-                d["is_register_only"] = False
-                continue
-            try:
-                r = requests.post(
-                    base + "/decide_register_wall",
-                    json={
-                        "user_id": user_id,
-                        "article_id": uuid,
-                        "preview": True,
-                        "is_authenticated": False,
-                    },
-                    timeout=0.8,
-                )
-                if r.ok:
-                    j = r.json()
-                    d["is_register_only"] = bool(j.get("display_register_wall"))
-                else:
-                    d["is_register_only"] = False
-            except Exception:
-                d["is_register_only"] = False
-    else:
-        # Use batch result
-        for d in homepage_docs:
-            uuid = d.get("uuid")
-            dec = decisions.get(uuid, {}) if uuid else {}
-            d["is_register_only"] = bool(dec.get("display_register_wall"))
-            # Optional debug fields you can surface in templates during the demo:
-            # d["register_thr"] = dec.get("thr")
-            # d["register_read"] = dec.get("read_count")
-
-    return homepage_docs
-
-
 @main.route('/')
 def index():
     if not 'was_here_before' in session:
@@ -1285,15 +1192,6 @@ def index():
     query = request.args.get('query')
     section = request.args.get('section') or session.get('section') or "_all"
     session['section'] = section
-
-    is_authenticated = 'user' in session
-    if user := session.get("user"):
-        user_id = user['username']
-    else:
-        user_id = session.get("anon_id")
-
-    print("is_authenticated: " + str(is_authenticated) + ", user_id: " + str(user_id))
-
     if query and query != "":
         docs = hybrid_search(query.strip(), MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
@@ -1365,9 +1263,6 @@ def index():
     docs = list(map(lambda doc: doc | {
         'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
 
-    # integration with bandit/agentic subsystem
-    _apply_register_wall_decisions(docs, user_id=user_id, is_authenticated=is_authenticated)
-
     # the following dynamic calculation of all sections currently existing
     # should probably be moved to a place where this is only calculated once
     # per server start, and not with every index page call. Currently this is
@@ -1386,47 +1281,7 @@ def index():
         sections = []
 
     return render_template('index.html', docs=docs, infoline=infoline,
-                           sections=sections, selected_section=section,
-                           is_authenticated=is_authenticated)
-
-
-@main.route("/go")
-def go():
-    article_id = request.args.get("uuid")
-    if not article_id:
-        return redirect("/")
-
-    is_authenticated = 'user' in session
-    if user := session.get("user"):
-        user_id = user['username']
-    else:
-        user_id = session.get("anon_id")
-
-    if is_authenticated: # no assignments while logged in
-        return redirect(f"/post?uuid={article_id}")
-
-    # real decision (creates assignment if eligible)
-    agent_url = app.config['AGENTIC_BASE_URL'] + '/decide_register_wall'
-    try:
-        r = requests.post(agent_url,
-                          json = { "user_id" : user_id, "article_id" : article_id},
-                          timeout=1.5
-            ).json()
-    except Exception:
-        r = { "display_register_wall" : False}
-
-    # DEBUG only
-    print("decide_register_wall resp: %r", r)
-
-    show = r.get("display_register_wall")
-    if show is None:
-        arm = (r.get("arm_label") or r.get("arm_id") or "").lower()
-        show = arm not in ("", "control", "no_wall")
-
-    if show:
-        return redirect(f"/register?article_id={article_id}")
-
-    return redirect(f"/post?uuid={article_id}")
+                           sections=sections, selected_section=section)
 
 
 @main.route('/delete')

@@ -153,16 +153,16 @@
                 {% for doc in docs | sort(attribute = 'score', reverse = True) %}
                 <article class="col-12 col-md-6 tm-post">
                     <hr class="tm-hr-primary">
-                    <a href="/go?uuid={{ doc.uuid }}"
+                    <a href="/post?uuid={{ doc.uuid }}"
                        class="tm-post-link tm-pt-20 tm-color-primary">
                         <div class="tm-post-link-inner">
                             <img src="/content/images/{{ doc.uuid }}.webp"
                                  style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">
-                            {% if not is_authenticated and doc.is_register_only %}
+                            {% if not is_authenticated and doc.must_register_to_read %}
                             <span class="badge badge-register"
-                                  style="vertical-align: 2px">R+</span>
+                                  style="vertical-align: 2px">R</span>
                             <span style="padding-right: 0.15em"></span>
                             {% endif %}
                             {{ doc.title }}

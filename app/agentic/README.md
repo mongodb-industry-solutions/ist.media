@@ -1,4 +1,4 @@
-# Demo Documentation: Agentic AI + MongoDB for Media Optimization
+# Agentic AI + MongoDB for Media Optimization
 
 ## Problem Statement
 
