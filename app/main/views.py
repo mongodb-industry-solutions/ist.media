@@ -8,7 +8,7 @@ from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
 from . import main
-from .metrics import compute_user_engagement, compute_article_engagement
+from .metrics import compute_user_engagement, compute_article_engagement, request_stats_pipelines
 from typing import List, Dict, Any
 from bson import Binary
 from bson.objectid import ObjectId
@@ -1065,146 +1065,8 @@ def about():
         gen_ai_cache = []
         print(e) # will be printed in the log file that is residing in /tmp
     try:
-        pipeline_countries = [
-            {
-                "$match": {
-                    "country": { "$exists": True },
-                    "city": { "$exists": True }
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "country": "$country",
-                        "city": "$city"
-                    },
-                    "city_access_count": { "$sum": 1 }
-                }
-            },
-            {
-                "$sort": { "city_access_count": -1 }
-            },
-            {
-                "$group": {
-                    "_id": "$_id.country",
-                    "access_count": { "$sum": "$city_access_count" },
-                    "top_cities": {
-                        "$push": {
-                            "city": "$_id.city",
-                            "access_count": "$city_access_count"
-                        }
-                    }
-                }
-            },
-            {
-                "$sort": { "access_count": -1 }
-            },
-            {
-                "$limit": 12
-            },
-            {
-                "$project": {
-                    "_id": 1,
-                    "access_count": 1,
-                    "top_cities": {
-                        "$slice": ["$top_cities", 5]
-                    }
-                }
-            }
-        ]
-        pipeline_paths = [
-            # Stage 1: Add both sortable and display month_year fields
-            {
-                "$addFields": {
-                    "month_year_sort": {
-                        "$dateToString": {
-                            "format": "%Y-%m",  # e.g., "2025-04"
-                            "date": { "$toDate": "$timestamp" }
-                        }
-                    },
-                    "month_year": {  # Renamed to be the final display field
-                        "$dateToString": {
-                            "format": "%b %Y",  # e.g., "Apr 2025"
-                            "date": { "$toDate": "$timestamp" }
-                        }
-                    }
-                }
-            },
-            # Stage 2: Group by path and month_year to count occurrences
-            {
-                "$group": {
-                    "_id": {
-                        "path": "$path",
-                        "month_year_sort": "$month_year_sort",
-                        "month_year": "$month_year"
-                    },
-                    "access_count": { "$sum": 1 }
-                }
-            },
-            # Stage 3: Group by month_year and collect paths with counts
-            {
-                "$group": {
-                    "_id": {
-                        "month_year_sort": "$_id.month_year_sort",
-                        "month_year": "$_id.month_year"
-                    },
-                    "paths": {
-                        "$push": {
-                            "path": "$_id.path",
-                            "access_count": "$access_count"
-                        }
-                    }
-                }
-            },
-            # Stage 4: Sort paths within each month and limit to top 10
-            {
-                "$project": {
-                    "month_year_sort": "$_id.month_year_sort",
-                    "month_year": "$_id.month_year",
-                    "top_paths": {
-                        "$slice": [
-                            { "$sortArray": {
-                                "input": "$paths",
-                                "sortBy": { "access_count": -1 }
-                            }},
-                            9
-                        ]
-                    }
-                }
-            },
-            # Stage 5: Unwind the top_paths array
-            {
-                "$unwind": "$top_paths"
-            },
-            # Stage 6: Final projection of fields
-            {
-                "$project": {
-                    "_id": 0,
-                    "month_year_sort": 1,  # Keep this for the next sort stage
-                    "month_year": 1,
-                    "path": "$top_paths.path",
-                    "access_count": "$top_paths.access_count"
-                }
-            },
-            # Stage 7: Final sort by month_year_sort and access_count
-            {
-                "$sort": {
-                    "month_year_sort": 1,    # Chronological sort
-                    "access_count": -1       # Within each month, highest count first
-                }
-            },
-            # Stage 8: Final projection to remove month_year_sort
-            {
-                "$project": {
-                    "_id": 0,
-                    "month_year": 1,
-                    "path": 1,
-                    "access_count": 1
-                }
-            }
-        ]
-        country_stats = list(access_log_collection.aggregate(pipeline_countries))
-        path_stats = list(access_log_collection.aggregate(pipeline_paths))
+        country_stats = list(access_log_collection.aggregate(request_stats_pipelines['countries']))
+        path_stats = list(access_log_collection.aggregate(request_stats_pipelines['paths']))
         for entry in country_stats: # add full country names
             entry['country'] = get_country_name(entry['_id'])
     except Exception as e:
@@ -1225,10 +1087,15 @@ def about():
         print(f"Error fetching article engagement stats: {e}")
         article_engagement_stats_json = []
 
-    return render_template('about.html', history=docs, gen_ai_cache=gen_ai_cache,
-                           article_engagement_stats_json=article_engagement_stats_json,
-                           news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
-                           loc=loc, country_stats=country_stats, path_stats=path_stats)
+    return render_template(
+        'about.html',
+        history=docs,
+        gen_ai_cache=gen_ai_cache,
+        article_engagement_stats_json=article_engagement_stats_json,
+        news_source=session['news_source'] if 'news_source' in session else DEFAULT_NEWS_COLLECTION,
+        loc=loc,
+        country_stats=country_stats,
+        path_stats=path_stats)
 
 
 def get_mongodb_date_filter(natural_language_date):
