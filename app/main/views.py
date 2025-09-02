@@ -766,7 +766,6 @@ def index():
                         concatenated_titles += ("" if i == 0 else " ") + doc['title']
                         i += 1
                     docs = similarity_search(concatenated_titles, session['history'], MAX_DOCS)
-                    # for unknown reasons, these docs lack the 'text' field - refetching...
                     docs = list(map(lambda doc: collection().find_one({ "uuid" : doc['uuid'] }), docs))
                     infoline = "For anonymous user"
                 else:
@@ -790,7 +789,9 @@ def index():
                         },
                         {
                             "$match": {
-                                "uuid" : { "$nin" : [ item["uuid"] for item in user["articles_visited"] ] }
+                                "uuid" : {
+                                    "$nin" : [ item["uuid"] for item in user["articles_visited"] ]
+                                }
                             }
                         }
                     ]
@@ -800,9 +801,17 @@ def index():
                     docs = collection().find({}).sort({ "published" : -1 }).limit(MAX_DOCS)
                     infoline = "Sorted by time"
                     section = "_all"
-    # prepare for a nice view
-    docs = list(map(lambda doc: doc | {
-        'ftext' : textwrap.shorten(doc['text'] if 'text' in doc else 'No content.', 450) }, docs))
+
+    # prepare for a nice view:
+    # 1) shorten the body content -- similar length each
+    # 2) popular articles require registration of users
+    docs = [
+        doc | {
+            "ftext": textwrap.shorten(doc.get("text", "No content."), 450),
+            "must_register_to_read": int(doc.get("read_count", 0)) >= 3,
+        }
+        for doc in docs
+    ]
 
     # the following dynamic calculation of all sections currently existing
     # should probably be moved to a place where this is only calculated once

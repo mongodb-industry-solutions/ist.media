@@ -1,0 +1,9 @@
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+{% macro option(value, selected, label=None) -%}
+<option value="{{ value }}"{% if value == selected %} selected{% endif %}>
+    {{ label if label is not none else value }}
+</option>
+{%- endmacro %}

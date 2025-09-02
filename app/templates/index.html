@@ -3,6 +3,7 @@
     Copyright (c) 2025 MongoDB Inc.
     Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 -->
+{% from "macros.html" import option %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -108,18 +109,12 @@
                         <select name="section" id="sectionSelect"
                                 class="form-control tm-section-input">
                             <optgroup label="General">
-                                <option value="_all" {{ 'selected' if "_all" == selected_section }}>
-                                    All News
-                                </option>
-                                <option value="_personalized" {{ 'selected' if "_personalized" == selected_section }}>
-                                    Personalized
-                                </option>
+                                {{ option("_all", selected_section, "All News") }}
+                                {{ option("_personalized", selected_section, "Personalized") }}
                             </optgroup>
                             <optgroup label="Sections">
                                 {% for section in sections %}
-                                <option value="{{ section }}" {{ 'selected' if section == selected_section }}>
-                                    {{ section }}
-                                </option>
+                                {{ option(section, selected_section) }}
                                 {% endfor %}
                             </optgroup>
                         </select>
