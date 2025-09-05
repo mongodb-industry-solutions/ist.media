@@ -299,7 +299,7 @@ def before_request():
     try:
         g.engagement = compute_user_engagement(g.user['username'])
     except Exception as e:
-        print(e)
+        #print(e)
         g.engagement = None
     if not 'user' in session:
         if cookie_anonymous := request.cookies.get("anon_id"):
@@ -504,7 +504,9 @@ def register():
     else:
         # allow for passing an optional article id --
         # can be used to redirect after registration (register wall)
-        return render_template('register.html', article_id=request.args.get('article_id'))
+        return render_template('register.html',
+                               article_id=request.args.get('article_id'),
+                               title=request.args.get('title'))
 
 
 @main.route('/do_register', methods=['POST'])
@@ -1047,6 +1049,10 @@ def post():
                 purchased = 'earlier'
         else:
             purchased = 'not_applicable'
+
+        # popular articles are register-only
+        doc["must_register_to_read"] = int(doc.get("read_count", 0)) >= 3 and not 'user' in session
+
         return render_template('post.html', doc=doc, fdoc=fdoc,
                                recommendations=recommendations, keywords=keywords, purchased=purchased,
                                visit_count=doc['visit_count']+1 if 'visit_count' in doc else 1,

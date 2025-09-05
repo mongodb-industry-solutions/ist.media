@@ -155,7 +155,7 @@
                                  style="aspect-ratio: 1200/675" class="img-fluid" alt="">
                         </div>
                         <h2 class="tm-pt-30 tm-color-primary tm-post-title">
-                            {% if not is_authenticated and doc.must_register_to_read %}
+                            {% if doc.must_register_to_read %}
                             <span class="badge badge-register"
                                   style="vertical-align: 2px">R</span>
                             <span style="padding-right: 0.15em"></span>

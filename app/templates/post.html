@@ -187,7 +187,21 @@
                             </div>
                             {% endif %}
                             <p style="margin: 0; padding: 0">&nbsp;</p>
+                            {% if doc.must_register_to_read %}
+                            <p>
+                                This is a popular article &mdash; access is restricted.
+                            </p>
+                            <p>
+                                You
+                                <a href="/register?article_id={{ doc.uuid }}&title={{ doc.title | urlencode }}"
+                                   class="tm-color-primary">
+                                    must register
+                                </a>
+                                in order to read it.
+                            </p>
+                            {% else %}
                             {{ fdoc | safe }}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
