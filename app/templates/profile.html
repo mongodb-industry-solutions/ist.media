@@ -92,10 +92,18 @@
                             <a href="/json/{{ user._id }}" class="tm-color-primary"
                                target="_blank">{{ user.fullname }}</a>
                         </div>
+                        {% if user.is_anonymous %}
+                        <div class="tm-color-primary text-right">
+                            <span class="tm-color-primary" style="font-size: 90%">
+                                &nbsp;
+                            </span>
+                        </div>
+                        {% else %}
                         <div class="tm-color-primary text-right">
                             [ <a class="tm-color-primary" style="font-size: 90%"
                                  href="/logout">log out</a> ]
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -111,13 +119,16 @@
                             <span class="list-key">Username</span>
                             <span class="list-value">{{ user.username }}</span>
                         </div>
+                        {% if not user.is_anonymous %}
                         <div class="profile-attribute">
                             <span class="list-key">Email Address</span>
                             <span class="list-value">{{ user.email }}</span>
                         </div>
-                        <h2 class="pt-2 tm-mb-30 tm-mt-40 tm-color-primary tm-post-title">
-                            My Usage Metrics
+                        {% endif %}
+                        <h2 class="pt-2 tm-mb-30 tm-mt-60 tm-color-primary tm-post-title">
+                            Usage Metrics
                         </h2>
+                        {% if not user.is_anonymous %}
                         <div class="profile-attribute">
                             <span class="list-key">Media Coins
                                 <span class="list-small">purchased</span>
@@ -143,9 +154,8 @@
                             </span>
                             <span class="list-value">{{ user.get('articles_purchased', 0) }}</span>
                         </div>
-                    </div>
-                    <div class="mb-4 tm-mt-60">
-                        <div class="profile-attribute">
+                        {% endif %}
+                        <div class="profile-attribute tm-mt-25">
                             <span class="list-key">Engagement</span>
                             <span class="list-value">
                                 <a href="/json/0" class="tm-color-primary" target="_blank">

@@ -105,15 +105,16 @@ def _compute_daily_indices(user_id: str, days_back: int = 28,
     # Build daily list
     daily = []
     if fill_gaps:
-        range_start = earliest_observed_dt if earliest_observed_dt else since
-        for day_dt in _daterange_utc_days(range_start, end_for_days):
-            metrics = by_day.get(day_dt, {
-                "read_to_end_count": 0,
-                "avg_scroll_depth": round(0.0, 2),
-                "distinct_articles": 0,
-                "index": round(0.0, 2),
-            })
-            daily.append({"day": day_dt.date().isoformat(), **metrics})
+        if earliest_observed_dt:
+            range_start = earliest_observed_dt
+            for day_dt in _daterange_utc_days(range_start, end_for_days):
+                metrics = by_day.get(day_dt, {
+                    "read_to_end_count": 0,
+                    "avg_scroll_depth": round(0.0, 2),
+                    "distinct_articles": 0,
+                    "index": round(0.0, 2),
+                })
+                daily.append({"day": day_dt.date().isoformat(), **metrics})
     else:
         for day_dt, metrics in by_day.items():
             daily.append({"day": day_dt.date().isoformat(), **metrics})
@@ -126,8 +127,7 @@ def _compute_daily_indices(user_id: str, days_back: int = 28,
         effective_start = datetime.fromisoformat(daily[-1]["day"])\
                                   .replace(tzinfo=timezone.utc)
     else:
-        effective_start = datetime(since.year, since.month, since.day,
-                                   tzinfo=timezone.utc)
+        effective_start = today_mid  # set to today for no activity
     effective_end = end_for_days  # today 24:00 UTC if include_today=True
 
     # Helper stats
@@ -143,7 +143,7 @@ def _compute_daily_indices(user_id: str, days_back: int = 28,
         ref_anchor = today_mid if include_today else effective_end
         days_since_last_visit = max(0, (ref_anchor - last_active_dt).days)
     else:
-        days_since_last_visit = None
+        days_since_last_visit = 0  # default for no activity
 
     # Flag: is the top entry "today"? (partial day when include_today=True)
     today_is_partial = (include_today and len(daily) > 0 and
@@ -197,17 +197,15 @@ def compute_user_engagement(user_id: str, windows=(3, 7, 28),
     # Momentum: ema7 / ema28 (guard division by zero)
     ema7 = ema_snapshot.get("ema7", 0.00)
     ema28 = ema_snapshot.get("ema28", 0.00)
-    if ema28:
-        ema7_over_ema28 = round(ema7 / ema28, 2)
-    else:
-        ema7_over_ema28 = None
+    # Momentum: ema7 / ema28 (return 0 if ema28 is 0)
+    ema7_over_ema28 = round(ema7 / ema28, 2) if ema28 else 0.00
 
     return {
         "window_days_observed": len(daily),
         "window_start_utc": effective_start.isoformat(),
         "window_end_utc": effective_end.isoformat(),
         "today_is_partial": bool(today_is_partial),
-        "ema": ema_snapshot,
+        "smoothed_indexes": ema_snapshot,
         "momentum": {"ema7_over_ema28": ema7_over_ema28},
         "active_days_28": active_days_28,
         "gaps_count_28": gaps_count_28,

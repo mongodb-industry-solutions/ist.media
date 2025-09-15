@@ -5,8 +5,7 @@
 
 from flask import (
     g, render_template, redirect, request, session,
-    url_for, send_file, jsonify )
-from flask import current_app as app
+    url_for, send_file, jsonify, current_app as app )
 from mistune import html
 from .. import mongo, logger
 from . import main
@@ -31,10 +30,8 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, urlencode
 from requests.auth import HTTPBasicAuth
 from json import JSONEncoder
-import re, textwrap, string, os, json, time, uuid as python_uuid, requests, geocoder, pycountry, math
-import io, qrcode, bcrypt
-import numpy as np
-import voyageai
+import re, textwrap, string, os, json, time, uuid as python_uuid, numpy as np
+import requests, geocoder, pycountry, math, io, qrcode, bcrypt, voyageai
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -72,9 +69,9 @@ MAX_RCOM = 3      # number of recommended articles
 MAX_RAG = 7       # number of articles for RAG context - 128k token limit
 
 
-###########################################
-###   BEGIN experimental video search   ###
-###########################################
+############################################
+###          BEGIN video search          ###
+############################################
 
 parent_folder = "/usr/local/share/content/video/frames"
 frames = []
@@ -98,9 +95,9 @@ def cosine_similarity(a, b):
     b = np.array(b)
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-###########################################
-###    END experimental video search    ###
-###########################################
+############################################
+###           END video search           ###
+############################################
 
 
 def debug(msg: str):
@@ -508,12 +505,9 @@ def welcome():
 def profile():
     log(request)
     check_for_quality_read()
-    if "user" in session:
-        stats = list(engagement_events_collection.aggregate(
-            user_consumption_pipeline(session["user"])))[0]
-        return render_template('profile.html', stats=stats)
-    else:
-        return redirect('/login')
+    stats = list(engagement_events_collection.aggregate(
+        user_consumption_pipeline(g.user['username'])))[0]
+    return render_template('profile.html', stats=stats)
 
 
 @main.route('/register')
@@ -550,7 +544,7 @@ def do_register():
 def login():
     log(request)
     check_for_quality_read()
-    if "user" in session:
+    if not g.user['is_anonymous']:
         return redirect('/profile')
     else:
         if 'badlogin' in session:
@@ -624,7 +618,7 @@ def create_qr_code(payment_uri):
 def payment():
     log(request)
     check_for_quality_read()
-    if "user" in session:
+    if not g.user['is_anonymous']:
         usd_amount = 5.0 # top up of 5 USD hardcoded for now
         sol_price, sol_amount = calculate_sol_amount(usd_amount)
         return render_template("payment.html", sol_price=sol_price, sol_amount=sol_amount,
