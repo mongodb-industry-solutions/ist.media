@@ -2,7 +2,7 @@
     Copyright (c) 2025 MongoDB Inc.
     Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 -->
-{% if user is defined and user.get('username') %}
+{% if user is defined and not user.get('is_anonymous') %}
 <div class="user-info">
     <span class="coin-count" style="text-align: center; flex: 1">
         <i class="fas fa-coins"></i>

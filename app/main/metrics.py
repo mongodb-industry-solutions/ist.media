@@ -612,3 +612,92 @@ request_stats_pipelines = {
             }
         ]
 }
+
+
+def user_consumption_pipeline(user_id):
+    pipeline = [
+        {
+            '$match': {
+                'user_id': user_id,
+                'event': 'view'
+            }
+        },
+        {
+            '$addFields': {
+                'article_uuid_str': {
+                    '$toString': '$article_uuid'
+                }
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'news',
+                'localField': 'article_uuid_str',
+                'foreignField': 'uuid',
+                'as': 'article'
+            }
+        },
+        {
+            '$unwind': '$article'
+        },
+        {
+            '$facet': {
+                'top_sections': [
+                    {
+                        '$unwind': '$article.sections'
+                    },
+                    {
+                        '$group': {
+                            '_id': '$article.sections',
+                            'count': {'$sum': 1}
+                        }
+                    },
+                    {
+                        '$sort': {'count': -1}
+                    },
+                    {
+                        '$limit': 7
+                    },
+                    {
+                        '$project': {
+                            'section': '$_id',
+                            'count': 1,
+                            '_id': 0
+                        }
+                    }
+                ],
+                'articles_by_day_of_week': [
+                    {
+                        '$group': {
+                            '_id': { '$isoDayOfWeek' : '$ts' },
+                            'count': { '$sum' : 1 }
+                        }
+                    },
+                    {
+                        '$sort': { '_id' : 1 }
+                    },
+                    {
+                        '$project': {
+                            'dayOfWeek': {
+                                '$switch': {
+                                    'branches': [
+                                        { 'case' : { '$eq' : [ '$_id', 1] }, 'then' : 'Monday' },
+                                        { 'case' : { '$eq' : [ '$_id', 2] }, 'then' : 'Tuesday' },
+                                        { 'case' : { '$eq' : [ '$_id', 3] }, 'then' : 'Wednesday' },
+                                        { 'case' : { '$eq' : [ '$_id', 4] }, 'then' : 'Thursday' },
+                                        { 'case' : { '$eq' : [ '$_id', 5] }, 'then' : 'Friday' },
+                                        { 'case' : { '$eq' : [ '$_id', 6] }, 'then' : 'Saturday' },
+                                        { 'case' : { '$eq' : [ '$_id', 7] }, 'then' : 'Sunday' }
+                                    ],
+                                    'default' : 'Unknown'
+                                }
+                            },
+                            'count' : 1,
+                            '_id' : 0
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+    return pipeline

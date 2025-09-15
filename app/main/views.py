@@ -3,12 +3,16 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import g, render_template, redirect, request, session, url_for, send_file, jsonify
+from flask import (
+    g, render_template, redirect, request, session,
+    url_for, send_file, jsonify )
 from flask import current_app as app
 from mistune import html
 from .. import mongo, logger
 from . import main
-from .metrics import compute_user_engagement, compute_article_engagement, request_stats_pipelines
+from .metrics import (
+    compute_user_engagement, compute_article_engagement,
+    request_stats_pipelines, user_consumption_pipeline )
 from typing import List, Dict, Any
 from bson import Binary
 from bson.objectid import ObjectId
@@ -288,22 +292,37 @@ def check_for_quality_read():
                 print(e)
 
 
-def get_user():
-    return users_collection.find_one({ 'username' : session['user'] }) if 'user' in session else {}
+def get_user_dict(request):
+    user_dict = {
+        "username" : "",
+        "fullname" : "",
+        "is_anonymous" : True
+    }
+    if "user" in session:
+        db_user = users_collection.find_one({ "username" : session["user"] })
+        if db_user:
+            user_dict.update(db_user)
+            user_dict["is_anonymous"] = False
+    elif anon_id := request.cookies.get("anon_id"):
+        db_user = users_collection.find_one_and_update(
+            { "username" : anon_id },
+            { "$setOnInsert" : { "fullname" : "Anonymous User" } },
+            upsert=True,
+            return_document=ReturnDocument.AFTER
+        )
+        if db_user:
+            user_dict.update(db_user)
+    return user_dict
 
 
 @main.before_request
 def before_request():
     session.permanent = True
-    g.user = get_user()
+    g.user = get_user_dict(request)
     try:
         g.engagement = compute_user_engagement(g.user['username'])
     except Exception as e:
-        #print(e)
         g.engagement = None
-    if not 'user' in session:
-        if cookie_anonymous := request.cookies.get("anon_id"):
-            session["anonymous_user"] = cookie_anonymous
 
 
 @main.context_processor
@@ -490,7 +509,9 @@ def profile():
     log(request)
     check_for_quality_read()
     if "user" in session:
-        return render_template('profile.html')
+        stats = list(engagement_events_collection.aggregate(
+            user_consumption_pipeline(session["user"])))[0]
+        return render_template('profile.html', stats=stats)
     else:
         return redirect('/login')
 
