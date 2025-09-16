@@ -325,7 +325,7 @@ def before_request():
 @main.context_processor
 def inject_user_metrics():
     try:
-        engagement = int( math.floor( g.engagement['ema']['ema28'] + 0.5 ))
+        engagement = int( math.floor( g.engagement['smoothed_indexes']['ema28'] + 0.5 ))
     except Exception:
         engagement = 0
     return { 'user' : g.user, 'engagement' : engagement }

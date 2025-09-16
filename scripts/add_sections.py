@@ -45,6 +45,11 @@ def detect_sections(text):
 
     Please use ONLY items from the list above. NO OTHER items!
 
+    The list may not contain more than ONE of the following sections:
+    - Finance
+    - Business
+    - Science & Tech
+
     Please return as a Python list without ``` or ```python that
     can be processed programmatically. The article starts now:
 
