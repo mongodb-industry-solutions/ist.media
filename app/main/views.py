@@ -501,12 +501,53 @@ def welcome():
     return render_template('welcome.html')
 
 
+@main.route('/ai-context-visualizer')
+def ai_context():
+    data = users_collection.find_one({ 'username' : g.user['username'] },
+                                     { "engagement" : 1, "stats" : 1 })
+    engagement = data['engagement']
+    stats = data['stats']
+
+    since = datetime.fromisoformat(engagement['window_start_utc']).strftime('%B %d %Y')
+    active_days = engagement['active_days_28']
+    inactive_days = engagement['gaps_count_28']
+
+    prompt_prefix = f"""
+
+    You are an agent to invent and conduct user acquisition experiments
+    for a news website. Here's information about the current anonymous user
+    with username { g.user['username'] }.
+
+    This user has been first seen on { since } and was active on { active_days } days
+    in the last 28 days. There have been { inactive_days } days of no activity.
+
+    Their current engagement indexes: { data['engagement']['smoothed_indexes'] }.
+    These numbers are exponential moving averages and show the frequency of recent
+    article consumption. The derived momentum is: { data['engagement']['momentum'] }.
+    A value larger than 1 indicates increasing reading activity, a value lower
+    than 1 indicates decreasing activity.
+
+    The user has so far been reading articles from the following sections:
+    { data['stats']['top_sections'] }.
+
+    Weekly breakdown looks like this:
+    { data['stats']['articles_by_day_of_week'] }.
+
+    """
+    return render_template('ai-context-visualizer.html', context=prompt_prefix)
+
+
 @main.route('/profile')
 def profile():
     log(request)
     check_for_quality_read()
+    username = g.user['username']
+    engagement = g.engagement
     stats = list(engagement_events_collection.aggregate(
-        user_consumption_pipeline(g.user['username'])))[0]
+        user_consumption_pipeline(username)))[0]
+    users_collection.update_one({ 'username' : username },
+                                { "$set" : { "engagement" : engagement,
+                                             "stats" : stats }})
     return render_template('profile.html', stats=stats)
 
 
