@@ -514,9 +514,9 @@ def user_prompt_prefix():
 
     prompt_prefix = f"""
 
-    You are an agent to invent and conduct user acquisition experiments
-    for a news website. Here's information about the current anonymous user
-    with username { g.user['username'] }.
+    You are an agent to invent and conduct user acquisition and retention
+    experiments for the news website called ist.media. Here's information about
+    the current user with username { g.user['username'] }.
 
     This user has been first seen on { since } and was active on { active_days } days
     in the last 28 days. There have been { inactive_days } days of no activity.
@@ -538,6 +538,29 @@ def ai_context():
     return render_template('ai-context-visualizer.html', context=user_prompt_prefix())
 
 
+def ai_user_summary():
+    context = user_prompt_prefix()
+    task = """Please provide a one-paragraph summary about the user.
+
+    Mention their username. If the username looks like a hash key, it is an
+    anonymous user, and you can expect that some of those users only show a
+    reasonably short history of activity.
+
+    Never show parantheses, and don't use technical terms,
+    or variable names, or dict keys, to describe things, but rather explain
+    for a non-technical user in business terms.
+    """
+    response = ai.chat.completions.create(
+        model = "gpt-4o-mini",
+        messages = [
+            { "role" : "user", "content" : f"{context}\n\nTask: {task}" }
+        ],
+        max_tokens = 150,
+        temperature = 0.7
+    )
+    return response.choices[0].message.content
+
+
 @main.route('/profile')
 def profile():
     log(request)
@@ -549,7 +572,7 @@ def profile():
     users_collection.update_one({ 'username' : username },
                                 { "$set" : { "engagement" : engagement,
                                              "stats" : stats }})
-    return render_template('profile.html', stats=stats)
+    return render_template('profile.html', stats=stats, user_info=ai_user_summary())
 
 
 @main.route('/register')
