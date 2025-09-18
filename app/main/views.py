@@ -11,7 +11,8 @@ from .. import mongo, logger
 from . import main
 from .metrics import (
     compute_user_engagement, compute_article_engagement,
-    request_stats_pipelines, user_consumption_pipeline )
+    request_stats_pipelines, user_consumption_pipeline,
+    format_user_context_prompt )
 from typing import List, Dict, Any
 from bson import Binary
 from bson.objectid import ObjectId
@@ -501,8 +502,7 @@ def welcome():
     return render_template('welcome.html')
 
 
-@main.route('/ai-context-visualizer')
-def ai_context():
+def user_prompt_prefix():
     data = users_collection.find_one({ 'username' : g.user['username'] },
                                      { "engagement" : 1, "stats" : 1 })
     engagement = data['engagement']
@@ -527,14 +527,15 @@ def ai_context():
     A value larger than 1 indicates increasing reading activity, a value lower
     than 1 indicates decreasing activity.
 
-    The user has so far been reading articles from the following sections:
-    { data['stats']['top_sections'] }.
-
-    Weekly breakdown looks like this:
-    { data['stats']['articles_by_day_of_week'] }.
+    { format_user_context_prompt(data['stats']) }
 
     """
-    return render_template('ai-context-visualizer.html', context=prompt_prefix)
+    return prompt_prefix
+
+
+@main.route('/ai-context-visualizer')
+def ai_context():
+    return render_template('ai-context-visualizer.html', context=user_prompt_prefix())
 
 
 @main.route('/profile')

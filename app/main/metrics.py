@@ -624,7 +624,14 @@ def user_consumption_pipeline(user_id):
             '$addFields': {
                 'article_uuid_str': {
                     '$toString': '$article_uuid'
-                }
+                },
+                'day_of_week': {
+                    '$arrayElemAt': [
+                        [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                        { '$subtract': [ { '$isoDayOfWeek': '$ts' }, 1 ] }
+                    ]
+                },
+                'day_of_week_index': { '$isoDayOfWeek': '$ts' }
             }
         },
         {
@@ -667,8 +674,9 @@ def user_consumption_pipeline(user_id):
                 'articles_by_day_of_week': [
                     {
                         '$group': {
-                            '_id': { '$isoDayOfWeek' : '$ts' },
-                            'count': { '$sum' : 1 }
+                            '_id': '$day_of_week_index',
+                            'day_of_week': { '$first': '$day_of_week' },
+                            'count': { '$sum': 1 }
                         }
                     },
                     {
@@ -676,22 +684,26 @@ def user_consumption_pipeline(user_id):
                     },
                     {
                         '$project': {
-                            'dayOfWeek': {
-                                '$switch': {
-                                    'branches': [
-                                        { 'case' : { '$eq' : [ '$_id', 1] }, 'then' : 'Monday' },
-                                        { 'case' : { '$eq' : [ '$_id', 2] }, 'then' : 'Tuesday' },
-                                        { 'case' : { '$eq' : [ '$_id', 3] }, 'then' : 'Wednesday' },
-                                        { 'case' : { '$eq' : [ '$_id', 4] }, 'then' : 'Thursday' },
-                                        { 'case' : { '$eq' : [ '$_id', 5] }, 'then' : 'Friday' },
-                                        { 'case' : { '$eq' : [ '$_id', 6] }, 'then' : 'Saturday' },
-                                        { 'case' : { '$eq' : [ '$_id', 7] }, 'then' : 'Sunday' }
-                                    ],
-                                    'default' : 'Unknown'
-                                }
-                            },
-                            'count' : 1,
-                            '_id' : 0
+                            'day_of_week': '$day_of_week',
+                            'count': 1,
+                            '_id': 0
+                        }
+                    }
+                ],
+                'recent_articles': [
+                    {
+                        '$sort': {'ts': -1}
+                    },
+                    {
+                        '$limit': 10
+                    },
+                    {
+                        '$project': {
+                            'title': '$article.title',
+                            'sections': '$article.sections',
+                            'clicked_at': '$ts',
+                            'weekday_of_click': '$day_of_week',
+                            '_id': 0
                         }
                     }
                 ]
@@ -699,3 +711,79 @@ def user_consumption_pipeline(user_id):
         }
     ]
     return pipeline
+
+
+def format_recent_articles_for_prompt(recent_articles):
+    if not recent_articles:
+        return "    No recent articles read."
+
+    formatted_lines = ["Last articles read:"]
+
+    for i, article in enumerate(recent_articles, 1):
+        title = article.get('title', 'Unknown title')
+        if len(title) > 80:
+            title = title[:77] + "..."
+
+        sections = article.get('sections', [])
+        if sections:
+            section_text = f"[{', '.join(sections)}] "
+        else:
+            section_text = ""
+
+        clicked_at = article.get('clicked_at')
+        if clicked_at:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            click_time = clicked_at.replace(tzinfo=timezone.utc)
+            time_diff = now - click_time
+
+            if time_diff.days >= 7:
+                time_text = f"{time_diff.days} days ago"
+            elif time_diff.days >= 1:
+                time_text = "yesterday"
+            elif time_diff.total_seconds() >= 3600:
+                hours = int(time_diff.total_seconds() / 3600)
+                time_text = f"{hours} hours ago"
+            elif time_diff.total_seconds() >= 60:
+                minutes = int(time_diff.total_seconds() / 60)
+                time_text = f"{minutes} minutes ago"
+            else:
+                time_text = "just now"
+        else:
+            time_text = "recently"
+
+        weekday = article.get('weekday_of_click', 'Unknown')
+
+        formatted_lines.append(f"    {i}. {section_text}{title}")
+        formatted_lines.append(f"       Clicked {time_text} on {weekday}")
+
+    formatted_lines.append("")
+
+    return "\n".join(formatted_lines)
+
+
+def format_user_context_prompt(stats):
+    formatted_lines = []
+
+    recent_articles_text = format_recent_articles_for_prompt(stats.get('recent_articles', []))
+    formatted_lines.extend(recent_articles_text.splitlines())
+
+    top_sections = stats.get('top_sections', [])
+    if top_sections:
+        formatted_lines.append("")
+        formatted_lines.append("    Most read sections:")
+        for section in top_sections:
+            count = section.get('count', 0)
+            section_name = section.get('section', 'Unknown')
+            formatted_lines.append(f"    - {section_name}: {count} articles")
+
+    day_stats = stats.get('articles_by_day_of_week', [])
+    if day_stats:
+        formatted_lines.append("")
+        formatted_lines.append("    Reading habits by day of week:")
+        for day_stat in day_stats:
+            day_name = day_stat.get('day_of_week', 'Unknown')
+            count = day_stat.get('count', 0)
+            formatted_lines.append(f"    - {day_name}: {count} articles")
+
+    return "\n".join(formatted_lines)

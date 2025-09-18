@@ -285,8 +285,8 @@
                 const countsByDay = {};
                 daysInput.forEach(d => {
                     // normalize day string (defensive)
-                    if (!d || !d.dayOfWeek) return;
-                    const key = String(d.dayOfWeek).trim();
+                    if (!d || !d.day_of_week) return;
+                    const key = String(d.day_of_week).trim();
                     countsByDay[key] = (typeof d.count === 'number') ? d.count : parseInt(d.count) || 0;
                 });
 
