@@ -125,7 +125,15 @@
                             <span class="list-value">{{ user.email }}</span>
                         </div>
                         {% endif %}
-                        <h2 class="pt-2 tm-mb-30 tm-mt-60 tm-color-primary tm-post-title">
+                        <div class="mb-4 tm-mt-25">
+                            <div class="profile-attribute">
+                                <span class="list-key">User Info</span>
+                                <span class="list-value" style="line-height: 1.5; font-size: 85%">
+                                    {{ user_info }}
+                                </span>
+                            </div>
+                        </div>
+                        <h2 class="pt-2 tm-mb-30 tm-mt-40 tm-color-primary tm-post-title">
                             Usage Metrics
                         </h2>
                         {% if not user.is_anonymous %}
@@ -186,12 +194,6 @@
                             <span class="list-value">
                                 <canvas id="weekdayChart" style="height:180px"></canvas>
                             </span>
-                        </div>
-                    </div>
-                    <div class="mb-4 tm-mt-60">
-                        <div class="profile-attribute">
-                            <span class="list-key">User Info</span>
-                            <span class="list-value" style="line-height: 1.5">{{ user_info }}</span>
                         </div>
                     </div>
                 </div>
