@@ -9,7 +9,6 @@ from .. import mongo, logger
 from . import api
 from .errors import ApiError, bad_request, internal_server_error
 from bson import ObjectId
-from pymongo import MongoClient
 from openai import OpenAI
 from langchain.docstore.document import Document
 from langchain.chains.llm import LLMChain
@@ -19,15 +18,8 @@ from langchain_openai import ChatOpenAI
 import os, re, datetime, json, geocoder, uuid
 
 
-MONGO_URI = os.environ['MONGODB_IST_MEDIA']
-
-client = MongoClient(MONGO_URI)
-dbName = "1_media_demo"
-
-ip_info_cache_collectionName = "ip_info_cache"
-ip_info_cache_collection = client[dbName][ip_info_cache_collectionName]
-news_incoming_collectionName = "news_incoming"
-news_incoming_collection = client[dbName][news_incoming_collectionName]
+ip_info_cache_collection = mongo.db.ip_info_cache
+news_incoming_collection = mongo.db.news_incoming
 
 ai = OpenAI()
 

@@ -7,7 +7,7 @@ from flask import (
     g, render_template, redirect, request, session,
     url_for, send_file, jsonify, current_app as app )
 from mistune import html
-from .. import mongo, logger
+from .. import mongo, mongo_preview, logger
 from . import main
 from .metrics import (
     compute_user_engagement, compute_article_engagement,
@@ -38,28 +38,17 @@ import requests, geocoder, pycountry, math, io, qrcode, bcrypt, voyageai
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
                    os.environ.get('IST_MEDIA_AUTH_PASSWORD', '') ]
 
-MONGO_URI = os.environ['MONGODB_IST_MEDIA']
-
-DB_NAME = "1_media_demo"
 DEFAULT_NEWS_COLLECTION = 'news'
+ALLOWED_NEWS_COLLECTIONS = { 'news', 'business_news' }
 
-client = MongoClient(MONGO_URI)
-
-gen_ai_cache_collection = client[DB_NAME]["gen_ai_cache"]
-ip_info_cache_collection = client[DB_NAME]["ip_info_cache"]
-access_log_collection = client[DB_NAME]["access_log"]
-daily_collection = client[DB_NAME]["daily"]
-users_collection = client[DB_NAME]["users"]
-solana_collection_tx = client[DB_NAME]["solana_tx"]
-solana_collection_tmp = client[DB_NAME]["solana_tmp"]
-engagement_events_collection = client[DB_NAME]["engagement_events"]
-
-
-# the database that is used for preview (from content lab)
-MONGO_URI_PREVIEW = os.environ['MONGODB_IST_MEDIA_PREVIEW']
-client_preview = MongoClient(MONGO_URI_PREVIEW)
-preview_collection = client_preview["ist_media_internship"]["preview"]
-
+gen_ai_cache_collection = mongo.db.gen_ai_cache
+ip_info_cache_collection = mongo.db.ip_info_cache
+access_log_collection = mongo.db.access_log
+daily_collection = mongo.db.daily
+users_collection = mongo.db.users
+solana_collection_tx = mongo.db.solana_tx
+solana_collection_tmp = mongo.db.solana_tmp
+engagement_events_collection = mongo.db.engagement_events
 
 ai = OpenAI()
 voyage_ai = voyageai.Client()
@@ -106,14 +95,21 @@ def debug(msg: str):
         print("[DEBUG]: " + msg)
 
 
+# the database that is used for preview (from content lab)
+def preview_collection():
+    return mongo_preview.db["preview"]
+
+
 def read_collection_from_session():
-    if not 'news_source' in session:
-        session['news_source'] = DEFAULT_NEWS_COLLECTION
-    return session['news_source']
+    name = session.get("news_source", DEFAULT_NEWS_COLLECTION)
+    if name not in ALLOWED_NEWS_COLLECTIONS:
+        name = DEFAULT_NEWS_COLLECTION
+        session["news_source"] = name
+    return name
 
 
 def collection():
-    return client[DB_NAME][read_collection_from_session()]
+    return mongo.db[read_collection_from_session()]
 
 
 def log(request):
@@ -126,8 +122,8 @@ def log(request):
                 "city" : ws.city if ws.city else " - ",
                 "country" : ws.country if ws.country else " - " }
         ip_info_cache_collection.insert_one(loc)
-    logger.info(ip + " (" + loc['city'] + ", " + loc['country'] + "): " + request.base_url +
-            (" (" + str(request.content_length) + " bytes)" if request.content_length else ""))
+    #logger.info(ip + " (" + loc['city'] + ", " + loc['country'] + "): " + request.base_url +
+    #        (" (" + str(request.content_length) + " bytes)" if request.content_length else ""))
     try:
         if loc['country'] != " - ":
             log_entry = { "timestamp" : datetime.utcnow(),
@@ -146,11 +142,12 @@ def log(request):
 
 
 def vector_search():
-    return MongoDBAtlasVectorSearch.from_connection_string(
-        MONGO_URI,
-        DB_NAME + "." + read_collection_from_session(),
-        OpenAIEmbeddings(disallowed_special=()),
-        index_name="vector_index")
+    """Build a VectorStore bound to the currently selected news collection."""
+    return MongoDBAtlasVectorSearch(
+        collection = mongo.db[read_collection_from_session()],
+        embedding = OpenAIEmbeddings(disallowed_special=()),
+        index_name = "vector_index"
+    )
 
 
 def similarity_search(text: str,
@@ -1078,7 +1075,7 @@ def post():
         return render_template('post.html', doc=doc, fdoc=fdoc, recommendations=recommendations)
     if preview and preview != "":
         published = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        doc = preview_collection.find_one({ "_id" : ObjectId(preview)})
+        doc = preview_collection().find_one({ "_id" : ObjectId(preview)})
         fdoc = '<div class="ai-gen">' + html(doc['content'].replace("\n", "\n\n")) + '</div>'
         return render_template('post.html', doc=doc, fdoc=fdoc, preview=True, published=published,
                                recommendations=[], keywords=doc['keywords'])

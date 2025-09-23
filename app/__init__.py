@@ -13,8 +13,10 @@ import logging
 
 
 mongo = PyMongo()
+mongo_preview = PyMongo()
+
 logger = logging.getLogger(__name__)
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone="UTC")
 
 def json_default(obj):
     if isinstance(obj, ObjectId):
@@ -35,6 +37,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     mongo.init_app(app)
+    mongo_preview.init_app(app, uri=app.config["MONGO_URI_PREVIEW"])
 
     logging.basicConfig(
         filename = '/tmp/ist.media.log',
@@ -53,11 +56,15 @@ def create_app(config_name):
     from .agentic import ai as ai_blueprint
     app.register_blueprint(ai_blueprint, url_prefix='/ai')
 
-    scheduler.start()
-
+    # scheduler initialization
     from .jobs import agentic_master_planner
+
+    if not scheduler.running:
+        scheduler.start()
+
     scheduler.add_job(
         func = agentic_master_planner,
+        args = [app],
         trigger = 'interval',
         minutes = 1,
         id = 'agentic master planner',

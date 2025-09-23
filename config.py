@@ -11,6 +11,7 @@ class Config:
 
     # MongoDB Atlas
     MONGO_URI = os.environ['MONGODB_IST_MEDIA']
+    MONGO_URI_PREVIEW = os.environ['MONGODB_IST_MEDIA_PREVIEW']
 
     # currently supported LLMs
     AVAILABLE_LLMS = { 'OpenAI GPT-3.5' : 'gpt-3.5-turbo',
