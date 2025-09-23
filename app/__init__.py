@@ -6,6 +6,7 @@
 from flask import Flask
 from flask_pymongo import PyMongo
 from flask.json.provider import JSONProvider, DefaultJSONProvider
+from apscheduler.schedulers.background import BackgroundScheduler
 from bson import ObjectId
 from config import config
 import logging
@@ -13,6 +14,7 @@ import logging
 
 mongo = PyMongo()
 logger = logging.getLogger(__name__)
+scheduler = BackgroundScheduler()
 
 def json_default(obj):
     if isinstance(obj, ObjectId):
@@ -28,7 +30,6 @@ class CustomJSONProvider(DefaultJSONProvider):
 def create_app(config_name):
     app = Flask(__name__)
     app.json = CustomJSONProvider(app)
-    #app.json.ensure_ascii = False # don't escape unicode characters
     app.secret_key = 'IST_MEDIA_SECRET_KEY'
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
@@ -41,6 +42,7 @@ def create_app(config_name):
         format = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
         datefmt = '%Y-%m-%d %H:%M:%S'
     )
+    logging.getLogger('apscheduler').setLevel(logging.WARNING)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
@@ -50,5 +52,17 @@ def create_app(config_name):
 
     from .agentic import ai as ai_blueprint
     app.register_blueprint(ai_blueprint, url_prefix='/ai')
+
+    scheduler.start()
+
+    from .jobs import agentic_master_planner
+    scheduler.add_job(
+        func = agentic_master_planner,
+        trigger = 'interval',
+        minutes = 1,
+        id = 'agentic master planner',
+        max_instances = 1,
+        replace_existing = True
+    )
 
     return app
