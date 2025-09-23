@@ -199,6 +199,8 @@ def compute_user_engagement(user_id: str, windows=(3, 7, 28),
     ema28 = ema_snapshot.get("ema28", 0.00)
     # Momentum: ema7 / ema28 (return 0 if ema28 is 0)
     ema7_over_ema28 = round(ema7 / ema28, 2) if ema28 else 0.00
+    # More momentum metrics
+    gap_days_ratio = round(gaps_count_28 / active_days_28, 2) if active_days_28 else 0.00
 
     return {
         "window_days_observed": len(daily),
@@ -206,7 +208,7 @@ def compute_user_engagement(user_id: str, windows=(3, 7, 28),
         "window_end_utc": effective_end.isoformat(),
         "today_is_partial": bool(today_is_partial),
         "smoothed_indexes": ema_snapshot,
-        "momentum": {"ema7_over_ema28": ema7_over_ema28},
+        "momentum": {"ema7_over_ema28": ema7_over_ema28, "gap_days_ratio": gap_days_ratio},
         "active_days_28": active_days_28,
         "gaps_count_28": gaps_count_28,
         "days_since_last_visit": days_since_last_visit,
