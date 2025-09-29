@@ -48,7 +48,7 @@ def _compute_daily_indices(user_id: str, days_back: int = 28,
                                           microsecond=0, tzinfo=timezone.utc)
     end_for_days = today_mid + timedelta(days=1) if include_today else today_mid
 
-    since = now - timedelta(days=days_back)
+    since = now - timedelta(days=days_back-1)
 
     pipeline = [
         {"$match": {
@@ -207,11 +207,21 @@ def compute_user_engagement(user_id: str, windows=(3, 7, 28),
         if window_days_observed > 0 else 0.00
     )
 
+    # Calculate the first time a user_id was logged
+    from .views import engagement_events_collection
+    first_seen_doc = next(engagement_events_collection.aggregate([
+        {"$match": {"user_id": user_id}},
+        {"$group": {"_id": None, "first_seen": {"$min": "$ts"}}}
+    ]), None)
+    # Fallback: if no events exist, use effective_start (today if no activity)
+    first_seen = (first_seen_doc or {}).get("first_seen") or effective_start
+
     return {
+        "first_seen": first_seen.isoformat(),
         "window_days_observed": window_days_observed,
         "window_start_utc": effective_start.isoformat(),
         "window_end_utc": effective_end.isoformat(),
-        "today_is_partial": bool(today_is_partial),
+#        "today_is_partial": bool(today_is_partial),
         "smoothed_indexes": ema_snapshot,
         "momentum": {
             "ema7_over_ema28": ema7_over_ema28,

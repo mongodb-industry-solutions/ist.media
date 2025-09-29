@@ -505,7 +505,7 @@ def user_prompt_prefix():
     engagement = data['engagement']
     stats = data['stats']
 
-    since = datetime.fromisoformat(engagement['window_start_utc']).strftime('%B %d %Y')
+    first_seen = datetime.fromisoformat(engagement['first_seen']).strftime('%B %d %Y')
     active_days = engagement['active_days_28']
     inactive_days = engagement['gaps_count_28']
 
@@ -515,8 +515,8 @@ def user_prompt_prefix():
     experiments for the news website called ist.media. Here's information about
     the current user with username { g.user['username'] }.
 
-    This user has been first seen on { since } and was active on { active_days } days
-    in the last 28 days. There have been { inactive_days } days of no activity.
+    This user has been first seen on { first_seen } and was active on { active_days } days
+    in the last 28 days, and with { inactive_days } days of no activity.
 
     Their current engagement indexes: { data['engagement']['smoothed_indexes'] }.
     These numbers are exponential moving averages and show the frequency of recent
