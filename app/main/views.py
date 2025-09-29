@@ -977,6 +977,12 @@ def video():
     return render_template('video.html', offset=0, infoline="Enter your search query above")
 
 
+@main.route('/signup-promo')
+def signup_promo():
+    text = "Hey, you should register! :)" # will be individually calculated by LLM later
+    return render_template('signup-promo.html', text=text)
+
+
 @main.route('/post')
 def post():
     log(request)
