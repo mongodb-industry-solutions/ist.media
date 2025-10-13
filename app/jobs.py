@@ -5,7 +5,9 @@
 
 from openai import OpenAI
 from datetime import datetime
-from .agentic.main import user_prompt_prefix, ai_agent_compute_user_summary
+from .agentic.main import (
+    user_prompt_prefix,
+    ai_agent_compute_user_summary )
 import logging
 
 
@@ -28,8 +30,10 @@ def agentic_master_planner(app):
 
         for user in cursor:
             username = user["username"]
+            logger.info("(Re-)generating user summary for %s", username)
             try:
-                summary_text = ai_agent_compute_user_summary(username)
+                if not (summary_text := ai_agent_compute_user_summary(username)):
+                    summary_text = "No insights available (yet)."
                 mongo.db.users.update_one(
                     { "_id" : user["_id"] },
                     { "$set" : {
@@ -39,6 +43,5 @@ def agentic_master_planner(app):
                         }
                     }}
                 )
-                logger.info("Summary regenerated for %s", username)
             except Exception as e:
                 logger.error(str(e))

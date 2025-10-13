@@ -3,24 +3,11 @@
 # Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
 #
 
-from flask import g, render_template, redirect, request
-from flask import session, url_for, send_file, jsonify, current_app as app
-from mistune import html
-from .. import mongo, logger
+from .. import mongo
 from ..main.metrics import format_user_context_prompt
-from . import ai
-from typing import List, Dict, Any
-from bson import Binary
-from bson.objectid import ObjectId
-from pymongo import ReturnDocument
+from datetime import datetime
 from openai import OpenAI
-from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse, urlencode
-from requests.auth import HTTPBasicAuth
-from json import JSONEncoder
-import re, textwrap, string, os, json, time, uuid as python_uuid
-import requests, geocoder, pycountry, math, voyageai
-import io, qrcode, bcrypt, numpy as np
+import voyageai
 
 
 open_ai = OpenAI()
@@ -30,10 +17,21 @@ voyage_ai = voyageai.Client()
 def user_prompt_prefix(username):
     data = mongo.db.users.find_one({ 'username' : username },
                                    { "engagement" : 1, "stats" : 1 })
-    engagement = data['engagement']
-    stats = data['stats']
+    if data is None:
+        return ""
+    if not (engagement := data.get('engagement')):
+        return ""
+    if not (stats := data.get('stats')):
+        return ""
 
-    first_seen = datetime.fromisoformat(engagement['first_seen']).strftime('%B %d %Y')
+    first_seen = 'unknown date and time'
+    if 'first_seen' in engagement and engagement['first_seen']:
+        try:
+            first_seen_dt = datetime.fromisoformat(engagement['first_seen'])
+            first_seen = first_seen_dt.strftime('%B %d %Y')
+        except ValueError:
+            pass
+
     active_days = engagement['active_days_28']
     inactive_days = engagement['gaps_count_28']
 
@@ -46,20 +44,22 @@ def user_prompt_prefix(username):
     This user has been first seen on { first_seen } and was active on { active_days } days
     in the last 28 days, and with { inactive_days } days of no activity.
 
-    Their current engagement indexes: { data['engagement']['smoothed_indexes'] }.
+    Their current engagement indexes: { engagement['smoothed_indexes'] }.
     These numbers are exponential moving averages and show the frequency of recent
-    article consumption. The derived momentum is: { data['engagement']['momentum'] }.
+    article consumption. The derived momentum is: { engagement['momentum'] }.
     A value larger than 1 indicates increasing reading activity, a value lower
     than 1 indicates decreasing activity.
 
-    { format_user_context_prompt(data['stats']) }
+    { format_user_context_prompt(stats) }
 
     """
     return prompt_prefix
 
 
 def ai_agent_compute_user_summary(username):
-    context = user_prompt_prefix(username)
+    if not (context := user_prompt_prefix(username)):
+        return ""
+
     task = """Please provide a one-paragraph summary about the user.
 
     Mention their username. If the username looks like a hash key, it is an
