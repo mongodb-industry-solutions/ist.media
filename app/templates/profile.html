@@ -125,14 +125,16 @@
                             <span class="list-value">{{ user.email }}</span>
                         </div>
                         {% endif %}
+                        {% if summary is not none %}
                         <div class="mb-4 tm-mt-25">
                             <div class="profile-attribute">
                                 <span class="list-key">User Info</span>
                                 <span class="list-value" style="line-height: 1.5; font-size: 85%">
-                                    {{ user_info }}
+                                    {{ summary }}
                                 </span>
                             </div>
                         </div>
+                        {% endif %}
                         <h2 class="pt-2 tm-mb-30 tm-mt-40 tm-color-primary tm-post-title">
                             Usage Metrics
                         </h2>

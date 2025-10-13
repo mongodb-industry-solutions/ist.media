@@ -8,6 +8,7 @@ from flask import (
     url_for, send_file, jsonify, current_app as app )
 from mistune import html
 from .. import mongo, mongo_preview, logger
+from ..agentic.main import user_prompt_prefix, ai_agent_compute_user_summary
 from . import main
 from .metrics import (
     compute_user_engagement, compute_article_engagement,
@@ -314,6 +315,10 @@ def get_user_dict(request):
 def before_request():
     session.permanent = True
     g.user = get_user_dict(request)
+    mongo.db.users.update_one(
+        { 'username' : g.user['username'] },
+        { '$set' : { 'last_active' : datetime.utcnow() } }
+    )
     try:
         g.engagement = compute_user_engagement(g.user['username'])
     except Exception as e:
@@ -499,63 +504,10 @@ def welcome():
     return render_template('welcome.html')
 
 
-def user_prompt_prefix():
-    data = users_collection.find_one({ 'username' : g.user['username'] },
-                                     { "engagement" : 1, "stats" : 1 })
-    engagement = data['engagement']
-    stats = data['stats']
-
-    first_seen = datetime.fromisoformat(engagement['first_seen']).strftime('%B %d %Y')
-    active_days = engagement['active_days_28']
-    inactive_days = engagement['gaps_count_28']
-
-    prompt_prefix = f"""
-
-    You are an agent to invent and conduct user acquisition and retention
-    experiments for the news website called ist.media. Here's information about
-    the current user with username { g.user['username'] }.
-
-    This user has been first seen on { first_seen } and was active on { active_days } days
-    in the last 28 days, and with { inactive_days } days of no activity.
-
-    Their current engagement indexes: { data['engagement']['smoothed_indexes'] }.
-    These numbers are exponential moving averages and show the frequency of recent
-    article consumption. The derived momentum is: { data['engagement']['momentum'] }.
-    A value larger than 1 indicates increasing reading activity, a value lower
-    than 1 indicates decreasing activity.
-
-    { format_user_context_prompt(data['stats']) }
-
-    """
-    return prompt_prefix
-
-
 @main.route('/ai-context-visualizer')
 def ai_context():
-    return render_template('ai-context-visualizer.html', context=user_prompt_prefix())
-
-
-def ai_user_summary():
-    context = user_prompt_prefix()
-    task = """Please provide a one-paragraph summary about the user.
-
-    Mention their username. If the username looks like a hash key, it is an
-    anonymous user, and you can expect that some of those users only show a
-    reasonably short history of activity.
-
-    Never show parantheses, and don't use technical terms,
-    or variable names, or dict keys, to describe things, but rather explain
-    for a non-technical user in business terms.
-    """
-    response = ai.chat.completions.create(
-        model = "gpt-4o-mini",
-        messages = [
-            { "role" : "user", "content" : f"{context}\n\nTask: {task}" }
-        ],
-        max_tokens = 150,
-        temperature = 0.7
-    )
-    return response.choices[0].message.content
+    return render_template('ai-context-visualizer.html',
+                           context = user_prompt_prefix(g.user['username']))
 
 
 @main.route('/profile')
@@ -564,12 +516,16 @@ def profile():
     check_for_quality_read()
     username = g.user['username']
     engagement = g.engagement
-    stats = list(engagement_events_collection.aggregate(
+    stats = list(mongo.db.engagement_events.aggregate(
         user_consumption_pipeline(username)))[0]
-    users_collection.update_one({ 'username' : username },
-                                { "$set" : { "engagement" : engagement,
-                                             "stats" : stats }})
-    return render_template('profile.html', stats=stats, user_info=ai_user_summary())
+    mongo.db.users.update_one({ 'username' : username },
+                              { "$set" : { "engagement" : engagement,
+                                           "stats" : stats }})
+    try:
+        summary = mongo.db.users.find_one({ 'username' : username })['summary']['text']
+    except Exception:
+        summary = None
+    return render_template('profile.html', stats=stats, summary=summary)
 
 
 @main.route('/register')

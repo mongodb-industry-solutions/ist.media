@@ -41,11 +41,12 @@ def create_app(config_name):
 
     logging.basicConfig(
         filename = '/tmp/ist.media.log',
-        level = logging.INFO,
+        level = app.config["LOG_LEVEL"],
         format = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
         datefmt = '%Y-%m-%d %H:%M:%S'
     )
     logging.getLogger('apscheduler').setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
@@ -66,7 +67,7 @@ def create_app(config_name):
         func = agentic_master_planner,
         args = [app],
         trigger = 'interval',
-        minutes = 1,
+        seconds = 30,
         id = 'agentic master planner',
         max_instances = 1,
         replace_existing = True
