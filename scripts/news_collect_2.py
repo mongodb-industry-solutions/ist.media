@@ -9,7 +9,7 @@ from pymongo.errors import DuplicateKeyError
 from time import sleep
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
-import keyparams, os, sys, requests, json, uuid, feedparser
+import keyparams, os, sys, requests, json, uuid, feedparser, cloudscraper
 
 client = MongoClient(keyparams.MONGO_URI)
 dbName = "1_media_demo"
@@ -32,11 +32,14 @@ feed = feedparser.parse(url)
 # Clean-up incoming collection
 collection.delete_many({}) # erase incoming
 
+# One instance of cloudscraper for all articles
+scraper = cloudscraper.create_scraper()
+
 # Function to extract full text from an article page
 def get_full_text(article_url):
     try:
         # Fetch the article page
-        response = requests.get(article_url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = scraper.get(article_url)
 
         # Check if the request was successful
         if response.status_code == 200:
