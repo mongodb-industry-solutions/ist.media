@@ -40,9 +40,10 @@ def get_full_text(article_url):
     try:
         # Fetch the article page
         response = scraper.get(article_url)
+        status_code = response.status_code
 
         # Check if the request was successful
-        if response.status_code == 200:
+        if status_code == 200:
             # Parse the page content
             soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -61,7 +62,11 @@ def get_full_text(article_url):
 
             return full_text.strip()
         else:
-            return "Failed to fetch full article"
+            print(
+                f"Failed to fetch full article: {article_url}: HTTP status "
+                f"code {status_code}"
+            )
+            return ""
     except Exception as e:
         return f"Error occurred: {e}"
 
