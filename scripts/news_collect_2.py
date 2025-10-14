@@ -68,7 +68,8 @@ def get_full_text(article_url):
             )
             return ""
     except Exception as e:
-        return f"Error occurred: {e}"
+        print(f"Failed to fetch full article: {e}")
+        return ""
 
 # Loop through each article entry in the RSS feed
 for entry in feed.entries[:5]:
