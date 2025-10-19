@@ -20,6 +20,8 @@ anyio==4.9.0
     # via
     #   httpx
     #   openai
+apscheduler==3.11.0
+    # via flask-apscheduler
 attrs==25.3.0
     # via aiohttp
 bcrypt==4.3.0
@@ -39,6 +41,8 @@ click==8.2.1
     # via
     #   flask
     #   geocoder
+cloudscraper==1.2.71
+    # via -r requirements.in
 dataclasses-json==0.6.7
     # via langchain-community
 decorator==5.2.1
@@ -52,7 +56,11 @@ feedparser==6.0.11
 filelock==3.18.0
     # via huggingface-hub
 flask==3.1.1
-    # via flask-pymongo
+    # via
+    #   flask-apscheduler
+    #   flask-pymongo
+flask-apscheduler==1.13.1
+    # via -r requirements.in
 flask-pymongo==3.0.1
     # via -r requirements.in
 frozenlist==1.7.0
@@ -187,8 +195,12 @@ pymongo==4.13.2
     # via
     #   flask-pymongo
     #   langchain-mongodb
+pyparsing==3.2.5
+    # via cloudscraper
 python-dateutil==2.9.0.post0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   flask-apscheduler
 python-dotenv==1.1.0
     # via pydantic-settings
 pyyaml==6.0.2
@@ -205,6 +217,7 @@ regex==2024.11.6
     # via tiktoken
 requests==2.32.4
     # via
+    #   cloudscraper
     #   geocoder
     #   huggingface-hub
     #   langchain
@@ -214,7 +227,9 @@ requests==2.32.4
     #   tiktoken
     #   voyageai
 requests-toolbelt==1.0.0
-    # via langsmith
+    # via
+    #   cloudscraper
+    #   langsmith
 sgmllib3k==1.0.0
     # via feedparser
 six==1.17.0
@@ -262,6 +277,8 @@ typing-inspection==0.4.1
     # via
     #   pydantic
     #   pydantic-settings
+tzlocal==5.3.1
+    # via apscheduler
 urllib3==2.4.0
     # via requests
 uwsgi==2.0.30

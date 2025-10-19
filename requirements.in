@@ -1,6 +1,8 @@
 bcrypt
 beautifulsoup4
+cloudscraper
 feedparser
+flask_apscheduler
 Flask-PyMongo
 geocoder
 langchain-community
