@@ -8,12 +8,12 @@ from flask import (
     url_for, send_file, jsonify, current_app as app )
 from mistune import html
 from .. import mongo, mongo_preview, logger
-from ..agentic.main import user_prompt_prefix, ai_agent_compute_user_summary
+from ..agentic.main import _user_prompt_prefix
 from . import main
 from .metrics import (
-    compute_user_engagement, compute_article_engagement,
-    request_stats_pipelines, user_consumption_pipeline,
-    format_user_context_prompt )
+    compute_user_engagement,
+    request_stats_pipelines,
+    user_consumption_pipeline )
 from typing import List, Dict, Any
 from bson import Binary
 from bson.objectid import ObjectId
@@ -436,11 +436,6 @@ def user_engagement(user_id):
     return jsonify({"user_id": user_id, **data})
 
 
-@main.route("/stats/article_engagement", methods=["GET"])
-def article_engagement_stats():
-    return compute_article_engagement()
-
-
 @main.route('/select_news_source', methods=['POST'])
 def select_news_source():
     log(request)
@@ -507,7 +502,7 @@ def welcome():
 @main.route('/ai-context-visualizer')
 def ai_context():
     return render_template('ai-context-visualizer.html',
-                           context = user_prompt_prefix(g.user['username']))
+                           context = _user_prompt_prefix(g.user['username']))
 
 
 @main.route('/profile')
@@ -526,6 +521,20 @@ def profile():
     except Exception:
         summary = None
     return render_template('profile.html', stats=stats, summary=summary)
+
+
+@main.route('/register_from_signup_promo_page', methods=['POST'])
+def register_from_signup_promo_page():
+    mongo.db.planner.update_one(
+        { "username" : g.user['username'] },
+        { "$set" : {
+            "history" : {
+                "register_click_ts" : datetime.utcnow()
+            }
+        }},
+        upsert=True
+    )
+    return redirect('/register')
 
 
 @main.route('/register')
@@ -769,7 +778,17 @@ def index():
     section = request.args.get('section') or session.get('section') or "_all"
     session['section'] = section
     if query and query != "":
-        docs = hybrid_search(query.strip(), MAX_DOCS)
+        cleaned_query = query.strip()
+        mongo.db.users.update_one(
+            { "username" : g.user['username'] },
+            { "$push" : {
+                "searches" : {
+                    "query" : cleaned_query,
+                    "submitted_at" : datetime.utcnow()
+                }
+            }}
+        )
+        docs = hybrid_search(cleaned_query, MAX_DOCS)
         docs = list(map(lambda doc: doc.dict()['metadata'] | { "text" : doc.page_content }, docs))
         #docs = list(filter(lambda doc: doc['vector_score'] > 0 and doc['fulltext_score'] > 0, docs))
         for doc in docs:
@@ -865,6 +884,15 @@ def index():
     else:
         sections = []
 
+    # check for active promotions - show them just in case
+    # TODO: store time of last display in planner doc
+    #         open up / allow to re-show after some days
+    # cookie solution for now, but this is not flexible. One-show only.
+    if (promo := mongo.db.planner.find_one({ "username" : g.user['username'], "type" : 1 })):
+        if not 'promo_was_presented_before' in session:
+            session['promo_was_presented_before'] = '1'
+            return redirect('/signup-promo')
+
     return render_template('index.html', docs=docs, infoline=infoline,
                            sections=sections, selected_section=section)
 
@@ -935,8 +963,14 @@ def video():
 
 @main.route('/signup-promo')
 def signup_promo():
-    text = "Hey, you should register! :)" # will be individually calculated by LLM later
-    return render_template('signup-promo.html', text=text)
+    promo = mongo.db.planner.find_one({ "username" : g.user['username'], "type" : 1 })
+    if promo:
+        text = promo['promo']['text']
+        ts = promo['promo']['ts'].strftime('%d.%m.%Y %H:%M')
+    else:
+        text = "There's no current acquisition promo for this user."
+        ts = ""
+    return render_template('signup-promo.html', text=text, ts=ts)
 
 
 @main.route('/post')

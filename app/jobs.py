@@ -6,9 +6,9 @@
 from openai import OpenAI
 from datetime import datetime
 from .agentic.main import (
-    user_prompt_prefix,
-    ai_agent_compute_user_summary )
-import logging
+    ai_agent_compute_user_summary,
+    ai_agent_compute_user_aquisition_promo )
+import logging, ast
 
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,15 @@ def agentic_master_planner(app):
                     { "$expr" : { "$gt" : [ "$last_active", "$summary.ts" ]}}
                 ]
             },
-            { "username" : 1 }
+            { "username" : 1, "fullname" : 1 }
         )
 
         for user in cursor:
             username = user["username"]
-            logger.info("(Re-)generating user summary for %s", username)
+            fullname = user["fullname"]
+
+            # re-generate user summary for users with recent activity
+            logger.info(f"(Re-)generating user summary for {username}")
             try:
                 if not (summary_text := ai_agent_compute_user_summary(username)):
                     summary_text = "No insights available (yet)."
@@ -44,4 +47,27 @@ def agentic_master_planner(app):
                     }}
                 )
             except Exception as e:
-                logger.error(str(e))
+                logger.error(f"While re-generating user summary: {e}")
+
+            # for anonymous users with recent activity, check
+            # - if there's already a promotion for them in place,
+            # - if not, ask the ai agent to generate one, only if
+            #   this is a suitable prospect. The agent will decide.
+            if fullname != 'Anonymous User':
+                return # acquisition promo only applies to anonymous users
+            if not mongo.db.planner.find_one({ "username" : username, "type" : 1 }):
+                if (result := ai_agent_compute_user_aquisition_promo(username)):
+                    add_promotion, promo_text = ast.literal_eval(result)
+                    if add_promotion:
+                        logger.info(f"Adding promo for {username}: {promo_text}")
+                        mongo.db.planner.update_one(
+                            { "username" : username },
+                            { "$set" : {
+                                "promo" : {
+                                    "text" : promo_text,
+                                    "ts" : datetime.utcnow()
+                                },
+                                "type" : 1 # acquisition promo, 2: retention promo
+                            }},
+                            upsert=True
+                        )

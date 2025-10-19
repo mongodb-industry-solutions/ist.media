@@ -7,4 +7,4 @@ from flask import Blueprint
 
 ai = Blueprint('ai', __name__)
 
-from . import memory
+from . import views
