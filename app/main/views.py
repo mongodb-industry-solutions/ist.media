@@ -315,14 +315,21 @@ def get_user_dict(request):
 def before_request():
     session.permanent = True
     g.user = get_user_dict(request)
+    username = g.user['username']
     mongo.db.users.update_one(
-        { 'username' : g.user['username'] },
+        { 'username' : username },
         { '$set' : { 'last_active' : datetime.utcnow() } }
     )
     try:
-        g.engagement = compute_user_engagement(g.user['username'])
+        g.engagement = compute_user_engagement(username)
+        g.stats = list(mongo.db.engagement_events.aggregate(
+            user_consumption_pipeline(username)))[0]
+        mongo.db.users.update_one({ 'username' : username },
+                                  { "$set" : { "engagement" : g.engagement,
+                                               "stats" : g.stats }})
     except Exception as e:
         g.engagement = None
+        g.stats = None
 
 
 @main.context_processor
@@ -509,18 +516,11 @@ def ai_context():
 def profile():
     log(request)
     check_for_quality_read()
-    username = g.user['username']
-    engagement = g.engagement
-    stats = list(mongo.db.engagement_events.aggregate(
-        user_consumption_pipeline(username)))[0]
-    mongo.db.users.update_one({ 'username' : username },
-                              { "$set" : { "engagement" : engagement,
-                                           "stats" : stats }})
     try:
-        summary = mongo.db.users.find_one({ 'username' : username })['summary']['text']
+        summary = mongo.db.users.find_one({ 'username' : g.user['username'] })['summary']['text']
     except Exception:
         summary = None
-    return render_template('profile.html', stats=stats, summary=summary)
+    return render_template('profile.html', stats=g.stats, summary=summary)
 
 
 @main.route('/register_from_signup_promo_page', methods=['POST'])
