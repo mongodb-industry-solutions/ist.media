@@ -27,11 +27,11 @@
         .truncate-1 {
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .clamp-3 {
+        .clamp-4 {
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 3;
-            line-clamp: 3;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
             overflow: hidden;
             white-space: normal;
             word-break: break-word;
@@ -142,7 +142,7 @@
                                         if doc.type in [1, 2, 3] else doc.type }}
                                     </td>
                                     <td class="col-promo">
-                                        <div class="clamp-3" title="{{ doc.promo.text }}">
+                                        <div class="clamp-4" title="{{ doc.why }}">
                                             <small>{{ doc.promo.text }}</small>
                                         </div>
                                     </td>
