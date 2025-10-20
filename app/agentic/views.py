@@ -9,9 +9,9 @@ from . import ai
 from .main import ai_agent_compute_user_aquisition_promo
 
 
-@ai.route("/promotest")
-def status():
-    text = ai_agent_compute_user_aquisition_promo("66d87c96-abc0-4712-be43-b93f9510580e")
+@ai.route("/acq/<id>")
+def status(id):
+    text = ai_agent_compute_user_aquisition_promo(id)
     return render_template('ai/status.html', text=text)
 
 

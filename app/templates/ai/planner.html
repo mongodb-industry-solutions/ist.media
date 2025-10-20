@@ -13,6 +13,31 @@
           rel="stylesheet">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/templatemo-xtra-blog.css') }}" rel="stylesheet">
+    <style>
+        table { table-layout: fixed; width: 100%; }
+        th.col-promo, td.col-promo {
+            width: 40%;
+        }
+        th.col-nm,
+        td.col-nm { width: 130px; }
+        th.col-ts,
+        td.col-ts { width: 110px; }
+        th.col-ts-2,
+        td.col-ts-2 { width: 100px; }
+        .truncate-1 {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .clamp-3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            overflow: hidden;
+            white-space: normal;
+            word-break: break-word;
+            hyphens: auto;
+        }
+    </style>
 </head>
 <body>
     <header class="tm-header" id="tm-header">
@@ -91,24 +116,48 @@
                         <table class="table table-striped">
                             <thead style="background-color: #00684a; color: white;">
                                 <tr>
-                                    <th>Username</th>
-                                    <th>Start</th>
-                                    <th>Promo Text</th>
-                                    <th>Status</th>
+                                    <th class="col-nm">Username</th>
+                                    <th class="col-ts">Start</th>
+                                    <th class="col-ts">Type</th>
+                                    <th class="col-promo">Promo Text</th>
+                                    <th class="col-ts-2">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for doc in docs|sort(attribute='promo.ts', reverse=True) %}
                                 <tr>
-                                    <td>{{ doc.username }}</td>
-                                    <td><small>{{ doc.promo.ts.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
-                                    <td>{{ doc.promo.text[:100] }}...</td>
-                                    <td>
+                                    <td class="col-nm" title="{{ doc.username }}">
+                                        {{ doc.username[:5] ~ '...' ~ doc.username[-5:] }}
+                                    </td>
+                                    <td class="col-ts">
+                                        <small>
+                                            {{ doc.promo.ts.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </small>
+                                    </td>
+                                    <td class="col-ts">
+                                        {{ {
+                                        1 : 'acq_page',
+                                        2 : 'acq_join&win',
+                                        3 : 'acq_discount' }[doc.type]
+                                        if doc.type in [1, 2, 3] else doc.type }}
+                                    </td>
+                                    <td class="col-promo">
+                                        <div class="clamp-3" title="{{ doc.promo.text }}">
+                                            <small>{{ doc.promo.text }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="col-ts-2">
                                         {% if doc.history and doc.history.register_click_ts %}
-                                        <span class="badge" style="background-color: #00684a; color: white;">Success</span>
-                                        <br><small>{{ doc.history.register_click_ts.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                        <span class="badge" style="background-color: #00684a; color: white;">
+                                            Success
+                                        </span>
+                                        <br><small>
+                                            {{ doc.history.register_click_ts.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </small>
                                         {% else %}
-                                        <span class="badge" style="background-color: #555; color: white;">Pending</span>
+                                        <span class="badge" style="background-color: #555; color: white;">
+                                            Pending
+                                        </span>
                                         {% endif %}
                                     </td>
                                 </tr>

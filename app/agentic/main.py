@@ -163,19 +163,28 @@ def ai_agent_compute_user_aquisition_promo(username):
     task = """Please check if the user is a good candidate for a user
     acquisition promo (advertising them to register with the website)
     by checking their usage metrics. If you find a good and convincing
-    argument for them to register, provide a promotional text to register
+    argument for them to register, decide for one of these promotions:
+
+    ID 1: acq_page: Provide a promotional text to register
     with the page, like "Hey, I see you have been reading ... and were active
     ... on our page, seems you like .... I tell you what: register with us
     and you will receive interesting benefits ..."
 
+    ID 2: acq_join&win: Have the users become part of a lotterie to win an iPhone 17.
+
+    ID 3: acq_discount: Provide the users 20% discount on the paid subscription,
+    should the user register with the page.
+
     Use the history of articles and sections that have been consumed, besides
-    other metrics that you find useful, to generate this one-paragraph promo text
-    that maximizes the chances that the user will react positively and click
-    on the register button.
+    other metrics that you find useful, to decide. Generate a one-paragraph promo
+    text if you decide for ID 1.
 
     Please ONLY return a Python list, first element shall be a boolean value, e.g.
-    True or False, indicating if this user is a candidate for promotion, second
-    element shall be your promotional text as a string.
+    True or False, indicating if this user is a candidate for promotion, second element
+    shall be the type of the promo, as an integer 1, 2, or 3, the third
+    element shall be your promotional text as a string, and the fourth element shall
+    be your explanation about why you decided for ID 1, 2, or 3, respectively. If you
+    decided for ID 1, explain why you did not decide for 2, or 3.
     No ```python or ```. Just pure Python list.
     """
     return _ai_agent(username, task)

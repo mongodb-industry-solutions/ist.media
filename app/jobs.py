@@ -55,11 +55,11 @@ def agentic_master_planner(app):
             #   this is a suitable prospect. The agent will decide.
             if fullname != 'Anonymous User':
                 return # acquisition promo only applies to anonymous users
-            if not mongo.db.planner.find_one({ "username" : username, "type" : 1 }):
+            if not mongo.db.planner.find_one({ "username" : username }):
                 if (result := ai_agent_compute_user_aquisition_promo(username)):
-                    add_promotion, promo_text = ast.literal_eval(result)
+                    add_promotion, promo_type, promo_text, why = ast.literal_eval(result)
+                    logger.info(f"User acquisition agent: {username}, {promo_type}, { promo_text}, {why}")
                     if add_promotion:
-                        logger.info(f"Adding promo for {username}: {promo_text}")
                         mongo.db.planner.update_one(
                             { "username" : username },
                             { "$set" : {
@@ -67,7 +67,8 @@ def agentic_master_planner(app):
                                     "text" : promo_text,
                                     "ts" : datetime.utcnow()
                                 },
-                                "type" : 1 # acquisition promo, 2: retention promo
+                                "type" : promo_type,
+                                "why" : why
                             }},
                             upsert=True
                         )
