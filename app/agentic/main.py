@@ -139,8 +139,8 @@ def _ai_agent(username: str, task: str):
         messages = [
             { "role" : "user", "content" : f"{context}\n\nTask: {task}" }
         ],
-        max_tokens = 150,
-        temperature = 0.7
+        max_tokens = 1000,
+        temperature = 0.5
     )
     return response.choices[0].message.content
 
@@ -185,6 +185,7 @@ def ai_agent_compute_user_aquisition_promo(username):
     element shall be your promotional text as a string, and the fourth element shall
     be your explanation about why you decided for ID 1, 2, or 3, respectively. If you
     decided for ID 1, explain why you did not decide for 2, or 3.
+    Only return a list [bool, int, str, str] and nothing else.
     No ```python or ```. Just pure Python list.
     """
     return _ai_agent(username, task)
