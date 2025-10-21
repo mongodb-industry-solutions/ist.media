@@ -44,7 +44,7 @@ def perform_search_and_click(client, query):
     print(f"\n🔍 Performing search for: '{query}'")
     search_url = f"{BASE_URL}/?query={query.replace(' ', '+')}"
     links = get_articles(client, search_url)
-    print(f"Found {len(links)} articles for '{query}'")
+    print(f"Found {len(links)} articles")
     click_articles(client, links)
 
 def generate_random_search_terms(n=5):
