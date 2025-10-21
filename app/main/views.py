@@ -316,20 +316,21 @@ def before_request():
     session.permanent = True
     g.user = get_user_dict(request)
     username = g.user['username']
-    mongo.db.users.update_one(
-        { 'username' : username },
-        { '$set' : { 'last_active' : datetime.utcnow() } }
-    )
-    try:
-        g.engagement = compute_user_engagement(username)
-        g.stats = list(mongo.db.engagement_events.aggregate(
-            user_consumption_pipeline(username)))[0]
-        mongo.db.users.update_one({ 'username' : username },
-                                  { "$set" : { "engagement" : g.engagement,
-                                               "stats" : g.stats }})
-    except Exception as e:
-        g.engagement = None
-        g.stats = None
+    if username:
+        mongo.db.users.update_one(
+            { 'username' : username },
+            { '$set' : { 'last_active' : datetime.utcnow() } }
+        )
+        try:
+            g.engagement = compute_user_engagement(username)
+            g.stats = list(mongo.db.engagement_events.aggregate(
+                user_consumption_pipeline(username)))[0]
+            mongo.db.users.update_one({ 'username' : username },
+                                      { "$set" : { "engagement" : g.engagement,
+                                                   "stats" : g.stats }})
+        except Exception as e:
+            g.engagement = None
+            g.stats = None
 
 
 @main.context_processor
