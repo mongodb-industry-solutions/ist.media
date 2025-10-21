@@ -1,6 +1,7 @@
 bcrypt
 beautifulsoup4
 cloudscraper
+faker
 feedparser
 flask_apscheduler
 Flask-PyMongo

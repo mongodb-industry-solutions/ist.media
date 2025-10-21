@@ -51,6 +51,8 @@ distro==1.9.0
     # via openai
 dnspython==2.7.0
     # via pymongo
+faker==37.11.0
+    # via -r requirements.in
 feedparser==6.0.11
     # via -r requirements.in
 filelock==3.18.0
@@ -277,6 +279,8 @@ typing-inspection==0.4.1
     # via
     #   pydantic
     #   pydantic-settings
+tzdata==2025.2
+    # via faker
 tzlocal==5.3.1
     # via apscheduler
 urllib3==2.4.0
