@@ -255,12 +255,6 @@
                             {% endif %}
                         </p>
                         <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-60">
-                            Top 5 Articles by Read-to-End Rate
-                        </h2>
-                        <p class="tm-pt-10">
-                            <canvas id="rteStatsChart" style="height: 200px;"></canvas>
-                        </p>
-                        <h2 class="pt-2 tm-color-primary tm-post-title tm-mt-60">
                             Access Statistics per Path
                         </h2>
                         {% if path_stats|length > 0 %}
@@ -404,72 +398,6 @@
                             stacked: true,
                             title: { display: true, text: 'Access Count' },
                             beginAtZero: true
-                        }
-                    }
-                }
-            });
-        });
-    </script>
-    <script>
-        window.articleEngagement = {{ article_engagement_stats_json | tojson | safe }};
-        document.addEventListener('DOMContentLoaded', function () {
-            const data = Array.isArray(window.articleEngagement) ? window.articleEngagement : [];
-
-            const top = data
-                  .filter(d =>
-                      typeof d.read_to_end_rate_visit_int === 'number' &&
-                          typeof d.read_to_end_rate_user_int === 'number' &&
-                          typeof d.read_to_end_rate_first_visit_int === 'number' &&
-                          d.title
-                  )
-                  .sort((a, b) => (b.read_to_end_rate_visit_int - a.read_to_end_rate_visit_int) ||
-                        (b.avg_scroll_depth - a.avg_scroll_depth))
-                  .slice(0, 10);
-
-            const maxLabelLength = 15;
-            const fullTitles = top.map(d => d.title);
-            const shortTitles = fullTitles.map(t =>
-                t.length > maxLabelLength ? t.slice(0, maxLabelLength - 1) + '…' : t
-            );
-
-            const visitValues = top.map(d => d.read_to_end_rate_visit_int);
-            //const userValues = top.map(d => d.read_to_end_rate_user_int);
-            const firstVisitValues = top.map(d => d.read_to_end_rate_first_visit_int);
-
-            const ctx = document.getElementById('rteStatsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: shortTitles,
-                    datasets: [
-                        { label: 'Per Visit', data: visitValues, backgroundColor: '#20886A' },
-                        //{ label: 'Per User', data: userValues, backgroundColor: '#ED7F11' },
-                        { label: 'First Visit', data: firstVisitValues, backgroundColor: '#4990C1' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: (ctx) => {
-                                    const index = ctx[0].dataIndex;
-                                    return fullTitles[index]; // show full title in tooltip
-                                },
-                                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}%`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { maxRotation: 0, autoSkip: false },
-                            title: { display: false, text: 'Article' }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: 'Read-to-End Rate (%)' }
                         }
                     }
                 }
