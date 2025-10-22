@@ -10,6 +10,10 @@ from .agentic.main import (
     ai_agent_compute_user_aquisition_promo )
 import logging, ast
 
+# TODO: In scheduler run, also
+#         - change from state 'pending' to 'failed' after 4 hours,
+#             if not 'success' in the meantime
+#         - delete failed promotions after 2 days, to keep demo view clear
 
 logger = logging.getLogger(__name__)
 
