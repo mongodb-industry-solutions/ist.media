@@ -33,7 +33,7 @@ from urllib.parse import urlparse, urlencode
 from requests.auth import HTTPBasicAuth
 from json import JSONEncoder
 import re, textwrap, string, os, json, time, uuid as python_uuid, numpy as np
-import requests, geocoder, pycountry, math, io, qrcode, bcrypt, voyageai
+import requests, geocoder, pycountry, math, io, qrcode, bcrypt, voyageai, threading
 
 
 IST_MEDIA_AUTH = [ os.environ.get('IST_MEDIA_AUTH_USERNAME', ''),
@@ -53,6 +53,9 @@ engagement_events_collection = mongo.db.engagement_events
 
 ai = OpenAI()
 voyage_ai = voyageai.Client()
+
+processing_users = set()
+processing_lock = threading.Lock()
 
 MAX_DOCS_VS = 30  # number of results for vector search
 MAX_DOCS = 16     # number of articles on the home page
@@ -311,26 +314,55 @@ def get_user_dict(request):
     return user_dict
 
 
+def update_user_engagement(username):
+    try:
+        engagement = compute_user_engagement(username)
+
+        _p = user_consumption_pipeline(username)
+        stats = list(mongo.db.engagement_events.aggregate(_p))[0]
+
+        mongo.db.users.update_one(
+            { 'username' : username },
+            { "$set" : { "engagement" : engagement, "stats" : stats }}
+        )
+
+    except Exception as e:
+        logger.error(f"{username}: background error - {e}")
+
+    finally:
+        with processing_lock:
+            processing_users.discard(username)
+
+        logger.warning(f"{username}: background thread ended: {datetime.utcnow()}")
+
+
 @main.before_request
 def before_request():
     session.permanent = True
     g.user = get_user_dict(request)
     username = g.user['username']
+
     if username:
-        mongo.db.users.update_one(
+        result = mongo.db.users.find_one_and_update(
             { 'username' : username },
-            { '$set' : { 'last_active' : datetime.utcnow() } }
+            { '$set' : { 'last_active' : datetime.utcnow() } },
+            return_document=ReturnDocument.AFTER
         )
-        try:
-            g.engagement = compute_user_engagement(username)
-            g.stats = list(mongo.db.engagement_events.aggregate(
-                user_consumption_pipeline(username)))[0]
-            mongo.db.users.update_one({ 'username' : username },
-                                      { "$set" : { "engagement" : g.engagement,
-                                                   "stats" : g.stats }})
-        except Exception as e:
-            g.engagement = None
-            g.stats = None
+        g.engagement = result.get('engagement') if result else None
+        g.stats = result.get('stats') if result else None
+
+        if request.path != '/':
+            return
+
+        with processing_lock:
+            if username not in processing_users:
+                processing_users.add(username)
+                t = threading.Thread(target=update_user_engagement, args=(username,))
+                t.daemon = True
+                t.start()
+                logger.warning(f"{username}: background thread started: {datetime.utcnow()}")
+            else:
+                logger.warning(f"{username}: background thread already running, skipping")
 
 
 @main.context_processor
