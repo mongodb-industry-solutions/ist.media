@@ -40,7 +40,7 @@ while True:
                     'path': 'embedding',
                     'queryVector': query_vector,
                     'numCandidates': 10,
-                    'limit': 3
+                    'limit': 1
                 }
             },
             {
@@ -55,7 +55,7 @@ while True:
         try:
             results = list(collection.aggregate(pipeline))
             if results:
-                print("Top 3 matches:")
+                print("Top match:")
                 for result in results:
                     print(
                         f" - {result['description']}"
