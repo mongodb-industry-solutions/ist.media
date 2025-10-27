@@ -30,24 +30,37 @@ def get_articles(client, url):
 
 def click_articles(client, links):
     """Click some article links with pause between each"""
-    for i, a in enumerate(links[:3], 1):
+    for i, a in enumerate(links[:2], 1):
         href = a.get("href")
         if not href:
             continue
         full_url = urljoin(BASE_URL, href)
         res = client.get(full_url)
-        print(f"{i}. {full_url} → {res.status_code}")
-        time.sleep(2)
+        print(f"{i}0 {full_url} → {res.status_code}")
+        # traversal of related posts
+        article_soup = BeautifulSoup(res.content, 'html.parser')
+        sidebar = article_soup.find('aside', class_='tm-aside-col')
+        if not sidebar:
+            print("  -> No sidebar found, skipping related posts search.")
+            continue
+        for j, a_tag in enumerate(sidebar.find_all('a',
+                    href=lambda href: href and href.startswith('/post?uuid=')), 1):
+            time.sleep(0.1)
+            related_url = urljoin(BASE_URL, a_tag['href'])
+            a_res = client.get(related_url)
+            print(f"{i}{j} {related_url} → {a_res.status_code}")
+        time.sleep(0.5)
 
-def perform_search_and_click(client, query):
+def perform_search_and_click(client, query, traverse=True):
     """Submit search query and click resulting articles"""
-    print(f"\n🔍 Performing search for: '{query}'")
+    print(f"\n🔍 Performing search for: '{query}'", end=("\n" if traverse else ""))
     search_url = f"{BASE_URL}/?query={query.replace(' ', '+')}"
     links = get_articles(client, search_url)
-    print(f"Found {len(links)} articles")
-    click_articles(client, links)
+    if traverse:
+        print(f"Found {len(links)} articles")
+        click_articles(client, links)
 
-def generate_random_search_terms(n=5):
+def generate_random_search_terms(n=10):
     """Generate n realistic search terms using Faker"""
     terms = []
     while len(terms) < n:
@@ -56,27 +69,38 @@ def generate_random_search_terms(n=5):
             terms.append(term)
     return terms
 
+# the main function
 def keep_site_warm():
+
     with httpx.Client(auth=AUTH,
                       headers=HEADERS,
                       timeout=TIMEOUT,
                       limits=LIMITS,
                       transport=TRANSPORT,
                       follow_redirects=True) as client:
+
         print("🔐 Step 1: Initial request (sets welcome cookie)...")
-        r1 = client.get(BASE_URL)
-        print("Status:", r1.status_code)
+        try:
+            r1 = client.get(BASE_URL)
+            print("Status:", r1.status_code)
+            print("🍪 Cookies after login:", client.cookies.jar)
 
-        print("🍪 Cookies after login:", client.cookies.jar)
+            print("🔁 Step 2: Second visit to homepage (with cookie)...")
+            homepage_links = get_articles(client, BASE_URL)
+            print(f"Found {len(homepage_links)} homepage articles")
+            click_articles(client, homepage_links)
 
-        print("🔁 Step 2: Second visit to homepage (with cookie)...")
-        homepage_links = get_articles(client, BASE_URL)
-        print(f"Found {len(homepage_links)} homepage articles")
-        click_articles(client, homepage_links)
+            # Step 3: Iterate over random search results
+            for term in generate_random_search_terms(5):
+                perform_search_and_click(client, term, False)
+                time.sleep(0.2)
+            print("")
+            for term in generate_random_search_terms(2):
+                perform_search_and_click(client, term)
 
-        random_terms = generate_random_search_terms()
-        for term in random_terms:
-            perform_search_and_click(client, term)
+        except (EOFError, KeyboardInterrupt):
+            print("\nExiting...")
+            return
 
 if __name__ == "__main__":
     keep_site_warm()
