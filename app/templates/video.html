@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    {% include "css/snippet_post.html" %}
+    <style>
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 = 9 / 16 * 100 */
+            overflow: hidden;
+        }
+        .video-inner {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+        }
+        .video-inner video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item active"><a href="/video" class="tm-nav-link">
+                            <i class="fas fa-film"></i>
+                            Video&nbsp;Search&nbsp;(NEW)
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <!-- Search form -->
+            <div class="row tm-row">
+                <div class="col-12">
+                    <form id="searchForm" class="form-inline tm-mb-60 tm-search-form">
+                        <input class="form-control tm-search-input"
+                               name="query" type="text" placeholder="Video Search..."
+                               aria-label="Search">
+                        <button class="tm-search-button" type="submit">
+                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="col-12">
+                    <div id="infoLine" style="background: #f1f1f1; padding-left: 0.2em;" class="tm-color-primary">
+                        {{ infoline }}
+                    </div>
+                    <div style="padding-bottom: 5px"></div>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <hr class="tm-hr-primary tm-mb-55">
+                    <div class="video-wrapper">
+                        <div class="video-inner">
+                            <video id="video" controls>
+                                <source src="video/cover.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12 tm-mt-40">
+                    You can also use one of the following search terms &mdash; finding in
+                    <b>German News</b>, and the <b>WWDC 2025 Keynote</b>
+                </div>
+                <div class="col-12 tm-mt-10" style="font-size: 90%">
+                    <a href="#" class="tm-color-primary bold search-term-link">police</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">ambulance</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">liquid glass</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">2026</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">apple car play</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">car play ultra</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">phone on the mac</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">Ted Lasso</a>
+                    <br/>
+                    <a href="#" class="tm-color-primary bold search-term-link">basketball</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">clock on the wall</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">men with glasses</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">send email</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">Greece</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">bierwerbung</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">wettervorhersage</a>
+                    <br/>
+                    <a href="#" class="tm-color-primary bold search-term-link">the feeling of joy</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">Gefühl von Freude</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">खुशी एक ऐसी अनुभूति है, जिसे बाँटना चाहिए।</a> |
+                    <a href="#" class="tm-color-primary bold search-term-link">שמחה היא תחושה שצריך לחלוק אותה</a>
+                </div>
+                <div class="col-12 tm-mt-30 tm-mb-60">
+                    A view behind the scenes
+                    <a class="tm-color-primary" href="/howto_videosearch">
+                        is provided here</a>.
+                </div>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+    <script>
+        const video = document.getElementById("video");
+        const infoLine = document.getElementById("infoLine");
+        const searchForm = document.getElementById("searchForm");
+        function performSearch(query) {
+            if (!query) {
+                infoLine.textContent = "Enter your query above";
+                return;
+            }
+            fetch(`/video_search?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.movie) {
+                        const newSrc = `/content/video/${encodeURIComponent(data.movie)}.mp4`;
+                        if (video.getAttribute("src") !== newSrc) {
+                            video.pause();
+                            video.controls = false;
+                            video.setAttribute("src", newSrc);
+                            video.load();
+                            let offset = data.offset || 0;
+                            video.addEventListener('loadedmetadata', function handler() {
+                                video.currentTime = offset;
+                                video.play();
+                                video.removeEventListener('loadedmetadata', handler);
+                            });
+                        } else if (data.offset !== undefined) {
+                            video.currentTime = data.offset;
+                            video.play();
+                        }
+                    } else if (data.offset !== undefined) {
+                        video.currentTime = data.offset;
+                        video.play();
+                    }
+
+                    if (data.infoline !== undefined) {
+                        infoLine.textContent = data.infoline;
+                    }
+                })
+                .catch(err => {
+                    console.error("Fetch error:", err);
+                    infoLine.textContent = "Error retrieving video info.";
+                });
+        }
+        video.addEventListener("mouseenter", () => {
+            video.controls = true;
+        });
+        video.addEventListener("mouseleave", () => {
+            video.controls = false;
+        });
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = this.query.value.trim();
+            performSearch(query);
+            this.query.value = ""; // clear input after search
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.search-term-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const query = this.textContent.trim();
+                    performSearch(query);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

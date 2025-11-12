@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <!-- Search form -->
+            <div class="row tm-row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="tm-color-primary text-left" style="font-size: 140%">
+                            <a href="/json/{{ user._id }}" class="tm-color-primary"
+                               target="_blank">{{ user.fullname }}</a>
+                        </div>
+                        {% if user.is_anonymous %}
+                        <div class="tm-color-primary text-right">
+                            <span class="tm-color-primary" style="font-size: 90%">
+                                &nbsp;
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="tm-color-primary text-right">
+                            [ <a class="tm-color-primary" style="font-size: 90%"
+                                 href="/logout">log out</a> ]
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <hr class="tm-hr-primary tm-mb-55">
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-lg-10 tm-post-col">
+                    <div class="mb-4 ai-gen">
+                        <div class="profile-attribute">
+                            <span class="list-key">Username</span>
+                            <span class="list-value">{{ user.username }}</span>
+                        </div>
+                        {% if not user.is_anonymous %}
+                        <div class="profile-attribute">
+                            <span class="list-key">Email Address</span>
+                            <span class="list-value">{{ user.email }}</span>
+                        </div>
+                        {% endif %}
+                        {% if summary is not none %}
+                        <div class="mb-4 tm-mt-25">
+                            <div class="profile-attribute">
+                                <span class="list-key">User Info</span>
+                                <span class="list-value" style="line-height: 1.5; font-size: 85%">
+                                    {{ summary }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <h2 class="pt-2 tm-mb-30 tm-mt-40 tm-color-primary tm-post-title">
+                            Usage Metrics
+                        </h2>
+                        {% if not user.is_anonymous %}
+                        <div class="profile-attribute">
+                            <span class="list-key">Media Coins
+                                <span class="list-small">purchased</span>
+                            </span>
+                            <span class="list-value">
+                                {{ user.get('coins_lifetime', 0) }}
+                                &nbsp;&nbsp;(<i>lifetime total</i>)
+                            </span>
+                            [<a class="list-anchor" href="/payment">buy more</a>]
+                        </div>
+                        <div class="profile-attribute">
+                            <span class="list-key">Media Coins
+                                <span class="list-small">available</span>
+                            </span>
+                            <span class="list-value">{{ user.get('coins_current', 0) }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="profile-attribute tm-mt-25">
+                            <span class="list-key">Engagement</span>
+                            <span class="list-value">
+                                <a href="/json/0" target="_blank">Details</a>
+                            </span>
+                        </div>
+                        <div class="profile-attribute">
+                            <span class="list-key">EMA (28 days)</span>
+                            <span class="list-value">{{ engagement }}
+                                &nbsp;&nbsp;(<i>Exponential Moving Average</i>)
+                            </span>
+                        </div>
+                        <div class="profile-attribute tm-mt-40">
+                            <span class="list-key">Agentic AI</span>
+                            <span class="list-value">
+                                <a href="/ai-context-visualizer">Context</a>
+                                &nbsp;&nbsp;(<i>prompt prefix for the LLM, providing user information</i>)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-4 tm-mt-60">
+                        <div class="profile-attribute">
+                            <span class="list-key">Top Sections</span>
+                            <span class="list-value">&nbsp;</span>
+                        </div>
+                        <div class="profile-attribute">
+                            <span class="list-key" style="min-width: 173px">&nbsp;</span>
+                            <span class="list-value">
+                                <canvas id="topSectionsChart" style="height:320px"></canvas>
+                            </span>
+                        </div>
+                        <div class="profile-attribute tm-mt-10">
+                            <span class="list-key">Per Weekday</span>
+                            <span class="list-value">&nbsp;</span>
+                        </div>
+                        <div class="profile-attribute tm-mt-10">
+                            <span class="list-key" style="min-width: 220px">&nbsp;</span>
+                            <span class="list-value">
+                                <canvas id="weekdayChart" style="height:180px"></canvas>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="row tm-row tm-pt-45">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dataSource = {{ stats | tojson | safe }};
+
+            // ===== Top Sections chart =====
+            (function renderTopSections() {
+                const top = Array.isArray(dataSource.top_sections) ? dataSource.top_sections : [];
+                if (top.length === 0) return;
+
+                const labels = top.map(s => s.section);
+                const counts = top.map(s => s.count);
+
+                // color palette (keeps the same feel as about.html)
+                const palette = [
+                    "#20886A", "#ED7F11", "#4990C1", "#F7B731", "#9B5996",
+                    "#DB99D6", "#F75C4C", "#B0D870"
+                ];
+                const bg = labels.map((_, i) => palette[i % palette.length]);
+
+                const ctx = document.getElementById('topSectionsChart').getContext('2d');
+                // create horizontal bar chart like style in about.html (but horizontal for readability)
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Article count',
+                            data: counts,
+                            backgroundColor: bg,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: (ctxItems) => ctxItems[0].label,
+                                    label: (ctxItem) => `Count: ${ctxItem.parsed.x ?? ctxItem.parsed.y}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Count' }
+                            },
+                            y: {
+                                ticks: { autoSkip: false }
+                            }
+                        }
+                    }
+                });
+            })();
+
+            // ===== Weekday chart =====
+            (function renderWeekdayChart() {
+                const daysInput = Array.isArray(dataSource.articles_by_day_of_week) ? dataSource.articles_by_day_of_week : [];
+                if (daysInput.length === 0) return;
+
+                // Define canonical order and short labels
+                const canonical = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+                const shortLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+                // Build a lookup from provided day names to counts
+                const countsByDay = {};
+                daysInput.forEach(d => {
+                    // normalize day string (defensive)
+                    if (!d || !d.day_of_week) return;
+                    const key = String(d.day_of_week).trim();
+                    countsByDay[key] = (typeof d.count === 'number') ? d.count : parseInt(d.count) || 0;
+                });
+
+                // Prepare dataset in canonical order (missing days -> 0)
+                const counts = canonical.map(day => countsByDay[day] || 0);
+
+                const ctx = document.getElementById('weekdayChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: shortLabels,
+                        datasets: [{
+                            label: 'Articles',
+                            data: counts,
+                            backgroundColor: '#4990C1',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    // Show full weekday in tooltip
+                                    title: (ctxItems) => {
+                                        const idx = ctxItems[0].dataIndex;
+                                        return canonical[idx];
+                                    },
+                                    label: (ctxItem) => `Articles: ${ctxItem.parsed.y}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Article count' }
+                            }
+                        }
+                    }
+                });
+            })();
+        });
+    </script>
+</body>
+</html>

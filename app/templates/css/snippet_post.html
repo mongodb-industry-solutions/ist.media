@@ -1,0 +1,30 @@
+<style>
+    button {
+        font-weight: normal;
+        -webkit-appearance: none; /* Removes default styles on iOS */
+    }
+    @media (max-width: 580px) {
+        .arrow {
+            display: none;
+        }
+    }
+    .delimiter::after {
+        content: "\00a0\00a0\00a0";
+    }
+    .summary::after {
+        content: "Create summary";
+    }
+    @media (max-width: 580px) {
+        .summary::after {
+            content: "Summary";
+        }
+    }
+    .translate::after {
+        content: "Translate to";
+    }
+    @media (max-width: 580px) {
+        .translate::after {
+            content: "Translate";
+        }
+    }
+</style>

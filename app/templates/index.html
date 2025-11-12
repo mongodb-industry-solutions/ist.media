@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+{% from "macros.html" import option %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    <style>
+        .tm-search-input:focus,
+        select.form-control:focus {
+            outline: none !important;
+        }
+        @-moz-document url-prefix() {
+            .tm-search-input:focus,
+            select.form-control:focus {
+                outline: none !important;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item"><a href="/video" class="tm-nav-link">
+                            <i class="fas fa-film"></i>
+                            Video&nbsp;Search&nbsp;(NEW)
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <div class="row tm-row">
+                <div class="col-12 d-flex">
+                    <form method="GET" class="form-inline tm-mb-25"
+                          style="margin-right: 10px">
+                        <select name="section" id="sectionSelect"
+                                class="form-control tm-section-input">
+                            <optgroup label="General">
+                                {{ option("_all", selected_section, "All News") }}
+                                {{ option("_personalized", selected_section, "Personalized") }}
+                            </optgroup>
+                            <optgroup label="Sections">
+                                {% for section in sections %}
+                                {{ option(section, selected_section) }}
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </form>
+                    <form method="GET" class="form-inline tm-mb-25 tm-search-form" style="flex-grow: 1">
+                        <input class="form-control tm-search-input"
+                               name="query" type="text" placeholder="Hybrid Search..."
+                               aria-label="Search">
+                        <button class="tm-search-button" type="submit">
+                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="col-12">
+                    <div style="background: #f1f1f1">
+                        <span style="padding-left: 0.2em" class="tm-color-primary">
+                            {{ infoline }}
+                            {% if infoline.startswith("For") %}
+                            &nbsp;
+                            <a href="/delete_articles_history_from_homepage"
+                               class="tm-color-primary"
+                               style="font-size: smaller">[ delete history ]</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div style="padding-bottom: 5px"></div>
+                </div>
+
+            </div>
+            <div class="row tm-row">
+                {% for doc in docs | sort(attribute = 'score', reverse = True) %}
+                <article class="col-12 col-md-6 tm-post">
+                    <hr class="tm-hr-primary">
+                    <a href="/post?uuid={{ doc.uuid }}"
+                       class="tm-post-link tm-pt-20 tm-color-primary">
+                        <div class="tm-post-link-inner">
+                            <img src="/content/images/{{ doc.uuid }}.webp"
+                                 style="aspect-ratio: 1200/675" class="img-fluid" alt="">
+                        </div>
+                        <h2 class="tm-pt-30 tm-color-primary tm-post-title">
+                            {% if doc.must_register_to_read %}
+                            <span class="badge badge-register"
+                                  style="vertical-align: 2px">R</span>
+                            <span style="padding-right: 0.15em"></span>
+                            {% endif %}
+                            {{ doc.title }}
+                        </h2>
+                    </a>
+                    <p class="tm-pt-10">
+                        {{ doc.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;&nbsp;{{ doc.ftext }}
+                    </p>
+                    {% if doc.score is defined %}
+                    <p>
+                        <strong>Vector Score</strong>: {{ doc.vector_score | round(5) }}<br/>
+                        <strong>Fulltext Score</strong>: {{ doc.fulltext_score | round(5) }}<br/>
+                        <strong>Time Decay</strong>: {{ doc.time_decay | round(5) }}<br/>
+                        <strong>Score</strong>: {{ doc.score | round(5) }}
+                    </p>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+    <script>
+        const select = document.getElementById('sectionSelect');
+        let alreadyNavigating = false;
+
+        function handleSelectionChange() {
+            if (alreadyNavigating) return; // prevent double fire
+            alreadyNavigating = true;
+
+            const newValue = select.value;
+            if (!newValue) return;
+
+            const newUrl = `/?section=${encodeURIComponent(newValue)}`;
+            window.location.href = newUrl;
+        }
+
+        select.addEventListener('input', handleSelectionChange);
+        select.addEventListener('change', handleSelectionChange);
+    </script>
+    <script>
+        (function syncAnonIdCookie(){
+            if (!localStorage.getItem('anon_id')) {
+                localStorage.setItem('anon_id', crypto.randomUUID());
+            }
+            const anon = localStorage.getItem('anon_id');
+            // write a cookie accessible to Flask (path=/, 180 days)
+            document.cookie = "anon_id=" + encodeURIComponent(anon) + "; path=/; max-age=" + (60*60*24*180) + "; SameSite=Lax";
+            // expose globals
+            window.userID = "{{ user.username if user else '' }}" || anon;
+            window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media Agentic Framework</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/templatemo-xtra-blog.css') }}" rel="stylesheet">
+    <style>
+        table { table-layout: fixed; width: 100%; }
+        th.col-promo, td.col-promo {
+            width: 40%;
+        }
+        th.col-nm,
+        td.col-nm { width: 130px; }
+        th.col-ts,
+        td.col-ts { width: 110px; }
+        th.col-ts-2,
+        td.col-ts-2 { width: 100px; }
+        .truncate-1 {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .clamp-4 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            overflow: hidden;
+            white-space: normal;
+            word-break: break-word;
+            hyphens: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="{{ url_for('static', filename='img/leaf.png') }}"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <div class="row tm-row tm-mb-45">
+                <div class="col-12">
+                    <hr class="tm-hr-primary">
+                </div>
+            </div>
+            <div class="row tm-row tm-mb-40">
+                <div class="col-12">
+                    <div class="mb-4">
+                        <h1 class="tm-color-primary tm-mb-30">
+                            Agentic Planner
+                        </h1>
+                        <table class="table table-striped">
+                            <thead style="background-color: #00684a; color: white;">
+                                <tr>
+                                    <th class="col-nm">Username</th>
+                                    <th class="col-ts">Start</th>
+                                    <th class="col-ts">Type</th>
+                                    <th class="col-promo">Promo Text</th>
+                                    <th class="col-ts-2">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in docs|sort(attribute='promo.ts', reverse=True) %}
+                                <tr>
+                                    <td class="col-nm" title="{{ doc.username }}">
+                                        {{ doc.username[:5] ~ '...' ~ doc.username[-5:] }}
+                                    </td>
+                                    <td class="col-ts">
+                                        <small>
+                                            {{ doc.promo.ts.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </small>
+                                    </td>
+                                    <td class="col-ts">
+                                        {{ {
+                                        1 : 'acq_page',
+                                        2 : 'acq_join&win',
+                                        3 : 'acq_discount' }[doc.type]
+                                        if doc.type in [1, 2, 3] else doc.type }}
+                                    </td>
+                                    <td class="col-promo">
+                                        <div class="clamp-4" title="{{ doc.why }}">
+                                            <small>{{ doc.promo.text }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="col-ts-2">
+                                        {% if doc.history and doc.history.register_click_ts %}
+                                        <span class="badge" style="background-color: #00684a; color: white;">
+                                            Success
+                                        </span>
+                                        <br><small>
+                                            {{ doc.history.register_click_ts.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </small>
+                                        {% else %}
+                                        <span class="badge" style="background-color: #555; color: white;">
+                                            Pending
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
+</body>
+</html>

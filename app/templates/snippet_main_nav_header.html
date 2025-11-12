@@ -1,0 +1,36 @@
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+{% if user is defined and not user.get('is_anonymous') %}
+<div class="user-info">
+    <span class="coin-count" style="text-align: center; flex: 1">
+        <i class="fas fa-coins"></i>
+        <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+           href="/profile"><strong>{{ user.get('coins_current', 0) }}</strong> Coins</a>
+        &nbsp;&nbsp;&nbsp;
+        <i class="fas fa-file-alt"></i>
+        <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+           href="/profile"><strong>{{ user.get('articles_read', 0) }}</strong> Reads</a>
+        &nbsp;&nbsp;&nbsp;
+        <i class="fas fa-fire"></i>
+        <span style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em">
+            {{ engagement }}
+        </span>
+        <br/>&nbsp;
+    </span>
+</div>
+{% else %}
+<div class="user-info" style="font-size: 120%">
+    <span class="coin-count">
+        <i class="fas fa-user"></i>
+        <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+           href="/login">Login</a>
+        &nbsp;&nbsp;&nbsp;
+        <i class="fas fa-user-plus"></i>
+        <a style="font-size: 100%; padding: 0 0.2em 0 0.2em; margin: 0 0 0 0.1em"
+           href="/register">Register</a>
+        <br/>&nbsp;
+    </span>
+</div>
+{% endif %}

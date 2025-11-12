@@ -1,0 +1,1 @@
+Or, when Apple Watch detects that you're in a remote location with no connectivity, a hint will appear to start BackTrack to support you while you're off the grid. We're also making Apple Watch more proactive with enhancements to notifications. You might use silent mode to avoid receiving a loud alert at an inopportune moment.

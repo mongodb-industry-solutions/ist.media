@@ -1,0 +1,1 @@
+windows. If I previously resized apps, when I open them again they open back in the exact same size and position and I can place them just where I want them. This is designed to work great with touch or with a trackpad. And now I also have a pointer that's more precise.

@@ -1,0 +1,1 @@
+and responsive. When I use it to hover over these new buttons in the top left, they expand into familiar controls. I can use these to close or minimize my windows. And a tap on their app icon brings them right back. Another way I can arrange my windows is with tiling. Since this is designed for the

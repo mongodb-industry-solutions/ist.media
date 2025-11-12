@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    {% include "css/snippet_howto.html" %}
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <div class="row tm-row">
+                <div class="col-12">
+                    <hr class="tm-hr-primary tm-mb-55">
+                    <h1 class="tm-color-primary tm-mb-30">
+                        Instructions and Talk Track
+                    </h1>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <p>
+                        The purpose of this demo is to show how easily a sophisticated, personalized
+                        newspaper experience can be built by leveraging the best features of MongoDB
+                        and generative AI (GenAI) to deliver multimodal content across multichannel
+                        platforms.
+                    </p>
+                </div>
+                <div class="col-12 tm-mt-20 ai-gen">
+                    <h2 class="tm-color-primary tm-mb-15">
+                        How to use the demo
+                    </h2>
+                    <p>
+                        There are several paths you can follow to conduct your demo. Combine them as
+                        you see fit for your meeting with the customer, aligning to their
+                        requirements:
+                    </p>
+                    <p><ul>
+                            <li>
+                                <strong>Document Model</strong>: In the Single Post Page, you can
+                                click on the article's title to open a browser window which displays
+                                the MongoDB Document in a nice, colored fashion. Use this to
+                                discuss how to build 360 degree object structures, in this case a
+                                document which is capable of storing all of the article's main content
+                                fields (id, title, body, date, imageURL),
+                                calculated meta data (e.g. read count),
+                                generated fields with the help of GenAI (e.g. keywords, sentiment) as well as
+                                embeddings for semantic/vector search.
+                            </li>
+                            <li>
+                                <strong>Hybrid Search</strong>: Use the form at the top of the Home
+                                or Single Post page to enter what you are interested about. It can
+                                be keyword-based ("Apple AI"), or a full phrase ("what are the
+                                recent notable events around Lucid Group"). In the search results,
+                                you find some meta information below each item. It is the individual
+                                scores of the Full Text and Vector searches, as well as the Time
+                                Decay factor (the older the article, the lower the number). Explain
+                                to your customer how easily developers can implement such a
+                                sophisticated parallel search. You can
+                                use <a class="tm-color-primary" href="#hybridsearch">this
+                                picture</a> for more technical audiences.
+                            </li>
+                            <li>
+                                <strong>Multimodal Video Search</strong>: On the left main
+                                navigation, click Video Search (accessible from the Home page).
+                                You can search for something displayed in the video ("basketball"),
+                                including written text ("Ted Lasso", "the feeling of joy"),
+                                and for words/sentences spoken on the voice track ("car play ultra").
+                                One of two videos will be selected, and they start playing with an
+                                appropriate offset to immediately see the sequence in question.
+                                To make your life easier, there's a list of preconfigured search
+                                terms at the bottom of the page for you to click.
+                                This capability of the demo is powered by
+                                <a href="https://docs.voyageai.com/docs/multimodal-embeddings"
+                                   class="tm-color-primary">
+                                    multimodal embeddings
+                                </a>
+                                of Voyage AI.
+                            </li>
+                            <li>
+                                <strong>Content Suggestions / Related Posts</strong>: Click on a
+                                news article on the Home page. Show the right column of the page,
+                                where three Related Posts are displayed, together with their
+                                matching score (between 0 and 1). Explain that this feature involves
+                                only MongoDB Vector Search, executed on-the-fly at display time. No
+                                LLM required. Further elaborate on the fact that usually these
+                                Related Posts are hardcoded by the editor of the article at writing
+                                time. Now, with this approach, content is selected dynamically: When
+                                looking at older articles, they can automatically be linked to newer
+                                related content.
+                            </li>
+                            <li>
+                                <strong>Personalization of the Home Page</strong>: Click on one or
+                                two articles of similar topic (ideally combining this with Hybrid
+                                Search, then the job is easier) and then click back to the Home
+                                page. The history of the previously read articles is used to show
+                                related articles on the Home page, rather than just sorting by
+                                newest. Explain that this feature involves a MongoDB Vector Search
+                                that is conducted on-the-fly under the hood every time the Home page
+                                is accessed. Argue that this is only possible with a good performing
+                                search functionality like the one that MongoDB provides.
+                            </li>
+                            <li>
+                                <strong>Meta Data Calculation (Sections / Keywords / Sentiment /
+                                Popularity)</strong>: Click on an article. At the top of the right
+                                column there is a list of 5-6 keywords displayed.
+                                Explain that they
+                                have been calculated with the help of an LLM, and then added to the
+                                JSON Document, leveraging the <a class="tm-color-primary"
+                                href="#documentmodel">flexibility of the MongoDB Document
+                                Model</a>. You can click on a keyword to fetch background
+                                information about the item (again leveraging the power of GenAI).
+                                <div style="padding: 0; margin: 0.5em"></div>
+                                In a similar way, sentiment of the article (positive,
+                                negative, neutral) is calculated, and displayed in smiley format.
+                                Furthermore, up to three sections are auto-generated
+                                for each article, and stored in MongoDB as a JSON list. Another
+                                opportunity for you to emphasize the power of the document model,
+                                allowing for list structures.
+                                <div style="padding: 0; margin: 0.5em"></div>
+                                Finally, popularity of the article is tracked by counting the page
+                                impressions, as well as the qualified reads (user scrolls to the end
+                                of the article, and stays on the page for longer than 10
+                                seconds). This data will be used for dynamic pricing in a later
+                                version of the demo.
+                            </li>
+                            <li>
+                                <strong>Content Manipulations (Summary / Translation)</strong>:
+                                Click on an article. At the top of the article's text, you find
+                                links to create a summary and to translate to various languages,
+                                available from the dropdown list. Explain that these manipulations
+                                are done on-the-fly with the help of an LLM.
+                            </li>
+                            <li>
+                                <strong>Dossiers / Multimodal & Multichannel Content</strong>: On
+                                the left main navigation, click to Daily Summary. You will see a
+                                summarization of all the recent news, which is generated with the
+                                help of an LLM. Close to midnight each working day, the summary is
+                                sent by E-Mail as well. <a class="tm-color-primary"
+                                href="mailto:benjamin.lorenz@mongodb.com">Let me know</a> if you
+                                want to receive these emails and I can add you to the
+                                list. Furthermore, creation of multimodal content is demonstrated:
+                                At the top of the content area, you can start listening to a podcast
+                                version of the summary. NotebookLM from Google is used for this
+                                feature. The podcasts for every workday
+                                are <a class="tm-color-primary" href="#podcast">uploaded to
+                                Apple</a>, so you can also point your
+                                customer <a class="tm-color-primary"
+                                href="https://podcasts.apple.com/de/podcast/ist-daily-news/id1797795255">
+                                to that channel</a> for listening in.
+                            </li>
+                            <li>
+                                <strong>Search Generative Experiences (SGE)</strong>: Click to the
+                                Insights page in the main navigtion on the left. Use the "Ask
+                                Question" form at the top of the page to formulate a question about
+                                any news-related topic. Using a <a class="tm-color-primary"
+                                href="#ragarchitecture">RAG Architecture</a> an informed answer to
+                                the question is formulated, which takes into account three sources:
+                                <ul>
+                                    <li style="margin-bottom: 0; padding: 0">
+                                        Knowledge baked into the LLM (available up to its cut-off date)
+                                    </li>
+                                    <li style="margin-bottom: 0; margin-top: 0.3em; padding: 0">
+                                        Information from relevant news articles within ist.media (retrieved
+                                        by MongoDB Vector Search)
+                                    </li>
+                                    <li style="margin-bottom: 0; margin-top: 0.3em; padding: 0">
+                                        Information from public web sources, looked up in real-time
+                                        (in the spirit of Agentic AI)
+                                    </li>
+                                </ul>
+                            </li>
+                    </ul></p>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <h2 class="tm-color-primary tm-mb-30">
+                        Behind the Scenes
+                    </h2>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <p>
+                        News articles are ingested from RSS feeds every 60 minutes during business
+                        hours, content is cleansed (removal of HTML Tags, Ads, Javascript, CSS, ...)
+                        and enriched (creation of Main Image) with the help of OpenAI GPT-4o-mini
+                        and Dall-E 3, and embeddings are calculated for Semantic Search and RAG.
+                    </p>
+                    <p>
+                        A number of Content Services are then using the article data stored in
+                        MongoDB, leveraging GPT-4o-mini, Google NotebookLM, and soon also Grok 3.
+                    </p>
+                    <p>
+                        For delivery, content is processed such that it renders nicely on multiple
+                        output channels &ndash; Desktop Browser, Mobile Phone, E-Mail. In addition,
+                        content can be consumed in several formats &ndash; text, audio/podcast.
+                    </p>
+                    <img class="tm-mt-20" style="width: 100%" src="/img/istmedia-architecture.png">
+                    <p class="tm-mt-60" id="documentmodel">
+                        The power of the Document Model can be leveraged for a publishing news
+                        website, by jointly storing various attributes of the article in one single
+                        place: Main Data, Meta Data, UGC, Logs (what you process togther you should
+                        store together).
+                    </p>
+                    <img class="tm-mt-10" style="width: 100%" src="/img/document-model.png">
+                    <p class="tm-mt-60" id="hybridsearch">
+                        Hybrid Search can be coded with LangChain in just a few lines of Python
+                        code, significantly boosting developer productivity. We are a partner of
+                        LangChain, and MongoDB is a first-level citizen in the LangChain library.
+                    </p>
+                    <img style="width: 100%" src="/img/hybrid-search.png">
+                    <p class="tm-mt-60" id="podcast">
+                        To demonstrate the creation of multimodal assets, there's an Apple podcast
+                        produced every workday, with news items from MongoDB. NotebookLM from Google
+                        is handling the text2audio conversion.
+                    </p>
+                    <img class="tm-mt-10" style="width: 100%" src="/img/podcast.png">
+                    <p class="tm-mt-60" id="ragarchitecture">
+                        Using a RAG Architecture, the LLM gets latest context about the questions
+                        being asked, so it can provide better informed answers, with much less
+                        hallucinations.
+                    </p>
+                    <img class="tm-mt-10" style="width: 100%" src="/img/rag-architecture.png">
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12 tm-mt-60">
+                    <h2 class="tm-color-primary tm-mb-30">
+                        Why MongoDB
+                    </h2>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12 ai-gen">
+                    <p><ul>
+                            <li>
+                                Flexible JSON Document Model to store all facets of a news item in
+                                one place. This allows for great performance, and it is the most
+                                intuitive way to develop the architecture in the first place
+                            </li>
+                            <li>
+                                Ultra-fast, Atlas-integrated Fulltext and Vector Search. With the
+                                integration of Voyage AI soon even easier with auto-embeddings
+                            </li>
+                            <li>
+                                AI-model agnostic &mdash; free choice of embedding and LL
+                                models. Super important in the fast-changing world of AI
+                            </li>
+                            <li>
+                                Deep integration of LangChain for boost in developer efficiency
+                                (deliver in time / in budget)
+                            </li>
+
+                            <li>
+                                Great performance, to track user actions in realtime, and to deliver
+                                pages quickly (already a 100ms increased latency severely increments
+                                the churn rate)
+                            </li>
+                            <li>
+                                High resilience (99.995%) to provide readers 24x7 with fresh news,
+                                all around the world, all days of the week
+                            </li>
+                    </ul></p>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+</body>
+</html>

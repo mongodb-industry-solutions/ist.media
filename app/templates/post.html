@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    {% include "css/snippet_post.html" %}
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item active"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <!-- Search form -->
+            <div class="row tm-row">
+                <div class="col-12">
+                    <form method="GET" class="form-inline tm-mb-60 tm-search-form">
+                        <input class="form-control tm-search-input"
+                               name="query" type="text" placeholder="Hybrid Search..."
+                               aria-label="Search">
+                        <button class="tm-search-button" type="submit">
+                            <i class="fas fa-search tm-search-icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-12">
+                    <hr class="tm-hr-primary tm-mb-55">
+                    {% if preview is defined %}
+                    <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
+                         src="img/contentlab-preview.png" alt="">
+                    {% else %}
+                    <img style="width: 100%; margin-bottom: 40px; aspect-ratio: 1200/675"
+                         src="/content/images/{{ doc.uuid }}.webp" alt="">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row tm-row">
+                <div class="col-lg-8 tm-post-col">
+                    <div class="tm-post-full">
+                        <div class="mb-4">
+                            <span style="font-size: 85%">{{ doc.sections | join(', ') }}</span>
+                            <h2 class="pt-2 tm-color-primary tm-post-title">
+                                <a href="/json/{{ doc._id }}" target="_blank"
+                                   class="tm-color-primary">{{ doc.title }}</a>
+                            </h2>
+                            {% if not request.args.get('style') %}
+                            <p style="margin: 0; padding: 0">
+                                {% if preview is defined %}
+                                {{ published | format_datetime('full') }}<br/>
+                                {% else %}
+                                {{ doc.published | format_datetime('full') }}<br/>
+                                Visits: <strong>{{ visit_count }}</strong>,
+                                &nbsp;Reads: <strong>{{ read_count }}</strong>,
+                                &nbsp;Sentiment:&nbsp;
+                                {% if doc.sentiment == "+" %}
+                                &#128578;
+                                {% elif doc.sentiment == "-" %}
+                                &#128577;
+                                {% elif doc.sentiment == "o" %}
+                                &#128528;
+                                {% else %}
+                                <strong>?</strong>
+                                {% endif %}
+                                {% if purchased == 'now' %}
+                                &nbsp;&nbsp;<span class="ps" style="font-size: 75%">just purchased</span>
+                                {% elif purchased == 'earlier' %}
+                                &nbsp;&nbsp;<span class="ps" style="font-size: 75%">already purchased</span>
+                                {% endif %}
+                                {% endif %}
+                            </p>
+                            {% else %}
+                            <p style="margin: 0; padding: 0">
+                                <a style="text-align: right" href="/post"
+                                   class="tm-color-primary">&#10145; Back to original</a>
+                            </p>
+                            {% endif %}
+                            {% if not request.args.get('style') and not preview is defined %}
+                            <div style="display: flex;
+                                        align-items: center">
+                                <a style="text-align: right" href="/post?style=summary"
+                                   class="tm-color-primary summary">
+                                    <span class="arrow">&#10145;&nbsp;</span></a>
+                                <span class="delimiter"></span>
+                                <form action="/post" method="GET"
+                                      style="display: inline-flex; align-items: center">
+                                    <input type="hidden" name="style" value="translated">
+                                    <button type="submit"
+                                            class="tm-color-primary translate"
+                                            style="display: inline-flex;
+                                                   align-items: center;
+                                                   background: none;
+                                                   border: none;
+                                                   cursor: pointer">
+                                        <span class="arrow">&#10145;&nbsp;</span>
+                                    </button>
+                                    <select name="lang"
+                                            style="border: 1px solid #dcdcdc;
+                                                   border-radius: 4px;
+                                                   padding: 1px 8px;
+                                                   margin-left: 8px">
+                                        <option value="German">German</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="Swedish">Swedish</option>
+                                        <option value="Lithuanian">Lithuanian</option>
+                                        <option value="Hindi">Hindi</option>
+                                        <option value="Arabic">Arabic</option>
+                                        <option value="Hebrew">Hebrew</option>
+                                    </select>
+                                </form>
+                            </div>
+                            {% endif %}
+                            <p style="margin: 0; padding: 0">&nbsp;</p>
+                            {% if doc.must_register_to_read %}
+                            <p>
+                                This is a popular article &mdash; access is restricted.
+                            </p>
+                            <p>
+                                You
+                                <a href="/register?article_id={{ doc.uuid }}&title={{ doc.title | urlencode }}"
+                                   class="tm-color-primary">
+                                    must register
+                                </a>
+                                in order to read it.
+                            </p>
+                            {% else %}
+                            {{ fdoc | safe }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <aside class="col-lg-4 tm-aside-col">
+                    <div class="tm-post-sidebar">
+                        {% if keywords is defined and keywords|length > 0 %}
+                        <hr class="mb-3 tm-hr-primary">
+                        <h2 class="mb-4 tm-post-title tm-color-primary">
+                            Keywords
+                            {% if not preview is defined %}
+                            <a class="tm-color-primary" style="font-size: 15px; padding-left: 0.3em"
+                               href="/recalculate_keywords/{{ doc.uuid }}">
+                                [recalculate]
+                            </a>
+                            {% endif %}
+                        </h2>
+                        <div style="line-height: 1.6em; padding-left: 0.9em">
+                            {% for keyword in keywords %}
+                            <a href="/insights?keyword={{ keyword | urlencode }}"
+                               class="tm-color-primary" style="font-size: 90%">
+                                {{ keyword }}
+                            </a><br/>
+                            {% endfor %}
+                            &nbsp;<br/>
+                            &nbsp;
+                        </div>
+                        {% endif %}
+                        {% if recommendations is defined and recommendations|length > 0 %}
+                        <hr class="mb-3 tm-hr-primary">
+                        <h2 class="tm-mb-40 tm-post-title tm-color-primary">Related Posts</h2>
+                        {% for rc in recommendations %}
+                        <a href="/post?uuid={{ rc.0.uuid }}"
+                           class="d-block tm-mb-40 tm-color-primary">
+                            <figure>
+                                <img src="/content/images/{{ rc.0.uuid }}.webp"
+                                     style="aspect-ratio: 1200/675" class="mb-3 img-fluid" alt="">
+                                <figcaption class="tm-color-primary">
+                                    {{ rc.0.published | format_datetime }}&nbsp;&nbsp;&ndash;&nbsp;
+                                    {{ rc.0.title }}&nbsp;&nbsp;({{ "%.2f" | format(rc.1) }})
+                                </figcaption>
+                            </figure>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </aside>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+    <script>
+        (function syncAnonIdCookie(){
+            if (!localStorage.getItem('anon_id')) {
+                localStorage.setItem('anon_id', crypto.randomUUID());
+            }
+            const anon = localStorage.getItem('anon_id');
+            // write a cookie accessible to Flask (path=/, 180 days)
+            document.cookie = "anon_id=" + encodeURIComponent(anon) + "; path=/; max-age=" + (60*60*24*180) + "; SameSite=Lax";
+            // expose globals
+            window.userID = "{{ user.username if user else '' }}" || anon;
+            window.articleUUID = "{{ doc.uuid if doc is defined else '' }}";
+        })();
+    </script>
+    <script src="js/tracking.js"></script>
+</body>
+</html>

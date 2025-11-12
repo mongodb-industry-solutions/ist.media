@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IST Media</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+          rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/templatemo-xtra-blog.css" rel="stylesheet">
+    <!-- favicons of different sizes -->
+    <link rel="icon" type="image/png" sizes="16x16"   href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="img/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicon-192x192.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="167x167" href="img/favicon-167x167.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="img/favicon-180x180.png">
+    {% include "css/snippet_howto.html" %}
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            {% include "snippet_main_nav_header.html" %}
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo">
+                    <img style="width: 100%; border-radius: 50%;"
+                         src="img/leaf.png"/>
+                </div>
+                <h1 class="text-center">IST Media</h1>
+                {% if user is defined and user.get('username') %}
+                <div class="user-info">
+                    <a href="/profile" style="display: inline-block">
+                        {{ user.fullname }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <nav class="tm-nav" id="tm-nav">
+                <ul>
+                    <li class="tm-nav-item active"><a href="/video" class="tm-nav-link">
+                            <i class="fas fa-film"></i>
+                            Video&nbsp;Search&nbsp;(NEW)
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/" class="tm-nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/post" class="tm-nav-link">
+                            <i class="fas fa-pen"></i>
+                            Single Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/daily" class="tm-nav-link">
+                            <i class="fas fa-stream"></i>
+                            Daily Summary
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/insights" class="tm-nav-link">
+                            <i class="fas fa-camera-retro"></i>
+                            Insights
+                    </a></li>
+                    <li class="tm-nav-item"><a href="/backstage" class="tm-nav-link">
+                            <i class="fas fa-tools"></i>
+                            Backstage Area
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://www.facebook.com/MongoDB/" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/MongoDB" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://www.instagram.com/mongodb/" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/mongodbinc/" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">
+            <div class="row tm-row">
+                <div class="col-12 ai-gen">
+                    <hr class="tm-hr-primary tm-mb-55">
+                    <h1 class="tm-color-primary tm-mb-30">
+                        Video Search &ndash; Behind the Scenes
+                    </h1>
+                    <p>
+                        We are using
+                        <a href="https://docs.voyageai.com/docs/multimodal-embeddings"
+                           class="tm-color-primary">
+                            multimodal embeddings
+                        </a>
+                        generated by Voyage AI.<br/>
+                        <i style="font-size: 80%">
+                            Source file snippets below are shortened for better readability. Check
+                            the github for complete code.
+                        </i>
+                    </p>
+                    <h2 class="tm-color-primary tm-mt-40 tm-mb-20">
+                        Workflow for Video Ingestion
+                    </h2>
+                    <p>
+                        To include another video.mp4 in the search, the following steps have to be
+                        conducted.
+                        <ul>
+                            <li>
+                                Generate the mp3 voice track (video2audio)
+                                <br/>
+                                <img class="tm-mt-20 tm-mb-30"
+                                     style="width: 480px"
+                                     src="/img/vid1.png">
+                            </li>
+                            <li>
+                                Generate the transcript from the mp3
+                                (audio2text). Create snippets of between
+                                10-20 seconds in length.
+                                <br/>
+                                <img class="tm-mt-20 tm-mb-30"
+                                     style="width: 600px"
+                                     src="/img/vid2.png">
+                            </li>
+                            <li>
+                                Create frames (image snapshots) from
+                                the video. Create one file every 2
+                                seconds.
+                                <br/>
+                                <img class="tm-mt-20 tm-mb-30"
+                                     style="width: 620px"
+                                     src="/img/vid3.png">
+                            </li>
+                            <li>
+                                Generate the multimodal vector
+                                embeddings with Voyage AI. Align
+                                multiple image frames to the same
+                                voice track, e.g. 5 frames
+                                (representing 10 seconds of the video)
+                                are each aligned with the same
+                                10-second transcript snippet.
+                                <br/>
+                                <img class="tm-mt-20"
+                                     style="width: 690px"
+                                     src="/img/vid4.png">
+                            </li>
+                        </ul>
+                    </p>
+                    <h2 class="tm-color-primary tm-mt-100 tm-mb-20">
+                        Video Ingestion: Workflow Diagram
+                    </h2>
+                    <p>
+                        <img class="tm-mt-15"
+                             style="width: 98%"
+                             src="/img/mp4search.png">
+                    </p>
+                    <h2 class="tm-color-primary tm-mt-100 tm-mb-20">
+                        Workflow for Video Search
+                    </h2>
+                    <p>
+                        <ul>
+                            <li>
+                                Generate text embedding for the search term. Leave the image part empty.
+                            </li>
+                            <li>
+                                Do a nearest-neighbor search, find the best matching clip.
+                            </li>
+                            <li>
+                                Find the beginning of the scene: move
+                                backwards in time, compare the clips
+                                and stop once the delta is larger than a
+                                threshold (e.g. the scene picture is
+                                fundamentally different, not just
+                                e.g. a slight move of the camera).
+                            </li>
+                        </ul>
+                    </p>
+                    <h2 class="tm-mt-40">&nbsp;</h2>
+                </div>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray">
+                    Design: <a href="https://templatemo.com/tm-553-xtra-blog"
+                               rel="noopener" target="_blank"
+                               class="tm-external-link">TemplateMo</a>
+                </div>
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright &copy; 2025 MongoDB Inc.
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/templatemo-script.js"></script>
+</body>
+</html>

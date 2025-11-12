@@ -1,0 +1,39 @@
+#
+SHELL=/bin/sh
+PATH=/bin:/usr/bin:/usr/local/bin:/usr/pkg/bin:/home/bjjl/bin
+HOME=/var/log
+CRON_WITHIN=7200
+#
+OPENAI_API_KEY=<removed>
+#
+AZURE_OPENAI_API_KEY=<removed>
+AZURE_OPENAI_ENDPOINT=https://gai-220-useast.openai.azure.com/
+#
+MONGODB_IST_MEDIA=<removed>
+#
+NEWS_API_URL=<removed>
+NEWS_API_KEY=<removed>
+#
+AUTOCONTENT_API_KEY=<removed>
+#
+#minute	hour	mday	month	wday	command
+#
+# refresh certificates
+01	22	4	*	*	/usr/local/bin/dehydrated -c
+#
+# update ist.media
+09	14	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_content.sh >/dev/null 2>&1
+#
+09	07	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh travel >/dev/null 2>&1
+09	08,15	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh autos >/dev/null 2>&1
+09	09,16	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh europe >/dev/null 2>&1
+09	10,17	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh tech >/dev/null 2>&1
+09	11,18	*	*	1-6	/usr/local/share/ist.media/cronjobs/update_section.sh business >/dev/null 2>&1
+09	12,19	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh intnews >/dev/null 2>&1
+09	20	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh usnews >/dev/null 2>&1
+09	13,21	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh finance >/dev/null 2>&1
+09	23	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_section.sh earnings >/dev/null 2>&1
+#
+21	14,23	*	*	1-5	/usr/local/share/ist.media/cronjobs/update_daily.sh
+29	14,23	*	*	1-5	/usr/local/share/ist.media/cronjobs/create_podcast.sh >/dev/null 2>&1
+25	23	*	*	1-5	/usr/local/share/ist.media/cronjobs/send_daily.sh

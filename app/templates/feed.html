@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2025 MongoDB Inc.
+    Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News of today</title>
+</head>
+<body>
+    {% for doc in docs %}
+    <p>
+        {{ doc.text }}
+    </p>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Copyright (c) 2024, 2025 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+#
+# start from the project's root directory (e.g. by running ./bin/uwsgi-debug.start)
+
+
+export FLASK_CONFIG=development
+
+umask 000
+uwsgi --http :9090 -w manage:app --master --processes 1 --threads 2 \
+      --auto-procname --thunder-lock --touch-reload reload --lazy-apps \
+      --check-static $HOME/ist.media/app/templates \
+      --check-static $HOME \
+      --master-fifo /tmp/uwsgi_media.fifo \
+      --attach-daemon2 "cmd=bin/start-solana-tx-monitor.sh"

@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Copyright (c) 2024, 2025 MongoDB Inc.
+# Author: Benjamin Lorenz <benjamin.lorenz@mongodb.com>
+#
+
+export PATH=/usr/local/bin:/usr/pkg/bin:$PATH
+
+cd /usr/local/share/ist.media
+uwsgi --virtualenv /usr/local/share/rt \
+      -s /tmp/uwsgi_media.sock -w manage:app --master --processes 2 --threads 2 \
+      --daemonize /tmp/uwsgi_media.log --disable-logging --auto-procname \
+      --thunder-lock --umask 0022 --vacuum --touch-reload reload --lazy-apps \
+      --procname-prefix-spaced ist.media --uid bjjl --gid users \
+      --master-fifo /tmp/uwsgi_media.fifo \
+      --attach-daemon2 "cmd=bin/start-solana-tx-monitor.sh"
+
+sleep 5
+chmod 777 /tmp/uwsgi_media.sock

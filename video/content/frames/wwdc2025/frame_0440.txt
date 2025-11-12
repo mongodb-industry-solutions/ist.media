@@ -1,0 +1,1 @@
+of actions from creating an event, to starting an audio recording, or even playing a podcast. And you can do this no matter what app you're currently working in. You can even fill out parameters for an action. Say you want to send an email. You can write the message, set the recipient, and add a subject, all without lifting your
