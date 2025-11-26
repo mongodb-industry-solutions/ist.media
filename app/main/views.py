@@ -388,19 +388,27 @@ class MongoJSONEncoder(JSONEncoder):
                 return "[circular reference]"
             if isinstance(item, (dict, list)):
                 seen.add(item_id)
+                try:
+                    if isinstance(item, dict):
+                        return { k : process_item(v) for k, v in item.items() }
+                    elif isinstance(item, list) and len(item) > 10:
+                        total_length = len(item)
+                        val = (
+                            item[:5]
+                            + [ "... (shortened, total: {})".format(total_length) ]
+                            + item[-5:]
+                        )
+                        return [ process_item(x) for x in val ]
+                    elif isinstance(item, list):
+                        return [ process_item(x) for x in item ]
+                finally:
+                    seen.remove(item_id)
             if isinstance(item, ObjectId):
                 return str(item)
             elif isinstance(item, datetime):
                 return item.isoformat()
             elif isinstance(item, bytes):
                 return item.decode('utf-8', errors='replace')
-            elif isinstance(item, dict):
-                return {k: process_item(v) for k, v in item.items()}
-            elif isinstance(item, list) and len(item) > 10:
-                total_length = len(item)
-                return item[:5] + [ "... (shortened, total: {})".format(total_length) ] + item[-5:]
-            elif isinstance(item, list):
-                return [process_item(x) for x in item]
             elif isinstance(item, str) and len(item) > 115:
                 return item[:115] + " [...]"
             return item
