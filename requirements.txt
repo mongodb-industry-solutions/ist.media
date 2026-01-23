@@ -115,7 +115,7 @@ langchain==0.3.27
     #   langchain-mongodb
 langchain-community==0.3.31
     # via -r requirements.in
-langchain-core==0.3.79
+langchain-core==0.3.81
     # via
     #   langchain
     #   langchain-community
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
