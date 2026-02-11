@@ -173,7 +173,7 @@ packaging==25.0
     #   langchain-core
     #   langsmith
     #   marshmallow
-pillow==12.0.0
+pillow==12.1.1
     # via
     #   -r requirements.in
     #   voyageai
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
