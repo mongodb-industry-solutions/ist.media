@@ -165,7 +165,7 @@ numpy==2.3.3
     #   voyageai
 openai==2.6.1
     # via langchain-openai
-orjson==3.11.4
+orjson==3.11.6
     # via langsmith
 packaging==25.0
     # via
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
