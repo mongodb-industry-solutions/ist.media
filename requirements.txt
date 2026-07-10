@@ -150,7 +150,7 @@ markupsafe==3.0.3
     #   werkzeug
 marshmallow==3.26.1
     # via dataclasses-json
-mistune==3.1.4
+mistune==3.3.0
     # via -r requirements.in
 multidict==6.7.0
     # via
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
