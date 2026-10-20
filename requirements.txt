@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
@@ -199,7 +198,7 @@ pydantic-settings==2.11.0
     # via langchain-community
 pydub==0.25.1
     # via -r requirements.in
-pymongo==4.15.3
+pymongo==4.18.2
     # via
     #   flask-pymongo
     #   langchain-mongodb
