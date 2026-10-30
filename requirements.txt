@@ -30,7 +30,7 @@ beautifulsoup4==4.14.2
     # via -r requirements.in
 blinker==1.9.0
     # via flask
-certifi==2025.10.5
+certifi==2026.10.18
     # via
     #   httpcore
     #   httpx
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
