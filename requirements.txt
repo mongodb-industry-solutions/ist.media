@@ -50,7 +50,7 @@ decorator==5.2.1
     # via ratelim
 distro==1.9.0
     # via openai
-dnspython==2.8.0
+dnspython==2.9.0
     # via pymongo
 faker==37.12.0
     # via -r requirements.in
@@ -186,7 +186,6 @@ pycountry==24.6.1
 pydantic==2.12.3
     # via
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langchain-voyageai
     #   langsmith
